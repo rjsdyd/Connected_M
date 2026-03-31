@@ -1,255 +1,188 @@
-/* 기본 초기화 */
+/* 브라우저 기본 여백 초기화 (화면 잘림 방지) */
 * {
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background-color: #141517; /* 키노라이츠 배경색 */
-  color: #ffffff;
-  -webkit-font-smoothing: antialiased;
-}
-
-.app-container {
+/* 전체 컨테이너: 화면 꽉 채우고 정중앙 정렬 */
+.login-container {
+  width: 100vw;
+  height: 100vh;
   display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-/* 상단 네비게이션 (GNB) */
-.navbar {
-  background-color: #1e2024;
-  padding: 1rem 0;
-  border-bottom: 1px solid #2a2c32;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.navbar-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 0 1.5rem;
-}
-
-.navbar .logo {
-  font-size: 1.25rem;
-  font-weight: bold;
-  color: #646cff; /* 우리 프로젝트 포인트 컬러 */
-}
-
-.search-bar {
+  background-color: #0b0c10; /* 다크 모드 배경 */
   position: relative;
-  width: 100%;
-  max-width: 400px;
-}
-
-.search-bar input {
-  width: 100%;
-  padding: 0.6rem 2.5rem 0.6rem 1rem;
-  border-radius: 20px;
-  border: none;
-  background-color: #2a2c32;
-  color: white;
-  font-size: 0.9rem;
-}
-
-.search-icon {
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #888;
-}
-
-.user-menu {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.9rem;
-  color: #aaa;
-}
-
-/* 메인 콘텐츠 */
-.main-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-  padding: 2rem 1.5rem;
-}
-
-/* AI 추천 섹션 */
-.ai-recommendation {
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #2a2c32;
-}
-
-.ai-recommendation h2 {
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.gemini-icon {
-  color: #a855f7;
-}
-
-.ai-recommendation p {
-  color: #aaa;
-}
-
-/* 콘텐츠 섹션 */
-.content-section {
-  margin-bottom: 3rem;
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.section-header h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.more-link {
-  font-size: 0.8rem;
-  color: #aaa;
-  cursor: pointer;
-}
-
-/* 콘텐츠 그리드 및 카드 */
-.content-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1.5rem;
-}
-
-@media (min-width: 768px) {
-  .content-grid {
-    grid-template-columns: repeat(3, 1fr); /* 이미지를 참고하여 3열로 고정 */
-  }
-}
-
-.content-card {
-  background-color: #1e2024;
-  border-radius: 8px;
   overflow: hidden;
-  transition: transform 0.2s;
-  display: flex;
-  flex-direction: column;
+  font-family: 'Pretendard', sans-serif; /* 폰트는 프로젝트에 맞게 변경하세요 */
 }
 
-.content-card:hover {
-  transform: translateY(-5px);
-}
-
-.poster-wrapper {
-  position: relative;
-  padding-top: 138%; /* 2:3 비율 */
-  overflow: hidden;
-}
-
-.poster-wrapper img {
+/* 배경 그리드 (영화 포스터가 들어갈 자리) */
+.bg-grid-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  padding: 20px;
+  opacity: 0.15;
+  z-index: 1;
 }
 
-.platform-badges {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.badge {
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  font-weight: bold;
-}
-
-.netflix { background-color: #E50914; color: white; }
-.wavve { background-color: #0050FF; color: white; }
-.disneyplus { background-color: #006E99; color: white; }
-
-.content-info {
-  padding: 1rem;
-}
-
-.content-type {
-  font-size: 0.75rem;
-  color: #646cff;
-  margin-bottom: 0.3rem;
-  display: block;
-}
-
-.content-info h4 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #fff;
-}
-
-/* 🤖 AI 리뷰 분석 박스 */
-.ai-analysis-box {
-  background-color: #2a2c32;
-  margin: 0 1rem 1rem;
-  padding: 1rem;
+.bg-movie-card {
+  background: #1f2833;
   border-radius: 8px;
-  border-left: 3px solid #a855f7;
-  margin-top: auto; /* info 아래쪽에 붙도록 */
+  aspect-ratio: 16/9;
 }
 
-.ai-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.6rem;
-  font-size: 0.8rem;
+/* 중앙 로그인 카드 (Glassmorphism) */
+.login-glass-card {
+  position: relative;
+  z-index: 10;
+  background: rgba(30, 30, 35, 0.6); /* 어두운 반투명 배경 */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 45px 40px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(75, 0, 130, 0.15); /* 브랜드 색상 은은한 그림자 */
+  text-align: center;
 }
 
-.ai-score {
-  color: #4ade80; /* 키노라이츠 초록색 느낌 */
-  font-weight: bold;
+/* 로고 텍스트: 브랜드 색상을 활용한 그라데이션 */
+.logo-text {
+  font-size: 2.2rem;
+  font-weight: 800;
+  /* #4b0082(인디고)에서 밝은 보라색으로 이어지는 그라데이션 */
+  background: linear-gradient(to right, #9d50bb, #4b0082);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
 }
 
-.ai-label {
-  color: #a855f7;
-  font-weight: bold;
-}
-
-.ai-summary {
-  font-size: 0.85rem;
+.sub-text {
+  color: #a0aabf;
+  font-size: 0.9rem;
   line-height: 1.5;
-  color: #ddd;
-  margin-bottom: 0.8rem;
+  margin-bottom: 30px;
 }
 
-.keyword-tags {
+/* 입력창 디자인 */
+.input-group {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  margin-bottom: 15px;
+  padding: 14px 16px;
+  transition: all 0.3s ease;
 }
 
-.keyword {
-  background-color: #3a3c42;
-  color: #bbb;
-  padding: 0.15rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
+/* 포커스 시 브랜드 색상(#4b0082)으로 테두리 및 빛 효과 */
+.input-group:focus-within {
+  border-color: #4b0082;
+  box-shadow: 0 0 10px rgba(75, 0, 130, 0.4);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.icon {
+  font-size: 1.1rem;
+  opacity: 0.7;
+}
+
+.input-group input {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  margin-left: 12px;
+  width: 100%;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.input-group input::placeholder {
+  color: #6e7687;
+}
+
+/* 로그인 버튼: 브랜드 색상(#4b0082) 적용 */
+.login-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  border: none;
+  background-color: #4b0082; /* 브랜드 컬러 */
+  color: white;
+  font-size: 1.05rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.2s ease;
+}
+
+.login-btn:hover {
+  background-color: #5c00a3; /* 마우스 올렸을 때 살짝 밝아지게 */
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(75, 0, 130, 0.4);
+}
+
+/* 하단 링크 및 소셜 로그인 */
+.form-footer {
+  margin-top: 25px;
+  color: #6e7687;
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.footer-link {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.footer-link:hover {
+  color: #9d50bb;
+}
+
+.social-login {
+  margin-top: 25px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.social-icon {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.social-icon:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #4b0082;
+}
+
+/* AI 검색 힌트 텍스트 */
+.ai-search-hint {
+  margin-top: 30px;
+  font-size: 0.85rem;
+  color: #9d50bb; /* 브랜드 색상 톤 맞춤 */
+  cursor: pointer;
+}
+
+.ai-search-hint:hover {
+  text-decoration: underline;
 }
