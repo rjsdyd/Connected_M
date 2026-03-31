@@ -1,5 +1,7 @@
 package com.Connectedm.backend.domain.user.service;
 
+import com.Connectedm.backend.domain.user.dto.UserLoginRequest;
+import com.Connectedm.backend.domain.user.dto.UserResponse;
 import com.Connectedm.backend.domain.user.dto.UserSignupRequest;
 import com.Connectedm.backend.domain.user.entity.User;
 import com.Connectedm.backend.domain.user.repository.UserRepository;
@@ -30,8 +32,20 @@ public class UserService {
                 .email(request.getEmail())
                 .password(encodedPassword)
                 .nickname(request.getNickname())
+                .realName(request.getRealName())
+                .phoneNumber(request.getPhoneNumber())
                 .build();
 
         return userRepository.save(user).getId();
+    }
+
+    public UserResponse login(UserLoginRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new CustomException(ErrorCode.INVALID_PASSWORD);
+        }
+        return UserResponse.from(user);
     }
 }
