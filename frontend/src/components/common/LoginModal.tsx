@@ -1,7 +1,7 @@
 import React, { useState } from 'react'; // useState 추가
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; // axios 추가
-import logo from '../../assets/img/Project_M_Logo.svg'
+import logo from '../../assets/img/Project_M_Logo.png'
 
 interface LoginModalProps {
   onClose: () => void;
@@ -56,7 +56,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <button className="close-btn" onClick={onClose}>✕</button>
-        <img src={logo} alt="Project M Logo" className="login_modal_logo-img" />
+        <img src={logo} alt="Project_M_Logo" className="login_modal_logo-img" />
         <div className="modal-header">
           <p>반갑습니다! 로그인을 해주세요.</p>
         </div>
