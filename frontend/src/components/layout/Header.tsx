@@ -39,7 +39,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
         
         <div className="header-left">
           <a href="/" onClick={handleLogoClick} className="logo">
-            <img src={logo} alt="Project M Logo" className="logo-img" />
+            <img src={logo} alt="Project_M_Logo" className="logo-img" />
           </a>
           <nav className="nav-menu">
             <div className="category-parent">

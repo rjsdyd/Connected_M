@@ -56,7 +56,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <button className="close-btn" onClick={onClose}>✕</button>
-        <img src={logo} alt="Project M Logo" className="login_modal_logo-img" />
+        <img src={logo} alt="Project_M_Logo" className="login_modal_logo-img" />
         <div className="modal-header">
           <p>반갑습니다! 로그인을 해주세요.</p>
         </div>
