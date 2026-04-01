@@ -21,13 +21,13 @@ public class AnalysisCache {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String summary;
 
-    @Column(name = "positive_ratio", nullable = false, precision = 3, scale = 1)
+    @Column(name = "positive_ratio", nullable = false )
     private double positiveRatio;
 
     @Column(name = "top_keywords")
     private String topKeywords;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "content_id")
     private Content content;
 
