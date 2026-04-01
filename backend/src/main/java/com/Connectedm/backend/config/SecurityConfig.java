@@ -1,0 +1,74 @@
+package com.Connectedm.backend.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    // 1. 비밀번호 암호화 빈 등록
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    // 2. HTTP 보안 및 필터 체인 설정
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                // CSRF 비활성화 (REST API 환경)
+                .csrf(AbstractHttpConfigurer::disable)
+
+                // ✨ CORS 설정을 보안 필터 체인에 직접 적용
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+                // 기본 로그인 폼 및 HTTP Basic 인증 비활성화
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+
+                // 경로별 권한 설정
+                // SecurityConfig.java의 filterChain 메서드 안에서
+                .authorizeHttpRequests(auth -> auth
+                        // ✨ OPTIONS 요청(Preflight)을 무조건 허용하도록 맨 위에 추가
+                        .requestMatchers(org.springframework.web.cors.CorsUtils::isPreFlightRequest).permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .anyRequest().authenticated()
+                );
+
+        return http.build();
+    }
+
+    // 3. ✨ WebConfig의 기능을 흡수한 통합 CORS 설정
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+
+        // 허용할 프론트엔드 주소 (React 기본 포트 3000, Vite 5173 모두 포함)
+        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173"));
+        // 허용할 HTTP 메서드
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // 허용할 헤더
+        config.setAllowedHeaders(List.of("*"));
+        // 쿠키 및 인증 정보(Credentials) 허용
+        config.setAllowCredentials(true);
+        // 응답 헤더 노출 설정
+        config.setExposedHeaders(List.of("*"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // 모든 경로(/**)에 대해 위 설정을 적용
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+}
