@@ -1,9 +1,5 @@
 import React from 'react';
-<<<<<<< HEAD
-import logo from '../../assets/img/Project_M_Logo.svg';
-=======
 import { useNavigate } from 'react-router-dom'; // ✨ 페이지 이동을 위한 훅 추가
->>>>>>> 3f696a6 (feat: register)
 
 interface LoginModalProps {
   onClose: () => void;
