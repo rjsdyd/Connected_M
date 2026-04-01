@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import './Chatbot.css';
 
 interface ChatMessage {
   id: number;
@@ -72,7 +73,7 @@ const Chatbot = () => {
               ))}
           </div>
           <div className="chat-input-area">
-              <input type="text" className="chat-input-field" placeholder="여기에 질문을 입력하세요..." value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={handleKeyPress} />
+              <input type="text" className="chat-input-field" placeholder="질문을 입력하세요" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={handleKeyPress} />
               <button className="chat-send-btn" onClick={handleSendMessage}>전송</button>
           </div>
         </div>

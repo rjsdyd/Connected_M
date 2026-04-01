@@ -1,7 +1,7 @@
 import React, { useState } from 'react'; // useState 추가
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; // axios 추가
-import logo from '../../assets/img/Project_M_Logo.svg'
+import logo from '../../assets/img/Project_M_Logo.png'
 
 interface LoginModalProps {
   onClose: () => void;
