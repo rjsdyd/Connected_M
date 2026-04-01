@@ -1,4 +1,4 @@
-package com.Connectedm.backend.domain.movie.controller;
+package com.Connectedm.backend.domain.content.controller;
 
 import org.springframework.web.bind.annotation.*;
 
