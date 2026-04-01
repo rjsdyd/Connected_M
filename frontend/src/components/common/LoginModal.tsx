@@ -1,4 +1,5 @@
 import React from 'react';
+import logo from '../../assets/img/Project_M_Logo.svg';
 
 interface LoginModalProps {
   onClose: () => void;
@@ -10,9 +11,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
       {/* e.stopPropagation()은 모달창 내부(하얀 박스)를 눌렀을 때는 창이 안 닫히게 막아주는 역할입니다 */}
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <button className="close-btn" onClick={onClose}>✕</button>
-        
+          <img src={logo} alt="Project M Logo" className="login_modal_logo-img" />
         <div className="modal-header">
-          <h2 style={{ color: '#4b0082' }}>💎 PRAYER</h2>
           <p>반갑습니다! 로그인을 해주세요.</p>
         </div>
         
