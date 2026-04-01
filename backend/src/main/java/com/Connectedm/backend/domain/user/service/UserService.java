@@ -48,4 +48,12 @@ public class UserService {
         }
         return UserResponse.from(user);
     }
+
+    // 3. 마이페이지 유저 정보 조회
+    public UserResponse getUserInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        return UserResponse.from(user);
+    }
 }

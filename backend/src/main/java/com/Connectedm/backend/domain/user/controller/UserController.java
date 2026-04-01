@@ -28,4 +28,11 @@ public class UserController {
         UserResponse response = userService.login(request);
         return ApiResponse.success(response);
     }
+
+    // 3. 마이페이지 정보 조회 API
+    @GetMapping("/{userId}")
+    public ApiResponse<UserResponse> getMyPage(@PathVariable Long userId) {
+        UserResponse response = userService.getUserInfo(userId);
+        return ApiResponse.success(response);
+    }
 }
