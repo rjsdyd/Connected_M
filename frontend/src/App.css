@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;700;900&display=swap');
 
 /* ==========================================
-   🚨 1. 화면 짤림 완벽 해결 (Vite 기본 설정 무력화)
+  🚨 1. 화면 짤림 완벽 해결 (Vite 기본 설정 무력화)
    ========================================== */
 #root { 
   width: 100%; 
