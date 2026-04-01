@@ -29,7 +29,7 @@ public class ExpertReview {
     @Column(name = "critic_name", nullable = false, length = 50)
     private String criticName;
 
-    @Column(nullable = false, precision = 2, scale = 1)
+    @Column(nullable = false)
     private Double rating;
 
     @Column(nullable = false, columnDefinition = "TEXT")

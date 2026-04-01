@@ -24,7 +24,7 @@ public class UserReview {
     @JoinColumn(name = "content_id")
     private Content content;
 
-    @Column(nullable = false, precision = 2, scale = 1)
+    @Column(nullable = false)
     private Double rating;
 
     @Column(nullable = false, columnDefinition = "TEXT")
