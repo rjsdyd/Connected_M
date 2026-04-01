@@ -1,4 +1,5 @@
 import React from 'react';
+import logo from '../../assets/img/Project_M_Logo_Dark.png';
 
 // 외부에서 받아올 props(함수) 타입 정의
 interface HeaderProps {
@@ -15,7 +16,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
     <header className="header">
       <div className="header-left">
         <a href="/" onClick={goHome} className="logo">
-          <span className="logo-icon">💎</span> PRAYER
+          <img src={logo} alt="Project M Logo" className="logo-img" />
         </a>
         <nav className="nav-menu">
           <div className="category-parent">
@@ -28,7 +29,8 @@ const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
               {/* ... 나머지 드롭다운 메뉴 생략 ... */}
             </div>
           </div>
-          <a href="#ranking" className="nav-link">랭킹 키워드</a>
+          <a href="#ranking" className="nav-link">랭킹</a>
+          <a href="#keyword" className="nav-link">키워드</a>
         </nav>
       </div>
 
