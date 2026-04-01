@@ -16,19 +16,46 @@
 body { font-family: 'Pretendard', -apple-system, sans-serif; background-color: #f8f9fa; color: #333; overflow-x: hidden; }
 a { text-decoration: none; color: inherit; }
 
-/* ================= 1. 헤더 (꽉 찬 너비) ================= */
+/* ================= 헤더 고정 및 가로 정렬 ================= */
 .header {
-  width: 100%; /* 화면 끝까지 채우기 */
-  background: white; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 1000;
-  display: flex; justify-content: space-between; align-items: center; padding: 16px 40px;
+  position: fixed;       /* ✨ 화면 상단에 고정 */
+  top: 0;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box; 
+  background: white; 
+  border-bottom: 1px solid #eee; 
+  z-index: 9000;         /* ✨ 챗봇보다 낮고 다른 콘텐츠보다 높게 */
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  padding: 16px 40px;
 }
-.header-left { display: flex; align-items: center; gap: 40px; }
+
+/* 🚨 여기가 핵심! 로고와 메뉴들을 가로로 한 줄에 배치 */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 40px; /* 로고와 카테고리 메뉴 사이의 간격 */
+}
+
+/* 로고 스타일 */
 .logo { font-size: 24px; font-weight: 900; color: #4b0082; display: flex; align-items: center; letter-spacing: -0.5px; }
 .logo-icon { margin-right: 8px; font-size: 20px; }
 
-/* 드롭다운 네비게이션 */
-.nav-menu { display: flex; align-items: center; gap: 28px; position: relative; }
-.category-parent { padding: 8px 0; cursor: pointer; font-weight: 700; font-size: 15px; }
+/* ================= 메인 배너 (헤더에 가려지지 않게 밀어내기) ================= */
+.hero-section {
+  margin-top: 70px;      /* ✨ 헤더의 높이만큼 위쪽 여백을 줘서 겹치지 않게 함 */
+}
+
+/* ================= 드롭다운 네비게이션 ================= */
+.nav-menu { 
+  display: flex; /* '카테고리+'와 '랭킹 키워드'를 가로로 배치 */
+  align-items: center; 
+  gap: 28px; 
+  position: relative; 
+}
+.category-parent { display: flex; align-items: center; padding: 8px 0; cursor: pointer; font-weight: 700; font-size: 15px; }
 .category-dropdown {
   display: none; position: absolute; top: 100%; left: 0; background: white; min-width: 650px;
   grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.1);
@@ -78,10 +105,24 @@ a { text-decoration: none; color: inherit; }
 /* ================= 4. 오늘의 추천작 (슬라이더) ================= */
 .slider-section { background: #f9fafb; padding: 48px 0; }
 .slider-header-wrapper { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
-.slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-.slider-controls button { padding: 8px; background: white; border: none; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; margin-left: 8px; }
-.slider-controls button:hover { background: #f3f4f6; }
+.slider-header { margin-bottom: 24px; } /* 버튼이 이동되었으므로 flex 속성 제거 */
+
+.slider-main-area { /* 슬라이더와 컨트롤을 감싸는 새로운 래퍼 */
+  position: relative; /* 자식 요소인 .slider-controls의 절대 위치 지정을 위한 기준점 */
+}
+
 .slider-container { position: relative; overflow: hidden; width: 100%; height: 450px; }
+.slider-controls {
+  position: absolute; /* 슬라이더 위에 겹치도록 절대 위치 지정 */
+  top: 50%; /* 세로 중앙 정렬 */
+  transform: translateY(-50%); /* 정확한 세로 중앙 정렬 */
+  width: 100%; /* 슬라이더 너비만큼 확장 */
+  display: flex; /* 버튼을 양 끝으로 배치하기 위해 flexbox 사용 */
+  justify-content: space-between; /* 버튼을 양 끝으로 분산 */
+  padding: 0 10px; /* 슬라이더 가장자리에서 버튼이 너무 붙지 않도록 패딩 추가 */
+}
+.slider-controls button { padding: 12px; background: white; border: none; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; font-size: 20px; transition: background 0.2s, transform 0.2s; }
+.slider-controls button:hover { background: #eee; transform: scale(1.1); }
 .slider-track { display: flex; transition: transform 0.5s ease-in-out; height: 100%; }
 .slide-card { min-width: 300px; margin-right: 20px; border-radius: 12px; position: relative; overflow: hidden; height: 400px; display: flex; align-items: center; justify-content: center; }
 .rating-badge { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #facc15; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 700; }
@@ -110,6 +151,128 @@ a { text-decoration: none; color: inherit; }
   cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 2000; transition: transform 0.2s;
 }
 .chatbot-toggle:hover { transform: scale(1.1); }
+
+/* ================= 챗봇 모달 내부 디자인 ================= */
+.chatbot-modal {
+  position: fixed;
+  bottom: 100px;
+  right: 25px;
+  width: 550px;
+  height: 650px;
+  background: white; /* 배경색 추가 */
+  border-radius: 24px; /* 둥근 모서리 */
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25); /* 예쁜 그림자 */
+  display: flex; /* 내부 요소 배치를 위해 flex 사용 */
+  flex-direction: column;
+  z-index: 99999;
+  overflow: hidden;
+  border: 1px solid rgba(75, 0, 130, 0.2);
+  animation: chatAppear 0.4s ease-out; /* 등장 애니메이션 */
+}
+
+/* 챗봇 등장 애니메이션 */
+@keyframes chatAppear {
+  from { opacity: 0; transform: translateY(40px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.chat-header {
+  background: #4b0082; /* 보라색 헤더 */
+  color: white;
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-body {
+  flex: 1;
+  background: #fdfdff;
+  padding: 20px;
+  overflow-y: auto; /* 내용이 길어지면 스크롤 생성 */
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.chat-msg {
+  max-width: 80%;
+  padding: 14px 18px;
+  border-radius: 18px;
+  font-size: 15px;
+  line-height: 1.6;
+  animation: msgIn 0.3s ease-out forwards; /* 메시지 등장 애니메이션 */
+}
+
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bot-msg {
+  background: white;
+  color: #333;
+  align-self: flex-start; /* 왼쪽 정렬 */
+  border-bottom-left-radius: 4px; /* 말풍선 꼬리 디테일 */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+  border: 1px solid #f0f0f0;
+}
+
+.user-msg {
+  background: #4b0082;
+  color: white;
+  align-self: flex-end; /* 오른쪽 정렬 */
+  border-bottom-right-radius: 4px; /* 말풍선 꼬리 디테일 */
+}
+
+.chat-input-area {
+  padding: 20px;
+  background: white;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  gap: 12px;
+}
+
+.chat-input-field {
+  flex: 1;
+  border: 1px solid #e0e0e0;
+  border-radius: 30px;
+  padding: 12px 20px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.chat-input-field:focus {
+  border-color: #4b0082;
+}
+
+.chat-send-btn {
+  background: #4b0082;
+  color: white;
+  border: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.chat-send-btn:hover {
+  background: #6a1b9a;
+}
 
 /* ================= 로그인 모달 (기존 스타일 유지) ================= */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 3000; }
