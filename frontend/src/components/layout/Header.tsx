@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from '../../assets/img/Project_M_Logo_Dark.png';
+import logo from '../../assets/img/Project_M_Logo_Dark.svg';
 
 // 외부에서 받아올 props(함수) 타입 정의
 interface HeaderProps {
@@ -26,7 +26,14 @@ const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
                 <h4>영화</h4>
                 <p>최신 영화</p><p>개봉 예정</p><p>박스오피스</p>
               </div>
-              {/* ... 나머지 드롭다운 메뉴 생략 ... */}
+              <div className="dropdown-column">
+                <h4>장르</h4>
+                <p>드라마</p>
+                <p>범죄/스릴러</p>
+                <p>애니메이션션</p>
+                <p>액션</p>
+                <p>코미디</p>
+              </div>
             </div>
           </div>
           <a href="#ranking" className="nav-link">랭킹</a>
@@ -37,7 +44,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
       <div className="header-right">
         <input type="text" placeholder="검색어를 입력하세요" className="search-input" />
         <button className="text-btn" onClick={onOpenLogin}>로그인</button>
-        <button className="btn-brand">마이페이지</button>
+        <button className="btn-brand" onClick={onOpenLogin}>마이페이지</button>
       </div>
     </header>
   );
