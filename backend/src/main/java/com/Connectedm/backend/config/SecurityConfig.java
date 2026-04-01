@@ -43,6 +43,7 @@ public class SecurityConfig {
                         // ✨ OPTIONS 요청(Preflight)을 무조건 허용하도록 맨 위에 추가
                         .requestMatchers(org.springframework.web.cors.CorsUtils::isPreFlightRequest).permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/contents/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 );

@@ -1,8 +1,6 @@
 package com.Connectedm.backend.domain.content.service;
 
-import com.Connectedm.backend.domain.content.dto.ContentCreateRequestDto;
-import com.Connectedm.backend.domain.content.dto.ContentSummaryDto;
-import com.Connectedm.backend.domain.content.dto.MainPageResponseDto;
+import com.Connectedm.backend.domain.content.dto.*;
 import com.Connectedm.backend.domain.content.entity.Content;
 import com.Connectedm.backend.domain.content.entity.ContentGenre;
 import com.Connectedm.backend.domain.content.entity.Genre;
@@ -30,7 +28,9 @@ public class ContentService {
     private final GenreRepository genreRepository;
     private final AnalysisCacheRepository analysisCacheRepository;
     private final ContentGenreRepository contentGenreRepository;
+    private final ReviewService reviewService;
 
+    // 크롤링 데이터 DB저장
     public void saveCrawledContent(ContentCreateRequestDto dto) {
         // 1. 중복 체크(TMDB ID 기준)
         if (contentRepository.findByTmdbId(dto.getTmdbId()).isPresent()) return;
@@ -50,6 +50,8 @@ public class ContentService {
             content.addGenre(cg);
         }
     }
+
+    // 메인페이지 데이터
     @Transactional(readOnly = true)
     public MainPageResponseDto getMainPageData() {
         // 1. 배경용 랜덤 영화 (포스터 경로만)
@@ -102,6 +104,45 @@ public class ContentService {
                 .backgroundImage(backgroundImage)
                 .todayRecommendations(todayRecommendations)
                 .genreContents(genreContents)
+                .build();
+    }
+
+    // 콘텐츠 상세 조회
+    @Transactional(readOnly = true)
+    public ContentDetailResponseDto getContentDetail(Long id) {
+        // 1. 콘텐츠 본체와 AI분석 캐시를 한 번에 가져오기
+        Content content = contentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("해당 콘텐츠를 찾을 수 없습니다. ID: " + id));
+
+        // 2. 장르 이름들만 리스트로 뽑기
+        List<String> genreNames = content.getContentGenres().stream()
+                .map(cg -> cg.getGenre().getName())
+                .collect(Collectors.toList());
+
+        // 3. AI 분석 데이터 가져오기 (Null 체크)
+        String summary = (content.getAnalysisCache() != null) ? content.getAnalysisCache().getSummary() : "분석 중입니다.";
+        Double ratio = (content.getAnalysisCache() != null) ? content.getAnalysisCache().getPositiveRatio() : 0.0;
+        // 키워드는 나중에 AnalysisCache에 필드 추가되면 매핑
+        List<String> keywords = Collections.emptyList();
+
+        // 4. 리뷰 데이터 가져오기
+        // TODO : ReviewService 구현 후 주입받어서 아래 주석 해제
+        List<ReviewResponseDto> expertReviews = reviewService.getExpertReviews(id);
+        List<ReviewResponseDto> userReviews = reviewService.getUserReviews(id);
+
+        // 5. 최종 DTO 빌드
+        return ContentDetailResponseDto.builder()
+                .id(content.getId())
+                .title(content.getTitle())
+                .overview(content.getOverview())
+                .posterPath(content.getPosterPath())
+                .ottLogos(content.getOttLogos())
+                .genres(genreNames)
+                .aiSummary(summary)
+                .positiveRatio(ratio)
+                .topKeywords(keywords)
+                .expertReviews(expertReviews)
+                .userReviews(userReviews)
                 .build();
     }
 }
