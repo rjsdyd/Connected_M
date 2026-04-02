@@ -223,3 +223,21 @@ a { text-decoration: none; color: inherit; }
   /* SVG가 잘리지 않게 설정 */
   object-fit: contain;
 }
+/* ================= 닉네임 표시 스타일 (새로 추가) ================= */
+/* ================= 브랜드 컬러 대비 닉네임 스타일 ================= */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* 닉네임과 로그아웃 버튼 사이 간격 */
+}
+
+.user-nickname {
+  color: #ffffff;           /* '님' 글자는 깔끔한 흰색으로 */
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.user-nickname strong {
+  color: #fff176; /* 채도가 낮은 연한 노란색 */
+  font-weight: 800;
+}
