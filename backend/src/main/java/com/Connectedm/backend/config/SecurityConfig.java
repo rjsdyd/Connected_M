@@ -30,7 +30,7 @@ public class SecurityConfig {
                 // CSRF 비활성화 (REST API 환경)
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // ✨ CORS 설정을 보안 필터 체인에 직접 적용
+                // CORS 설정을 보안 필터 체인에 직접 적용
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 // 기본 로그인 폼 및 HTTP Basic 인증 비활성화
@@ -40,7 +40,7 @@ public class SecurityConfig {
                 // 경로별 권한 설정
                 // SecurityConfig.java의 filterChain 메서드 안에서
                 .authorizeHttpRequests(auth -> auth
-                        // ✨ OPTIONS 요청(Preflight)을 무조건 허용하도록 맨 위에 추가
+                        //  OPTIONS 요청(Preflight)을 무조건 허용하도록 맨 위에 추가
                         .requestMatchers(org.springframework.web.cors.CorsUtils::isPreFlightRequest).permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/register").permitAll()
@@ -52,7 +52,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // 3. ✨ WebConfig의 기능을 흡수한 통합 CORS 설정
+    // 3. WebConfig의 기능을 흡수한 통합 CORS 설정
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();

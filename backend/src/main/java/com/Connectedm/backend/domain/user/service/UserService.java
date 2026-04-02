@@ -21,12 +21,17 @@ public class UserService {
 
     @Transactional
     public Long signUp(UserSignupRequest request) {
-        // 1. 중복 체크
+        // 1. 이메일 중복 체크
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new CustomException(ErrorCode.ALREADY_REGISTERED_EMAIL);
         }
 
-        // 2. 암호화 및 빌더로 저장
+        // 2. 닉네임 중복 체크
+        if (userRepository.existsByNickname(request.getNickname())) {
+            throw new CustomException(ErrorCode.ALREADY_USED_NICKNAME);
+        }
+
+        // 3. 암호화 및 빌더로 저장
         String encodedPassword = passwordEncoder.encode(request.getPassword());
         User user = User.builder()
                 .email(request.getEmail())

@@ -1,10 +1,13 @@
 package com.Connectedm.backend.domain.user.entity;
 
+import com.Connectedm.backend.domain.content.entity.UserReview;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "user")
@@ -37,6 +40,10 @@ public class User {
     @CreationTimestamp
     @Column(name="created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    // UserReview와 관계 연결
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserReview> reviews = new ArrayList<>();
 
     // DB 저장되기 직전에 번호 형식 바꿔주는 로직
     @PrePersist
