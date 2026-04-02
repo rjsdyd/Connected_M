@@ -1,5 +1,7 @@
 package com.Connectedm.backend.domain.content.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

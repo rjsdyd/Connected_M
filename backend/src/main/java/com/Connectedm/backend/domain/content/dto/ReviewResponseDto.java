@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 
 @Getter
 @Builder
@@ -17,6 +16,5 @@ public class ReviewResponseDto {
     private Double rating;
     private String comment;
     private String source;
-    private LocalDateTime createdAt;
     private String movieTitle;
 }
