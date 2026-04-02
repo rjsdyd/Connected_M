@@ -1,128 +1,189 @@
+/* ================= 챗봇 토글 버튼 ================= */
 .chatbot-toggle {
-  position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; background: #4b0082;
-  border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white;
-  cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 2000; transition: transform 0.2s;
+  position: fixed; 
+  bottom: 30px; 
+  right: 30px; 
+  width: 60px; 
+  height: 60px; 
+  background: linear-gradient(135deg, #4b0082 0%, #6a1b9a 100%);
+  border-radius: 50%; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  color: white;
+  cursor: pointer; 
+  box-shadow: 0 8px 24px rgba(75, 0, 130, 0.3);
+  z-index: 2000; 
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-.chatbot-toggle:hover { transform: scale(1.1); }
+
+.chatbot-toggle:hover { 
+  transform: scale(1.1) rotate(5deg); 
+}
 
 /* ================= 챗봇 모달 내부 디자인 ================= */
 .chatbot-modal {
   position: fixed;
-  bottom: 100px;
-  right: 25px;
-  width: 480px;
-  height: 650px;
-  background: white; /* 배경색 추가 */
-  border-radius: 24px; /* 둥근 모서리 */
-  box-shadow: 0 20px 60px rgba(0,0,0,0.25); /* 예쁜 그림자 */
-  display: flex; /* 내부 요소 배치를 위해 flex 사용 */
+  bottom: 110px;
+  right: 30px;
+  width: 420px; 
+  height: 600px;
+  background: #ffffff;
+  border-radius: 28px; 
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  display: flex;
   flex-direction: column;
   z-index: 99999;
   overflow: hidden;
-  border: 1px solid rgba(75, 0, 130, 0.2);
-  animation: chatAppear 0.4s ease-out; /* 등장 애니메이션 */
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  animation: chatAppear 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-/* 챗봇 등장 애니메이션 */
 @keyframes chatAppear {
-  from { opacity: 0; transform: translateY(40px) scale(0.95); }
+  from { opacity: 0; transform: translateY(30px) scale(0.9); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* 헤더: 투명도 있는 화이트 텍스트와 그림자 */
 .chat-header {
-  background: #4b0082; /* 보라색 헤더 */
+  background: linear-gradient(135deg, #4b0082 0%, #6a1b9a 100%);
   color: white;
-  padding: 24px;
+  padding: 20px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .chat-header h3 {
   margin: 0;
   font-size: 18px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  letter-spacing: -0.5px;
 }
 
+/* ✨ 누락되었던 X 버튼 (닫기 버튼) 디자인 ✨ */
+.chat-close-btn {
+  background: rgba(255, 255, 255, 0.15); 
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  font-size: 16px; 
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chat-close-btn:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(1.1);
+}
+
+/* 바디: 부드러운 스크롤과 배경색 */
 .chat-body {
   flex: 1;
-  background: #fdfdff;
+  background: #f8f9fa; 
   padding: 20px;
-  overflow-y: auto; /* 내용이 길어지면 스크롤 생성 */
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-}
-
-.chat-msg {
-  max-width: 80%;
-  padding: 14px 18px;
-  border-radius: 18px;
-  font-size: 15px;
-  line-height: 1.6;
-  animation: msgIn 0.3s ease-out forwards; /* 메시지 등장 애니메이션 */
-}
-
-@keyframes msgIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.bot-msg {
-  background: white;
-  color: #333;
-  align-self: flex-start; /* 왼쪽 정렬 */
-  border-bottom-left-radius: 4px; /* 말풍선 꼬리 디테일 */
-  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-  border: 1px solid #f0f0f0;
-}
-
-.user-msg {
-  background: #4b0082;
-  color: white;
-  align-self: flex-end; /* 오른쪽 정렬 */
-  border-bottom-right-radius: 4px; /* 말풍선 꼬리 디테일 */
-}
-
-.chat-input-area {
-  padding: 20px;
-  background: white;
-  border-top: 1px solid #f0f0f0;
-  display: flex;
   gap: 12px;
 }
 
+/* 스크롤바 디자인 추가 */
+.chat-body::-webkit-scrollbar {
+  width: 6px;
+}
+.chat-body::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 10px;
+}
+
+/* 메시지 공통 */
+.chat-msg {
+  max-width: 85%;
+  padding: 12px 16px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  position: relative;
+}
+
+/* 봇 메시지: 좀 더 깔끔한 화이트 카드 느낌 */
+.bot-msg {
+  background: white;
+  color: #333;
+  align-self: flex-start;
+  border-radius: 18px 18px 18px 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border: 1px solid #f0f0f0;
+}
+
+/* 사용자 메시지: 보라색 강조 */
+.user-msg {
+  background: #4b0082;
+  color: white;
+  align-self: flex-end;
+  border-radius: 18px 18px 4px 18px;
+  box-shadow: 0 4px 12px rgba(75, 0, 130, 0.2);
+}
+
+/* 입력 영역: 알약 모양 디자인 */
+.chat-input-area {
+  padding: 16px 20px;
+  background: white;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center; 
+  gap: 12px;
+}
+
+/* ================= 입력창 (글자색 진하게 수정) ================= */
 .chat-input-field {
   flex: 1;
-  border: 1px solid #e0e0e0;
-  border-radius: 30px;
-  padding: 12px 20px;
+  background: #f1f3f5;
+  color: #111111; 
+  border: none;
+  border-radius: 24px;
+  padding: 12px 18px;
   font-size: 15px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
 }
 
 .chat-input-field:focus {
-  border-color: #4b0082;
+  background: white;
+  box-shadow: 0 0 0 2px rgba(75, 0, 130, 0.2);
 }
 
+/* ================= 전송 버튼 (가로 정렬 & 크기 확보) ================= */
 .chat-send-btn {
   background: #4b0082;
   color: white;
   border: none;
-  width: 48px;
-  height: 48px;
+  
+  width: 52px;  
+  height: 52px; 
+  min-width: 52px; 
+  flex-shrink: 0; 
   border-radius: 50%;
-  cursor: pointer;
+  
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: background 0.2s;
+  white-space: nowrap; 
+  font-size: 14px; 
+  letter-spacing: 1px; 
+  padding: 0; 
+  
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .chat-send-btn:hover {
-  background: #6a1b9a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(75, 0, 130, 0.3);
 }
