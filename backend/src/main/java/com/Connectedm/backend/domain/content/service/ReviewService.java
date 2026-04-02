@@ -22,10 +22,11 @@ public class ReviewService {
     public List<ReviewResponseDto> getExpertReviews(Long contentId) {
         return expertReviewRepository.findByContentId(contentId).stream()
                 .map(review -> ReviewResponseDto.builder()
-                        .critictName(review.getCriticName())
+                        .criticName(review.getCriticName())
                         .comment(review.getComment())
                         .rating(review.getRating())
                         .source(review.getSource())
+                        .movieTitle(review.getMovieTitle())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -33,7 +34,7 @@ public class ReviewService {
     public List<ReviewResponseDto> getUserReviews(Long contentId) {
         return userReviewRepository.findByContentId(contentId).stream()
                 .map(review -> ReviewResponseDto.builder()
-                        .critictName(review.getUser().getNickname()) // 유저 닉네임 ㅋㅋㅋㅋ
+                        .criticName(review.getUser().getNickname()) // 유저 닉네임 ㅋㅋㅋㅋ
                         .comment(review.getComment())
                         .rating(review.getRating())
                         .build())

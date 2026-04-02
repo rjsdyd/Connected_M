@@ -26,6 +26,9 @@ public class ExpertReview {
     @JoinColumn(name = "analysis_id")
     private AnalysisCache analysisCache;
 
+    @Column(name = "movie_title", nullable = false, length = 250)
+    private String movieTitle;
+
     @Column(name = "critic_name", nullable = false, length = 50)
     private String criticName;
 
