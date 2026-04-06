@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './Home.css'
 
 const Home = () => {
   // ================= 1. 상태 관리 =================

@@ -6,7 +6,7 @@
   left: 0;
   width: 100%;
   box-sizing: border-box; 
-  background: #4b0082; /* 브랜드 컬러 */
+  background: #4b0082;
   z-index: 9000;
   display: flex; 
   justify-content: space-between; 
@@ -44,18 +44,46 @@
   position: relative; 
 }
 
-.category-parent { display: flex; align-items: center; padding: 8px 0; cursor: pointer; font-weight: 700; font-size: 15px; }
-
-.category-dropdown {
-  display: none; position: absolute; top: 100%; left: 0; background: white; min-width: 650px;
-  grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-  border-radius: 0 0 12px 12px; border: 1px solid #f3f4f6; z-index: 100;
+/* 드롭다운 메뉴 */
+.category-parent { 
+  display: flex; 
+  align-items: center; 
+  padding: 8px 0; 
+  cursor: pointer; 
+  font-weight: 700; 
+  font-size: 15px; 
 }
 
-.category-parent:hover .category-dropdown { display: grid; }
+.category-dropdown {
+  display: none; 
+  position: absolute; 
+  top: 100%; 
+  left: 0; 
+  background: white; 
+  min-width: 650px;
+  grid-template-columns: repeat(4, 1fr); 
+  gap: 16px; 
+  padding: 30px; 
+  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  border-radius: 0 0 12px 12px; 
+  border: 1px solid #f3f4f6; 
+  z-index: 100;
+}
 
-.nav-link { font-weight: 700; font-size: 15px; transition: color 0.2s; color:#fff }
-.nav-link:hover, .category-title:hover { color: #6a1b9a; }
+.category-parent:hover .category-dropdown { 
+  display: grid; 
+}
+
+.nav-link { 
+  font-weight: 700; 
+  font-size: 15px; 
+  transition: color 0.2s; 
+  color:#fff 
+}
+
+.nav-link:hover, .category-title:hover { 
+  color: #6a1b9a; 
+}
 
 /* 헤더 오른쪽 영역 */
 .header-right { 
@@ -65,8 +93,22 @@
   flex-shrink: 0; 
 }
 
-.search-input { background: #f3f4f6; padding: 10px 20px; border-radius: 30px; font-size: 14px; border: none; width: 180px; transition: width 0.3s ease; }
-.search-input:focus { width: 260px; outline: 2px solid #4b0082; background: white; }
+/* 검색어 영역 */
+.search-input { 
+  background: #f3f4f6; 
+  padding: 10px 20px; 
+  border-radius: 30px; 
+  font-size: 14px; 
+  border: none; 
+  width: 180px; 
+  transition: width 0.3s ease; 
+}
+
+.search-input:focus { 
+  width: 300px; 
+  outline: 2px solid #4b0082; 
+  background: white; 
+}
 
 /* 닉네임 스타일 (투명도 반영) */
 .user-info {
@@ -82,16 +124,40 @@
 }
 
 .user-nickname strong {
-  /* 쨍하지 않은 은은한 노란색 투명도 조절 */
   color: rgba(255, 235, 59, 0.85); 
   font-weight: 900;
 }
 
+/* text-btn 영역 */
 .text-btn { 
-  font-size: 14px; font-weight: 800; color: #fff; background: none; border: none; 
-  cursor: pointer; padding: 8px; white-space: nowrap; transition: color 0.2s;
+  font-size: 14px; 
+  font-weight: 800; 
+  color: #fff; 
+  background: none; 
+  border: none; 
+  cursor: pointer; 
+  padding: 8px; 
+  white-space: nowrap;    /* 줄바꿈 금지 */
+  transition: color 0.2s;
 }
-.text-btn:hover { color: #6a1b9a; }
 
-.btn-brand { background-color: #fff; color: #4b0082; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; transition: background 0.2s; }
-.btn-brand:hover { background-color: #6a1b9a; color: #fff; }
+.text-btn:hover { 
+  color: #6a1b9a; 
+}
+
+.btn-brand { 
+  background-color: #fff; 
+  color: #4b0082; 
+  padding: 10px 20px; 
+  border-radius: 8px; 
+  font-size: 14px; 
+  font-weight: 700; 
+  border: none; 
+  cursor: pointer; 
+  transition: background 0.2s; 
+}
+
+.btn-brand:hover { 
+  background-color: #6a1b9a; 
+  color: #fff; 
+}
