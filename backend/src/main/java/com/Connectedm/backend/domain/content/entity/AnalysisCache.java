@@ -21,7 +21,7 @@ public class AnalysisCache {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String summary;
 
-    @Column(name = "positive_ratio", nullable = false )
+    @Column(name = "positive_ratio", nullable = false)
     private double positiveRatio;
 
     @Column(name = "top_keywords")

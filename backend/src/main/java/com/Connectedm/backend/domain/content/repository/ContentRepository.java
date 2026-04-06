@@ -11,5 +11,5 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
     // TMDB ID로 영화찾는 기능
     Optional<Content> findByTmdbId(String tmdbId);
 
-    ;
+
 }
