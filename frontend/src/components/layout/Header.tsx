@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // 페이지 이동을 위해 추가
+import { useNavigate } from 'react-router-dom';
 import logo from '../../assets/img/Project_M_Logo_Dark.png';
 import { FaPlus } from "react-icons/fa";
 
@@ -9,7 +9,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
   const [nickname, setNickname] = useState<string | null>(null);
-  const navigate = useNavigate(); // 추가
+  const navigate = useNavigate();
 
   useEffect(() => {
     const savedNickname = localStorage.getItem('nickname');
@@ -18,23 +18,32 @@ const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
     }
   }, []);
 
+  // ✨ 수정된 로그아웃 함수
   const handleLogout = () => {
+    // 1. 지갑 비우기 (아까 추가했던 user도 꼭 같이 지워주세요!)
+    localStorage.removeItem('user'); 
     localStorage.removeItem('nickname');
     localStorage.removeItem('token');
+    
+    // 2. 상태 초기화 및 알림
     setNickname(null);
+    alert("로그아웃 되었습니다.");
+    
+    // 3. 어디에 있든 무조건 메인 홈으로 쫓아내기
+    navigate('/');
+    
+    // 4. 화면 새로고침으로 완벽하게 상태 반영
     window.location.reload();
   };
 
-  // 로고 클릭 시 메인으로 이동 + 부드럽게 위로
   const handleLogoClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate('/'); // 메인 경로로 이동
+    navigate('/');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <header className="header">
-      {/* ✨ 중앙 정렬을 위한 컨테이너 추가 */}
       <div className="header-inner">
         
         <div className="header-left">
@@ -63,6 +72,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
         <div className="header-right">
           <input type="text" placeholder="검색어를 입력하세요" className="search-input" />
           
+          {/* 로그인 상태에 따른 버튼 렌더링 (아주 잘 짜셨습니다!) */}
           {nickname ? (
             <div className="user-info">
               <span className="user-nickname">

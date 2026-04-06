@@ -33,6 +33,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
     if (nick) {
       localStorage.setItem('nickname', nick);
       localStorage.setItem('token', token);
+
+      localStorage.setItem('user', JSON.stringify(data));
       
       alert(`${nick}님, 환영합니다!`);
       onClose();
