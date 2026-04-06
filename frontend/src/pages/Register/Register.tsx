@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Register.css';
+import logo from '../../assets/img/Project_M_Logo.png'
 
 const Register = () => {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ const Register = () => {
     <div className="register-container">
       <div className="register-card">
         <div className="register-header">
-          <h2 className="register-logo">JOIN PRAYER</h2>
+          <img src={logo} alt="Project_M_Logo" className="login_modal_logo-img" />
           <p className="register-subtitle">당신의 인생 작품을 기록할 준비가 되셨나요?</p>
         </div>
 

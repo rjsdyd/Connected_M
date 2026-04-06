@@ -1,0 +1,499 @@
+@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;700;900&display=swap');
+/* 기본 폰트 */
+
+#root { 
+  width: 100%; 
+  max-width: none !important;     /* 가장 먼저 진행하라 */
+  margin: 0; 
+  padding: 0; 
+  text-align: left; 
+}
+
+.app-container { 
+  width: 100%; 
+  min-height: 100vh; 
+  overflow-x: hidden; 
+}
+
+/* 전체 코드 */
+* { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
+
+/* 바디 영역 */
+body { 
+  font-family: 'Pretendard', -apple-system, sans-serif; 
+  background-color: #f8f9fa; 
+  color: #333; 
+  overflow-x: hidden; 
+}
+
+/* a 태그에 대한 전체적인 css */
+a { 
+  text-decoration: none; 
+  color: inherit; 
+}
+
+/* ================= 헤더 고정 및 가로 정렬 ================= */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box; 
+  background: #4b0082;
+  z-index: 9000;
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  padding: 12px 120px; 
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 60px; 
+}
+
+/* 로고 영역 */
+.logo-img {
+  height: 70px;
+  display: block;
+  object-fit: contain;
+}
+
+/* 카테고리 */
+.category-title {
+  color: #fff;
+  transition: color 0.2s;
+}
+
+.header-inner {
+  width: 100%;
+  max-width: 1280px; 
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ================= 메인 배너 (헤더에 가려지지 않게 밀어내기) ================= */
+.hero-section {
+  margin-top: 94px;
+}
+
+/* ================= 드롭다운 네비게이션 ================= */
+.nav-menu { 
+  display: flex; 
+  align-items: center; 
+  gap: 40px;
+  position: relative; 
+}
+
+.category-parent { 
+  display: flex; 
+  align-items: center; 
+  padding: 8px 0; 
+  cursor: pointer; 
+  font-weight: 700; 
+  font-size: 15px; 
+}
+
+.category-dropdown {
+  display: none; 
+  position: absolute; 
+  top: 100%; 
+  left: 0; 
+  background: white; 
+  min-width: 650px;
+  grid-template-columns: repeat(4, 1fr); 
+  gap: 16px; 
+  padding: 30px; 
+  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  border-radius: 0 0 12px 12px; 
+  border: 1px solid #f3f4f6;
+  z-index: 100;
+}
+
+.category-parent:hover .category-dropdown { 
+  display: grid;    /* 2차원 배치 */
+}
+
+.dropdown-column h4 { 
+  font-weight: 800; 
+  border-bottom: 2px solid #f3f4f6; 
+  padding-bottom: 8px; 
+  margin-bottom: 12px; 
+  color: #111; 
+}
+
+.dropdown-column p { 
+  font-size: 14px; 
+  color: #6b7280; 
+  margin-bottom: 10px; 
+  cursor: pointer; 
+  transition: color 0.2s; 
+  font-weight: 500; 
+}
+
+.dropdown-column p:hover { 
+  color: #4b0082; 
+  font-weight: 700; 
+}
+
+.nav-link { 
+  font-weight: 700; 
+  font-size: 15px; 
+  transition: color 0.2s; 
+  color:#fff 
+}
+
+.nav-link:hover { 
+  color: #6a1b9a; 
+}
+
+.category-title:hover { 
+  color: #6a1b9a; 
+}
+
+.header-right { 
+  display: flex; 
+  align-items: center; 
+  gap: 24px;
+  flex-shrink: 0; 
+}
+
+.search-input { 
+  background: #f3f4f6; 
+  padding: 10px 20px; 
+  border-radius: 30px; 
+  font-size: 14px; 
+  border: none; 
+  width: 180px; 
+  transition: width 0.3s ease, outline 0.1s; 
+}
+
+.search-input:focus { 
+  width: 260px; 
+  outline: 2px solid #4b0082; 
+  background: white; 
+}
+
+.text-btn { 
+  font-size: 14px; 
+  font-weight: 800; 
+  color: #fff; 
+  background: none; 
+  border: none; 
+  cursor: pointer; 
+  padding: 8px; 
+  white-space: nowrap; 
+  transition: color 0.2s;
+}
+
+.text-btn:hover { 
+  color: #6a1b9a; 
+}
+
+.btn-brand { 
+  background-color: #fff; 
+  color: white; 
+  padding: 10px 20px; 
+  border-radius: 8px; 
+  font-size: 14px; 
+  font-weight: 700; 
+  border: none; 
+  cursor: pointer; 
+  transition: background 0.2s; 
+  white-space: nowrap; 
+  color: #4b0082; 
+}
+
+.btn-brand:hover { 
+  background-color: #6a1b9a; 
+  color: #fff;
+}
+
+.hero-section {
+  width: 100%;
+  background-color: #757575; 
+  height: 420px; 
+  display: flex; 
+  flex-direction: column;
+  justify-content: center;
+  align-items: center; 
+  color: white; 
+  text-align: center;
+}
+
+.hero-title { 
+  font-size: 40px; 
+  font-weight: 800; 
+  margin-bottom: 30px; 
+  letter-spacing: -1px; 
+}
+
+.hero-search-wrapper { 
+  position: relative; 
+  width: 100%; 
+  max-width: 650px; 
+  display: flex; 
+  align-items: center; 
+}
+
+.hero-search { 
+  width: 100%; 
+  padding: 20px 30px; 
+  border-radius: 40px; 
+  border: none; 
+  color: black; 
+  font-size: 16px; 
+  font-weight: 500; 
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15); 
+  outline: none; 
+}
+
+.hero-search-btn { 
+  position: absolute; 
+  right: 10px; 
+  background: #4b0082; 
+  color: white; 
+  padding: 12px 30px; 
+  border-radius: 30px; 
+  border: none; 
+  font-weight: 800; 
+  cursor: pointer; 
+  transition: background 0.2s; 
+}
+
+.hero-search-btn:hover { 
+  background: #6a1b9a; 
+  color: #fff; 
+}
+
+/* ================= 공통 레이아웃 & 키워드 ================= */
+.content-section { 
+  max-width: 1280px; 
+  margin: 0 auto; 
+  padding: 48px 24px; 
+}
+
+.section-title { 
+  font-size: 24px; 
+  font-weight: 700; 
+  margin-bottom: 24px; 
+}
+
+.keyword-grid { 
+  display: grid; 
+  grid-template-columns: repeat(4, 1fr); 
+  gap: 16px; 
+}
+
+.keyword-card { 
+  height: 128px; 
+  background: white; 
+  border: 2px dashed #d1d5db; 
+  border-radius: 12px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  color: #9ca3af; 
+}
+
+/* ================= 오늘의 추천작 (슬라이더) ================= */
+.slider-section { 
+  background: #f9fafb; 
+  padding: 48px 0; 
+}
+
+.slider-header-wrapper { 
+  max-width: 1280px; 
+  margin: 0 auto; 
+  padding: 0 24px; 
+}
+
+.slider-header { 
+  margin-bottom: 24px; 
+}
+
+.slider-main-area {
+  position: relative;
+}
+
+.slider-container { 
+  position: relative; 
+  overflow: hidden; 
+  width: 100%;
+  height: 450px; 
+}
+
+.slider-controls {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%; 
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
+}
+
+.slider-controls button { 
+  padding: 12px; 
+  background: white; 
+  border: none; 
+  border-radius: 50%; 
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+  cursor: pointer; font-size: 20px; 
+  transition: background 0.2s, transform 0.2s; 
+  outline: none;
+}
+
+.slider-controls button:focus {
+  outline: none;
+}
+
+.slider-controls button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.slider-controls button:hover { 
+  background: #eee; 
+  transform: scale(1.1); 
+}
+
+.slider-track { 
+  display: flex; 
+  transition: transform 0.5s ease-in-out; 
+  height: 100%;
+}
+
+.slide-card { 
+  min-width: 300px; 
+  margin-right: 20px; 
+  border-radius: 12px; 
+  position: relative; 
+  overflow: hidden; 
+  height: 400px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+}
+
+.rating-badge { 
+  position: absolute; 
+  bottom: 10px; 
+  right: 10px; 
+  background: rgba(0,0,0,0.7); 
+  color: #facc15; 
+  padding: 4px 8px; 
+  border-radius: 4px; 
+  font-size: 12px; 
+  font-weight: 700; 
+}
+
+/* ================= 카테고리별 영화 ================= */
+.category-header { 
+  display: flex; 
+  justify-content: space-between;
+  align-items: center; 
+  margin-bottom: 32px; 
+}
+
+.genre-tabs { 
+  display: flex; 
+  gap: 8px; 
+  flex-wrap: wrap; 
+}
+
+.genre-btn { 
+  padding: 6px 16px; 
+  border-radius: 20px; 
+  border: 1px solid #d1d5db; 
+  background: white; 
+  font-size: 14px; 
+  cursor: pointer; 
+  transition: all 0.2s; 
+}
+
+.genre-btn.active, .genre-btn:hover { 
+  background: #4b0082; 
+  color: white; 
+  border-color: #4b0082; 
+}
+
+.movie-grid { 
+  display: grid; 
+  grid-template-columns: repeat(5, 1fr); 
+  gap: 24px; 
+}
+
+.movie-item { 
+  cursor: pointer; 
+}
+
+.movie-item:hover .movie-poster { 
+  transform: translateY(-8px); 
+}
+
+.movie-poster { 
+  aspect-ratio: 2/3; 
+  background: #e5e7eb; 
+  border-radius: 8px;
+  position: relative; 
+  margin-bottom: 8px; 
+  display: flex; 
+  justify-content: center;
+  align-items: center; 
+  color: #9ca3af; 
+  font-weight: 500; 
+  transition: transform 0.2s ease; 
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+}
+
+.movie-rating { 
+  position: absolute; 
+  bottom: 8px; 
+  right: 8px; 
+  background: rgba(0,0,0,0.7); 
+  color: #facc15; 
+  font-size: 10px; 
+  padding: 2px 6px; 
+  border-radius: 4px; 
+  font-weight: bold; 
+}
+
+.movie-title { 
+  font-weight: 700; 
+  font-size: 14px;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis; 
+  white-space: nowrap; 
+}
+
+.movie-info { 
+  font-size: 12px; 
+  color: #6b7280; 
+}
+
+/* ================= 브랜드 컬러 대비 닉네임 스타일 ================= */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px; 
+}
+
+.user-nickname {
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.user-nickname strong {
+  color: #fff176; 
+  font-weight: 800;
+}

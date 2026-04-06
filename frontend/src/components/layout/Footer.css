@@ -1,0 +1,22 @@
+/* ================= 푸터 & 챗봇 ================= */
+.footer { 
+  background: #111827; 
+  color: #9ca3af; 
+  padding: 48px 24px; 
+  text-align: center; 
+  margin-top: 48px; 
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  font-size: 14px;
+  margin: 16px 0 24px 0;
+}
+
+.copyright { 
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
