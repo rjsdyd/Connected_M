@@ -14,7 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "Content")
+//@Table(name = "Content")
+@Table(name = "content")
 public class Content {
 
     @Id

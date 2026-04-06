@@ -11,21 +11,15 @@
   background: white;
   width: 100%;
   max-width: 480px;
-  padding: 50px 40px;
+  padding: 25px 40px;
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  margin-top: 100px;
 }
 
 .register-header {
   text-align: center;
-  margin-bottom: 40px;
-}
-
-.register-logo {
-  font-size: 28px;
-  font-weight: 800;
-  color: #4b0082;
-  margin-bottom: 10px;
+  margin-bottom: 25px;
 }
 
 .register-subtitle {
@@ -56,24 +50,24 @@
   border: 1px solid #e0e0e0;
   border-radius: 10px;
   font-size: 14px;
-  color: #333 !important; /* ✨ 글자 색상을 진한 회색으로 명시적 고정! */
-  background-color: #ffffff; /* 배경은 흰색 */
+  color: #333 !important; 
+  background-color: #ffffff;
   transition: all 0.2s;
 }
 
-/* ✨ 브라우저 자동완성 시 글자가 안 보이는 현상 방지 */
+/* 브라우저 자동완성 시 글자가 안 보이는 현상 방지 */
 .input-group input:-webkit-autofill,
 .input-group input:-webkit-autofill:hover, 
 .input-group input:-webkit-autofill:focus, 
 .input-group input:-webkit-autofill:active  {
-  -webkit-box-shadow: 0 0 0 1000px white inset !important; /* 배경 흰색 유지 */
-  -webkit-text-fill-color: #333 !important; /* 자동완성 시에도 글자색 진하게 유지 */
+  -webkit-box-shadow: 0 0 0 1000px white inset !important;
+  -webkit-text-fill-color: #333 !important;
   transition: background-color 5000s ease-in-out 0s;
 }
 
 .input-group input:focus {
   border-color: #4b0082;
-  color: #000; /* ✨ 포커스 시 글자 색상을 더 또렷하게 */
+  color: #000;
   outline: none;
   box-shadow: 0 0 0 3px rgba(75, 0, 130, 0.1);
 }

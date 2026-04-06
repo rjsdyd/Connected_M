@@ -2,6 +2,7 @@ import React, { useState } from 'react'; // useState 추가
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; // axios 추가
 import logo from '../../assets/img/Project_M_Logo.png'
+import './LoginModal.css'
 
 interface LoginModalProps {
   onClose: () => void;
@@ -33,6 +34,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
     if (nick) {
       localStorage.setItem('nickname', nick);
       localStorage.setItem('token', token);
+
+      localStorage.setItem('user', JSON.stringify(data));
       
       alert(`${nick}님, 환영합니다!`);
       onClose();

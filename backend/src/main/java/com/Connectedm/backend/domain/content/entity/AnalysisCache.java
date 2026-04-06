@@ -11,7 +11,8 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Table(name = "AnalysisCache")
+//@Table(name = "AnalysisCache")
+@Table(name = "analysis_cache")
 public class AnalysisCache {
 
     @Id
