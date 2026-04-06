@@ -8,7 +8,8 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Table(name = "ContentGenre")
+//@Table(name = "ContentGenre")
+@Table(name = "content_genre")
 public class ContentGenre {
 
     @Id

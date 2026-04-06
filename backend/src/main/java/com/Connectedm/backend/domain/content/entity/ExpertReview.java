@@ -13,7 +13,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "ExpertReview")
+//@Table(name = "ExpertReview")
+@Table(name = "expert_review")
 public class ExpertReview {
 
     @Id
