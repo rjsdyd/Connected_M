@@ -27,11 +27,13 @@ public class User {
     private String password;
 
     // 이름 추가
-    @Column(nullable = false, length = 50)
+    //@Column(nullable = false, length = 50)
+    @Column(name = "real_name", nullable = false, length = 50)
     private String realName;
 
     // 전화번호 추가
-    @Column(length = 20)
+    //@Column(length = 20)
+    @Column(name = "phone_number", length = 20)
     private String phoneNumber;
 
     @Column(nullable = false, length = 50)
