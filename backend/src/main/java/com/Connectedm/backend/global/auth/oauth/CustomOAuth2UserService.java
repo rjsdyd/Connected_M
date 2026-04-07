@@ -56,7 +56,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         final AuthProvider finalProvider = authProvider;
 
         // 5. ✨ [핵심 로직] 이메일이 아닌 '지문(Provider + ID)'으로 유저 식별
-        // 이제 이메일을 audwns...로 바꿔도 providerId가 그대로라 명준님을 알아봅니다.
         userRepository.findByProviderAndProviderId(finalProvider, providerId)
                 .map(entity -> {
                     // 기존 유저가 있다면 닉네임만 최신화 (이메일은 유지)
