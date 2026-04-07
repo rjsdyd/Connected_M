@@ -18,6 +18,7 @@ public class ContentCreateRequestDto {
     private String overview;    // 영화 줄거리
     private String posterPath;  // 포스터 이미지 경로
     private String ottLogos;    // OTT 플랫폼 로고들 (쉼표 구분 등)
+    private String cine21MovieId; // 씨네21 영화 고유 ID
 
     private List<String> genres; // ["액션", "코미디"] 형태
 

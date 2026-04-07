@@ -111,7 +111,7 @@ public class ContentService {
     @Transactional(readOnly = true)
     public ContentDetailResponseDto getContentDetail(Long id) {
         // 1. 콘텐츠 본체와 AI분석 캐시를 한 번에 가져오기
-        Content content = contentRepository.findById(id)
+        Content content = contentRepository.findWithCacheById(id)
                 .orElseThrow(() -> new RuntimeException("해당 콘텐츠를 찾을 수 없습니다. ID: " + id));
 
         // 2. 장르 이름들만 리스트로 뽑기
