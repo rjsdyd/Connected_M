@@ -1,23 +1,24 @@
 package com.Connectedm.backend.config;
 
-import com.Connectedm.backend.global.auth.JwtTokenProvider;
-import com.Connectedm.backend.global.auth.filter.JwtAuthenticationFilter;
-import com.Connectedm.backend.global.auth.handler.OAuth2SuccessHandler;
-import com.Connectedm.backend.global.auth.oauth.CustomOAuth2UserService;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
+import com.Connectedm.backend.global.auth.JwtTokenProvider;
+import com.Connectedm.backend.global.auth.filter.JwtAuthenticationFilter;
+import com.Connectedm.backend.global.auth.handler.OAuth2SuccessHandler;
+import com.Connectedm.backend.global.auth.oauth.CustomOAuth2UserService;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
@@ -28,11 +29,7 @@ public class SecurityConfig {
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final JwtTokenProvider jwtTokenProvider;
 
-    // 1. 비밀번호 암호화 빈 등록
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+
 
     // 2. HTTP 보안 및 필터 체인 설정
     @Bean

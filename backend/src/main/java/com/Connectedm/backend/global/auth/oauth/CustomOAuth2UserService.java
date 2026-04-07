@@ -1,7 +1,7 @@
 package com.Connectedm.backend.global.auth.oauth;
 
 import com.Connectedm.backend.domain.user.entity.User;
-import com.Connectedm.backend.domain.user.entity.User.AuthProvider; // ✨ 내부 Enum 정확한 임포트
+import com.Connectedm.backend.domain.user.entity.User.AuthProvider;
 import com.Connectedm.backend.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -54,20 +54,21 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         final String finalEmail = email;
         final AuthProvider finalProvider = authProvider;
+        final String finalNickname = (nickname != null) ? nickname : "소셜유저";
 
-        // 5. ✨ [핵심 로직] 이메일이 아닌 '지문(Provider + ID)'으로 유저 식별
+        // 5. [핵심 로직] 이메일이 아닌 '지문(Provider + ID)'으로 유저 식별
         userRepository.findByProviderAndProviderId(finalProvider, providerId)
                 .map(entity -> {
                     // 기존 유저가 있다면 닉네임만 최신화 (이메일은 유지)
-                    entity.setNickname(nickname);
+                    entity.setNickname(finalNickname);
                     return userRepository.save(entity);
                 })
                 .orElseGet(() -> {
-                    // 처음 온 사람이라면 새로 가입 (ID 3번 같은 데이터 생성)
+                    // 처음 온 사람이라면 새로 가입
                     return userRepository.save(User.builder()
                             .email(finalEmail)
-                            .nickname(nickname)
-                            .realName(nickname)
+                            .nickname(finalNickname)
+                            .realName(finalNickname)
                             // 암호화된 임시 비밀번호 설정 (nullable=false 대응)
                             .password(passwordEncoder.encode(UUID.randomUUID().toString()))
                             .phoneNumber("010-0000-0000")
