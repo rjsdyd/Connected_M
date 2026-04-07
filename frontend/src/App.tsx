@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom'; // ✨ 라우터 기능 불러오기
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
 
-// 📦 분리한 컴포넌트들 불러오기
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Chatbot from './components/chatbot/Chatbot';
@@ -10,35 +9,32 @@ import LoginModal from './components/common/LoginModal';
 import Home from './pages/Home/Home';
 import MyPage from './pages/MyPage/MyPage';
 import Register from './pages/Register/Register';
+import MovieDetail from './pages/MovieDetail/MovieDetail';
 
 const App = () => {
-  // 로그인 모달 상태는 전체 화면에서 관리
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   return (
-    // ✨ 전체 앱을 BrowserRouter로 감싸줍니다.
     <BrowserRouter>
       <div className="app-container">
-        {/* 1. 상단 헤더 (모든 페이지 고정) */}
+        {/* 1. 상단 헤더 */}
         <Header onOpenLogin={() => setIsLoginModalOpen(true)} />
         
-        {/* 2. 메인 페이지 컨텐츠 (✨ 주소에 따라 화면이 바뀌는 영역!) */}
+        {/* 2. 메인 콘텐츠 영역 (모든 Route는 이 안으로 모아야 합니다) */}
         <div className="main-content" style={{ minHeight: '80vh' }}> 
           <Routes>
-            {/* 기본 주소('/')로 오면 Home을 보여줌 */}
             <Route path="/" element={<Home />} />
-
             <Route path="/register" element={<Register />} />
-            
-            {/* '/mypage' 주소로 오면 MyPage를 보여줌 */}
             <Route path="/mypage" element={<MyPage />} />
+            {/* 상세페이지 경로 - 반드시 여기에 위치해야 합니다 */}
+            <Route path="/movie/:id" element={<MovieDetail />} />
           </Routes>
         </div>
         
-        {/* 3. 하단 푸터 (모든 페이지 고정) */}
+        {/* 3. 하단 푸터 */}
         <Footer />
         
-        {/* 4. 우측 하단 챗봇 (모든 페이지 고정) */}
+        {/* 4. 챗봇 */}
         <Chatbot />
         
         {/* 5. 로그인 모달 */}
@@ -46,6 +42,8 @@ const App = () => {
           <LoginModal onClose={() => setIsLoginModalOpen(false)} />
         )}
       </div>
+
+      {/* ❌ 맨 아래에 있던 중복된 <Routes> 덩어리는 삭제했습니다. */}
     </BrowserRouter>
   );
 };
