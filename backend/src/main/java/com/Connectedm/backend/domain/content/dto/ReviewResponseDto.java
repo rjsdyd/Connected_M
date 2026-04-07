@@ -15,6 +15,6 @@ public class ReviewResponseDto {
     private String criticName;
     private String rating;
     private String comment;
-    private String source;
-    private String movieTitle;
+    private String sourceName;  // "cine21" 등
+    private String movieTitle;  // 응답시에는 Content 또는 Cine21Source에서 보냄
 }

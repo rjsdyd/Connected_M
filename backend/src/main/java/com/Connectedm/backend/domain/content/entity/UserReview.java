@@ -40,7 +40,7 @@ public class UserReview {
     @JoinColumn(name = "content_id")
     private Content content;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 10)
     private String rating;
 
     @Column(nullable = false, columnDefinition = "TEXT")

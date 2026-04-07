@@ -35,8 +35,9 @@ public class ExpertReview {
     @JoinColumn(name = "analysis_id")
     private AnalysisCache analysisCache;
 
-    @Column(name = "movie_title", nullable = false, length = 250)
-    private String movieTitle;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "source_id")
+    private Cine21Source cine21Source;
 
     @Column(name = "critic_name", nullable = false, length = 50)
     private String criticName;
