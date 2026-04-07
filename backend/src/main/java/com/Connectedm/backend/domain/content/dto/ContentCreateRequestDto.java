@@ -13,11 +13,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ContentCreateRequestDto {
-    private String tmdbId;      // 노션에 있던 그 고유 ID
+    private String tmdbId;      // TMDB 고유 ID
+    private String cine21Id;    // 씨네21 고유 ID
     private String title;       // 영화 제목
     private String overview;    // 영화 줄거리
     private String posterPath;  // 포스터 이미지 경로
     private String ottLogos;    // OTT 플랫폼 로고들 (쉼표 구분 등)
+    private String cine21MovieId; // 씨네21 영화 고유 ID
 
     private List<String> genres; // ["액션", "코미디"] 형태
 
@@ -29,11 +31,11 @@ public class ContentCreateRequestDto {
     public Content toEntity() {
         return Content.builder()
                 .tmdbId(this.tmdbId)
+                .cine21Id(this.cine21Id)
                 .title(this.title)
                 .overview(this.overview)
                 .posterPath(this.posterPath)
                 .ottLogos(this.ottLogos)
                 .build();
     }
-
 }
