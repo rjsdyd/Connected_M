@@ -15,6 +15,12 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  // 1. ✨ 이 함수를 handleSubmit 위에 추가하세요!
+  const handleSocialLogin = (provider: 'kakao' | 'google') => {
+    // 8080(백엔드)의 시큐리티가 기다리고 있는 주소로 보냅니다.
+    window.location.href = `http://localhost:8080/oauth2/authorization/${provider}`;
+  };
+
   // 2. ✨ 로그인 처리 함수
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -96,8 +102,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
         </div>
 
         <div className="social-login-section">
-          <button className="social-btn btn-kakao">카카오</button>
-          <button className="social-btn btn-google">구글</button>
+          <button className="social-btn btn-kakao" onClick={() => handleSocialLogin('kakao')}>카카오</button>
+          <button className="social-btn btn-google" onClick={() => handleSocialLogin('google')}>구글</button>
         </div>
       </div>
     </div>

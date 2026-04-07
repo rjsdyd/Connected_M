@@ -11,7 +11,7 @@ const Chatbot = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { id: 1, type: 'bot', text: '<strong>반갑습니다! 👋</strong><br> 궁금한 영화나 드라마가 있다면 무엇이든 물어보세요.' }
+    { id: 1, type: 'bot', text: '<strong>반갑습니다! 👋</strong><br> 궁금한 영화가 있다면 무엇이든 물어보세요.' }
   ]);
   
   const chatBodyRef = useRef<HTMLDivElement>(null);

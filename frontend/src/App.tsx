@@ -8,16 +8,23 @@ import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Chatbot from './components/chatbot/Chatbot';
 import LoginModal from './components/common/LoginModal';
+import { useAuthCheck } from './hooks/useAuthCheck'; // ✨ 커스텀 훅 가져오기
+
+// 페이지들
 import Home from './pages/Home/Home';
 import MyPage from './pages/MyPage/MyPage';
 import Register from './pages/Register/Register';
-import MovieDetail from './pages/MovieDetail/MovieDetail';
+import MovieDetail from './pages/MovieDetail/Moviedetail';
+
 
 
 
 
 const App = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  
+  // ✨ 여기서 훅을 실행하면 모든 로직이 돌아갑니다!
+  useAuthCheck();
 
   return (
     <BrowserRouter>
@@ -53,7 +60,6 @@ const App = () => {
         )}
       </div>
 
-      {/* ❌ 맨 아래에 있던 중복된 <Routes> 덩어리는 삭제했습니다. */}
     </BrowserRouter>
   );
 };

@@ -9,30 +9,30 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
   const [nickname, setNickname] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const navigate = useNavigate();
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
     const savedNickname = localStorage.getItem('nickname');
-    if (savedNickname) {
-      setNickname(savedNickname);
+    
+    if (token) {
+      setIsLoggedIn(true);
+      // 소셜 로그인 시 닉네임이 없을 수 있으므로 기본값 설정
+      setNickname(savedNickname || "사용자"); 
     }
   }, []);
 
-  // ✨ 수정된 로그아웃 함수
   const handleLogout = () => {
-    // 1. 지갑 비우기 (아까 추가했던 user도 꼭 같이 지워주세요!)
     localStorage.removeItem('user'); 
     localStorage.removeItem('nickname');
     localStorage.removeItem('token');
     
-    // 2. 상태 초기화 및 알림
+    setIsLoggedIn(false); // 상태 업데이트
     setNickname(null);
     alert("로그아웃 되었습니다.");
     
-    // 3. 어디에 있든 무조건 메인 홈으로 쫓아내기
     navigate('/');
-    
-    // 4. 화면 새로고침으로 완벽하게 상태 반영
     window.location.reload();
   };
 
@@ -72,11 +72,12 @@ const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
         <div className="header-right">
           <input type="text" placeholder="검색어를 입력하세요" className="search-input" />
           
-          {/* 로그인 상태에 따른 버튼 렌더링 (아주 잘 짜셨습니다!) */}
-          {nickname ? (
+          {/* ✨ 기준을 nickname에서 isLoggedIn으로 변경했습니다. */}
+          {isLoggedIn ? (
             <div className="user-info">
               <span className="user-nickname">
-                <strong>{nickname}</strong>님
+                {/* 닉네임이 로컬스토리지에 없으면 '사용자'라고 표시해주는 센스! */}
+                <strong>{nickname || "사용자"}</strong>님
               </span>
               <button className="text-btn" onClick={handleLogout}>로그아웃</button>
             </div>
@@ -86,7 +87,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
           
           <button 
             className="btn-brand" 
-            onClick={() => nickname ? navigate('/mypage') : onOpenLogin()}
+            onClick={() => isLoggedIn ? navigate('/mypage') : onOpenLogin()}
           >
             마이페이지
           </button>

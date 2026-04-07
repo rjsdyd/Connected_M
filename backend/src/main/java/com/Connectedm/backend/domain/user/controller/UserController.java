@@ -8,12 +8,21 @@ import com.Connectedm.backend.global.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+
+import com.Connectedm.backend.domain.user.entity.User;
+import com.Connectedm.backend.domain.user.repository.UserRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     // 1. 신규 회원가입
     @PostMapping("/signup")
@@ -34,5 +43,37 @@ public class UserController {
     public ApiResponse<UserResponse> getMyPage(@PathVariable Long userId) {
         UserResponse response = userService.getUserInfo(userId);
         return ApiResponse.success(response);
+    }
+
+    @PutMapping("/update-extra-info")
+    public ApiResponse<String> updateExtraInfo(@RequestBody Map<String, Object> request) {
+        try {
+            // 1. 데이터 추출 (null 체크 포함)
+            if (request.get("id") == null) return ApiResponse.error("ID가 누락되었습니다.");
+
+            Long id = Long.valueOf(request.get("id").toString());
+            String email = (String) request.get("email");
+            String phoneNumber = (String) request.get("phoneNumber");
+            String password = (String) request.get("password");
+
+            // 2. 유저 조회
+            User user = userRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("해당 유저를 찾을 수 없습니다. ID: " + id));
+
+            // 3. 데이터 업데이트
+            user.setEmail(email);
+            user.setPhoneNumber(phoneNumber);
+            if (password != null && !password.isEmpty()) {
+                user.setPassword(passwordEncoder.encode(password));
+            }
+
+            userRepository.save(user);
+            return ApiResponse.success("정보 업데이트 성공!");
+
+        } catch (Exception e) {
+            // ✨ 로그에 에러 원인을 찍어줍니다. (인텔리제이에서 확인 가능)
+            e.printStackTrace();
+            return ApiResponse.error("서버 내부 에러: " + e.getMessage());
+        }
     }
 }

@@ -12,6 +12,7 @@ import java.util.List;
 @Entity
 @Table(name = "user")
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -20,7 +21,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(nullable = true, unique = true, length = 100)
     private String email;
 
     @Column(nullable = false, length = 255)
@@ -46,6 +47,16 @@ public class User {
     // UserReview와 관계 연결
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserReview> reviews = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    private AuthProvider provider; // LOCAL, KAKAO, GOOGLE 중 하나
+
+    private String providerId; // 소셜에서 주는 고유 번호 (일반 유저는 null)
+
+    // Enum을 만들어서 관리하면 오타 실수를 줄일 수 있어요!
+    public enum AuthProvider {
+        LOCAL, KAKAO, GOOGLE
+    }
 
     // DB 저장되기 직전에 번호 형식 바꿔주는 로직
     @PrePersist
