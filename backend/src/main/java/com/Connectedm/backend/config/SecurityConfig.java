@@ -1,10 +1,16 @@
 package com.Connectedm.backend.config;
 
+import com.Connectedm.backend.global.auth.JwtTokenProvider;
+import com.Connectedm.backend.global.auth.filter.JwtAuthenticationFilter;
+import com.Connectedm.backend.global.auth.handler.OAuth2SuccessHandler;
+import com.Connectedm.backend.global.auth.oauth.CustomOAuth2UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -15,7 +21,12 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final JwtTokenProvider jwtTokenProvider;
 
     // 1. 비밀번호 암호화 빈 등록
     @Bean
@@ -33,22 +44,35 @@ public class SecurityConfig {
                 // CORS 설정을 보안 필터 체인에 직접 적용
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
+                // 1. JWT 사용을 위한 세션 정책 추가 ✨ (필수!)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                 // 기본 로그인 폼 및 HTTP Basic 인증 비활성화
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
 
                 // 경로별 권한 설정
-                // SecurityConfig.java의 filterChain 메서드 안에서
                 .authorizeHttpRequests(auth -> auth
-                        //  OPTIONS 요청(Preflight)을 무조건 허용하도록 맨 위에 추가
                         .requestMatchers(org.springframework.web.cors.CorsUtils::isPreFlightRequest).permitAll()
-                        .requestMatchers("/","/error").permitAll()
+                        .requestMatchers("/", "/error", "/favicon.ico").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/register").permitAll()
+                        // 4. OAuth2 관련 엔드포인트 허용 추가
+                        .requestMatchers("/login/oauth2/**", "/oauth2/**").permitAll()
                         .requestMatchers("/api/contents/**").permitAll()
+                        .requestMatchers("/api/auth/update-extra-info").authenticated()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
-                );
+                ) // 👈 여기서 세미콜론(;)을 지웠습니다!
+
+                // 5. OAuth2 로그인 설정 추가 ✨ (위의 닫는 괄호 뒤에 바로 연결)
+                .oauth2Login(oauth -> oauth
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .successHandler(oAuth2SuccessHandler)
+                )
+                // ✨ 핵심: JWT 필터를 UsernamePasswordAuthenticationFilter보다 먼저 실행하게 설정
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
+                        org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
