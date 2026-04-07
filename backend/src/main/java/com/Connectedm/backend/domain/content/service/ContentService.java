@@ -29,6 +29,68 @@ public class ContentService {
     private final AnalysisCacheRepository analysisCacheRepository;
     private final ContentGenreRepository contentGenreRepository;
     private final ReviewService reviewService;
+    private final TmdbService tmdbService;
+
+
+    @Transactional
+    public void updateContentWithTmdb(Long id) {
+        // 1. DB에서 해당 콘텐츠 조회
+        Content content = contentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("콘텐츠를 찾을 수 없습니다. ID: " + id));
+
+        // 2. 영화 제목으로 진짜 TMDB ID 찾아오기
+        Long realTmdbId = tmdbService.searchMovieIdByTitle(content.getTitle());
+        
+        if (realTmdbId == null) {
+            throw new RuntimeException("TMDB에서 해당 영화를 찾을 수 없습니다: " + content.getTitle());
+        }
+
+        // 3. 찾은 진짜 TMDB ID로 상세 정보 가져오기
+        TmdbMovieResponseDto tmdbData = tmdbService.getMovieDetails(realTmdbId);
+
+        // 4. API 응답 데이터 중 poster_path 앞에는 "https://image.tmdb.org/t/p/w500"를 붙여서 전체 경로 생성
+        String fullPosterPath = (tmdbData.getPoster_path() != null) 
+                ? "https://image.tmdb.org/t/p/w500" + tmdbData.getPoster_path() 
+                : null;
+        
+        // 5. OTT 로고 데이터 준비
+        String logos = tmdbData.getOttLogos() != null ? tmdbData.getOttLogos() : "";
+
+        // 6. 장르 동기화 로직 추가
+        if (tmdbData.getGenres() != null) {
+            for (TmdbMovieResponseDto.TmdbGenre tmdbGenre : tmdbData.getGenres()) {
+                String genreName = tmdbGenre.getName();
+
+                // 6-1. 장르가 DB에 없는 경우 새로 생성 후 저장
+                Genre genre = genreRepository.findByName(genreName)
+                        .orElseGet(() -> genreRepository.save(Genre.builder().name(genreName).build()));
+
+                // 6-2. 현재 영화와 해당 장르가 이미 연결되어 있는지 확인
+                boolean alreadyLinked = content.getContentGenres().stream()
+                        .anyMatch(cg -> cg.getGenre().getName().equals(genreName));
+
+                // 6-3. 연결되어 있지 않다면 ContentGenre 생성 및 추가
+                if (!alreadyLinked) {
+                    ContentGenre contentGenre = ContentGenre.builder()
+                            .content(content)
+                            .genre(genre)
+                            .build();
+                    content.addGenre(contentGenre);
+                }
+            }
+        }
+
+        // 7. 진짜 TMDB ID와 함께 모든 정보 업데이트
+        content.updateTmdbInfo(
+            String.valueOf(realTmdbId), // 진짜 TMDB ID로 교체
+            tmdbData.getOverview(), 
+            fullPosterPath, 
+            logos
+        );
+
+        // 8. 명시적으로 변경 사항 저장 (변경 감지에 의존하나 확실한 반영을 위해 호출)
+        contentRepository.save(content);
+    }
 
     // 크롤링 데이터 DB저장
     public void saveCrawledContent(ContentCreateRequestDto dto) {

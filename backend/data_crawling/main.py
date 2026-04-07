@@ -17,6 +17,8 @@ from scraper import MovieScraper
 from expert_saver import ExpertSaver, db_host, db_port, db_user, db_pw, db_name
 from dotenv import load_dotenv
 
+DEFAULT_ANALYSIS_ID = 1  # analysis_cache 테이블의 1번 데이터 ID (자가 치유용)
+
 load_dotenv()
 
 
@@ -33,9 +35,6 @@ def save_data_and_crawling_plzplzplz():
 
     print("데이터 적재 시작")
 
-    content_id_cnt = 1
-    DEFAULT_ANALYSIS_ID = 1
-
     for genre, movies in movie_data.MOVIE_CATEGORIES.items():
         print(f"\n --- {genre} ---")
 
@@ -47,20 +46,17 @@ def save_data_and_crawling_plzplzplz():
 
                 if result:
                     db.save_review(
-                        content_id=content_id_cnt,
+                        cine21_id=cine21_id,
                         analysis_id=DEFAULT_ANALYSIS_ID,
                         movie_title=movie_name,
                         reviews=result
                     )
-                    print(f"저장 완료 (content_id : {content_id_cnt}, 제목 : {movie_name})")
+                    print(f"저장 완료 (cine21_id : {cine21_id}, 제목 : {movie_name})")
                 else:
                     print("수집 된 리뷰가 없습니다.")
 
             except Exception as e:
                 print(f"오류 발생: {e}")
-            
-            # 3. 결과가 있든 없든, 한 영화 작업이 끝나면 번호를 하나 올립니다.
-            content_id_cnt += 1
 
     scraper.close()
 
