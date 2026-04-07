@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
 
-import Terms from './pages/Terms/Terms';
-import Privacy from './pages/Privacy/Privacy';
+// 컴포넌트 & 페이지 임포트
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Chatbot from './components/chatbot/Chatbot';
@@ -15,12 +14,11 @@ import Home from './pages/Home/Home';
 import MyPage from './pages/MyPage/MyPage';
 import Register from './pages/Register/Register';
 import MovieDetail from './pages/MovieDetail/Moviedetail';
+import Terms from './pages/Terms/Terms';
+import Privacy from './pages/Privacy/Privacy';
 
 
-
-
-
-const App = () => {
+const AppContent = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   
   // ✨ 여기서 훅을 실행하면 모든 로직이 돌아갑니다!
@@ -63,5 +61,11 @@ const App = () => {
     </BrowserRouter>
   );
 };
+
+const App = () => (
+  <BrowserRouter>
+    <AppContent />
+  </BrowserRouter>
+);
 
 export default App;
