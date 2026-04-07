@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
 
+import Terms from './pages/Terms/Terms';
+import Privacy from './pages/Privacy/Privacy';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Chatbot from './components/chatbot/Chatbot';
@@ -10,6 +12,9 @@ import Home from './pages/Home/Home';
 import MyPage from './pages/MyPage/MyPage';
 import Register from './pages/Register/Register';
 import MovieDetail from './pages/MovieDetail/MovieDetail';
+
+
+
 
 const App = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -28,6 +33,11 @@ const App = () => {
             <Route path="/mypage" element={<MyPage />} />
             {/* 상세페이지 경로 - 반드시 여기에 위치해야 합니다 */}
             <Route path="/movie/:id" element={<MovieDetail />} />
+            <Route path="/terms" element={<Terms />} /> 
+            <Route path="/privacy" element={<Privacy />} />
+
+
+
           </Routes>
         </div>
         
