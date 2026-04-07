@@ -89,28 +89,51 @@ class MovieScraper:
 
             for item in items[:limit]:
                 try:
-                    # 평론가 이름 및 점수 추출
-                    name = item.find_element(By.CSS_SELECTOR, "div.reviewer .name").text.strip()
-                    score = item.find_element(By.CSS_SELECTOR, "div.reviewer .num").text.strip()
+                    # 1. 평론가 이름 추출
+                    try:
+                        name = item.find_element(By.CSS_SELECTOR, "div.reviewer .name").text.strip()
+                    except Exception:
+                        name = "익명 평론가" # 이름이 없는 경우 대비
 
-                    # 본문 추출 (우선순위: comment_open -> review)
-                    # .text는 이미 HTML을 제거하지만 내부의 지저분한 공백을 _clean_text로 처리함
+                    # 2. 평점(score) 추출 - [중요: 예외 처리 강화]
+                    try:
+                        score_element = item.find_element(By.CSS_SELECTOR, "div.reviewer .num")
+                        score = score_element.text.strip()
+                        if not score: # 요소는 있는데 텍스트가 비어있는 경우
+                            score = "0" 
+                    except Exception:
+                        score = "평점 없음" # 평점 요소 자체가 없는 경우
+
+                    # 3. 본문 추출 (우선순위: comment_open -> review)
                     content_raw = ""
                     try:
+                        # 펼쳐진 댓글창 시도
                         content_raw = item.find_element(By.CSS_SELECTOR, "div.review div.comment_open").text
-                    except:
-                        content_raw = item.find_element(By.CSS_SELECTOR, "div.review").text
+                    except Exception:
+                        try:
+                            # 일반 리뷰창 시도
+                            content_raw = item.find_element(By.CSS_SELECTOR, "div.review").text
+                        except Exception:
+                            content_raw = ""
 
-                    # 텍스트 정제 적용
+                    # 4. 텍스트 정제 적용
                     clean_content = self._clean_text(content_raw)
+                    
+                    # 이름과 별점도 정제함 (혹시 모를 특수문자 제거)
+                    clean_name = self._clean_text(name)
+                    clean_score = self._clean_text(score)
 
+                    # 내용이 있는 경우에만 리스트에 추가
                     if clean_content:
                         reviews.append({
-                            "critic": name,
-                            "score": score,
+                            "critic": clean_name,
+                            "score": clean_score, # 이제 "8.5" 혹은 "평점 없음" 등이 문자열로 들어감
                             "content": clean_content
                         })
-                except Exception:
+                        
+                except Exception as e:
+                    # 한 개의 리뷰에서 에러가 나도 다음 리뷰로 넘어가도록 처리
+                    print(f"      [!] 개별 리뷰 추출 중 오류 발생: {e}")
                     continue
 
         except Exception as e:
