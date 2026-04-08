@@ -63,12 +63,32 @@
 .link-group {
   display: flex;
   justify-content: center;
-  gap: 30px;
+  align-items: center;
+  gap: 2px; /* 로고 사이 간격 */
+  margin-top: 10px;
+  margin-right: 100px;
 }
 
-.tmdb-link { color: #01b4e4; font-weight: 900; cursor: pointer; }
-.cine21-link { font-weight: 900; cursor: pointer; }
+/* TMDB 로고 스타일 */
+.tmdb-logo-img {
+  height: 80px; /* 텍스트 크기와 비슷하게 맞춤 */
+  width: auto;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
 
+/* 씨네21 로고 스타일 */
+.cine21-logo-img {
+  height: 30px; /* 씨네21 로고 특성에 맞춰 살짝 조절 */
+  width: auto;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.tmdb-logo-img:hover,
+.cine21-logo-img:hover {
+  opacity: 0.7;
+}
 /* 3. 오른쪽 팀원 영역 */
 .footer-right {
   display: flex;
@@ -120,9 +140,9 @@
   font-weight: 600;
 }
 
-.copyright {
-  margin-top: 5px;
+.copyright { 
   font-size: 12px;
-  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 1px;
   cursor: pointer;
 }

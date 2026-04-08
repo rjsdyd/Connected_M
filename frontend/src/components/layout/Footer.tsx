@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Footer.css';
+import tmdbLogoImg from '../../image/TMDB로고.png'; 
+import cine21LogoImg from '../../image/씨네21로고.png';
+
+
 
 const Footer: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
   const teamMembers = [
-    { id: 1, name: 'Member 1', github: 'https://github.com/LMJ-01', img: 'image/KakaoTalk_20260407_100625430.png', color: '#fbbf24' },
-    { id: 2, name: 'Member 2', github: 'https://github.com/Joohang', img: 'image/KakaoTalk_20260407_100625430_01.png', color: '#60a5fa' },
-    { id: 3, name: 'Member 3', github: 'https://github.com/rjsdyd', img: 'image/KakaoTalk_20260407_100625430_02.png', color: '#f472b6' },
-    { id: 4, name: 'Member 4', github: 'https://github.com/Sleep404NF', img: 'image/KakaoTalk_20260407_100625430_03.png', color: '#e5e7eb' },
-    { id: 5, name: 'Member 5', github: 'https://github.com/dnwls0022', img: 'image/KakaoTalk_20260407_100625430_04.png', color: '#4b5563' },
+    { id: 1, name: 'Member 1', github: 'https://github.com/LMJ-01', img: 'image/팀장님 깃허브로고.png', color: '#fbbf24' },
+    { id: 2, name: 'Member 2', github: 'https://github.com/Joohang', img: 'image/한규대팀원 깃허브로고.png', color: '#60a5fa' },
+    { id: 3, name: 'Member 3', github: 'https://github.com/rjsdyd', img: 'image/이건용팀원 깃허브로고.png', color: '#f472b6' },
+    { id: 4, name: 'Member 4', github: 'https://github.com/Sleep404NF', img: 'image/이승우팀원 깃허브로고.png', color: '#e5e7eb' },
+    { id: 5, name: 'Member 5', github: 'https://github.com/dnwls0022', img: 'image/조우진 팀원깃허브로고.png', color: '#4b5563' },
   ];
 
   const goToUrl = (url: string) => {
@@ -27,7 +31,7 @@ const Footer: React.FC = () => {
         
         {/* 1. 팀 로고 */}
         <div className="footer-logo" onClick={() => navigateTo('/')}>
-          <img src="image/화면_캡처_2026-04-07_110635-removebg-preview (2).png" alt="Logo" />
+          <img src="image/팀 로고.png" alt="Logo" />
         </div>
 
         {/* 2. 중앙 텍스트 정보 */}
@@ -35,8 +39,19 @@ const Footer: React.FC = () => {
           <p className="main-text">이 사이트는 TMDB와 씨네21 데이터를 기반으로 하여 제작되었습니다.</p>
           <p className="sub-text">이윤을 추구하지않는 비영리 프로젝트로써 <span className="brand-name">Connected_M</span>은 무료입니다.</p>
           <div className="link-group">
-             <span className="tmdb-link" onClick={() => goToUrl('https://www.themoviedb.org/')}>TMDB</span>
-             <span className="cine21-link" onClick={() => goToUrl('http://www.cine21.com/')}>씨네<span className="cine21-red">21</span></span>
+             <img 
+      src={'image/TMDB로고.png'} /* 👈 여기에 TMDB 이미지 경로를 넣으세요! */
+      alt="TMDB"
+      className="tmdb-logo-img"
+      onClick={() => goToUrl('https://www.themoviedb.org/')}
+    />
+    <img 
+      src={'image/씨네21로고.png'} /* 👈 여기에 씨네21 이미지 경로를 넣으세요! */
+      alt="씨네21"
+      className="cine21-logo-img"
+      onClick={() => goToUrl('http://www.cine21.com/')}
+    />
+
           </div>
         </div>
 
