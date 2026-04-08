@@ -1,20 +1,28 @@
 package com.Connectedm.backend.domain.content.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.Connectedm.backend.domain.content.dto.ExpertReviewCreateRequestDto;
+import com.Connectedm.backend.domain.content.dto.ReviewCreateRequestDto;
 import com.Connectedm.backend.domain.content.dto.ReviewResponseDto;
 import com.Connectedm.backend.domain.content.entity.Cine21Source;
 import com.Connectedm.backend.domain.content.entity.Content;
 import com.Connectedm.backend.domain.content.entity.ExpertReview;
+import com.Connectedm.backend.domain.content.entity.UserReview;
 import com.Connectedm.backend.domain.content.repository.Cine21SourceRepository;
 import com.Connectedm.backend.domain.content.repository.ContentRepository;
 import com.Connectedm.backend.domain.content.repository.ExpertReviewRepository;
 import com.Connectedm.backend.domain.content.repository.UserReviewRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.Connectedm.backend.domain.user.entity.User;
+import com.Connectedm.backend.domain.user.repository.UserRepository;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+
+
 
 @Service
 @Transactional(readOnly = true)
@@ -25,6 +33,7 @@ public class ReviewService {
     private final UserReviewRepository userReviewRepository;
     private final Cine21SourceRepository cine21SourceRepository;
     private final ContentRepository contentRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public void saveExpertReview(ExpertReviewCreateRequestDto dto) {
@@ -89,4 +98,25 @@ public class ReviewService {
                         .build())
                 .toList();
     }
+        // 사용자 리뷰 저장
+        @Transactional
+        public void saveUserReview(Long userId, ReviewCreateRequestDto dto) {
+        // 1. 유저 찾기
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
+        // 2. 컨텐츠(영화) 찾기
+        Content content = contentRepository.findById(dto.getContentId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 컨텐츠입니다."));
+
+        // 3. 엔티티 생성 및 저장
+        UserReview userReview = UserReview.builder()
+                .user(user)
+                .content(content)
+                .rating(dto.getRating())
+                .comment(dto.getComment())
+                .build();
+
+        userReviewRepository.save(userReview);
+        }
 }

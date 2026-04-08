@@ -25,7 +25,7 @@ const AppContent = () => {
   useAuthCheck();
 
   return (
-    <BrowserRouter>
+    // <BrowserRouter>
       <div className="app-container">
         {/* 1. 상단 헤더 */}
         <Header onOpenLogin={() => setIsLoginModalOpen(true)} />
@@ -57,10 +57,10 @@ const AppContent = () => {
           <LoginModal onClose={() => setIsLoginModalOpen(false)} />
         )}
       </div>
-
-    </BrowserRouter>
   );
 };
+    {/* </BrowserRouter> */}
+
 
 const App = () => (
   <BrowserRouter>
