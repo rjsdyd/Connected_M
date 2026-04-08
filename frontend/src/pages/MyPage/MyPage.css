@@ -1,3 +1,20 @@
+/* 1. 폰트 불러오기 (CSS 파일 최상단에 위치해야 함) */
+@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;700;900&display=swap');
+
+/* 2. 전체 요소에 폰트 적용 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  /* 모든 요소에 Pretendard 적용, 없을 경우 샌세리프 계열 사용 */
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+}
+
+/* 3. input, button 등 기본 폰트가 상속되지 않는 요소들까지 강제 적용 */
+input, button, textarea, select {
+  font-family: inherit;
+}
+
 /* 전체 배경 및 정렬 */
 .mypage-container {
   min-height: 100vh;
@@ -16,6 +33,7 @@
   border-radius: 16px;
   padding: 40px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  margin-top: 50px;
 }
 
 .mypage-title {

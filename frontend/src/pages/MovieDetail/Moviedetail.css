@@ -1,10 +1,24 @@
-/* MovieDetail.css */
+/* 1. 폰트 불러오기 (CSS 파일 최상단에 위치해야 함) */
+@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;700;900&display=swap');
 
-/* 전체 배경 및 폰트 설정 */
+/* 2. 전체 요소에 폰트 적용 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  /* 모든 요소에 Pretendard 적용, 없을 경우 샌세리프 계열 사용 */
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+}
+
+/* 3. input, button 등 기본 폰트가 상속되지 않는 요소들까지 강제 적용 */
+input, button, textarea, select {
+  font-family: inherit;
+}
+
 .detail-container {
   background-color: #ffffff;
   color: #333;
-  font-family: 'Pretendard', -apple-system, sans-serif;
+  font-family: 'Pretendard', sans-serif;
   margin: 0;
   padding: 0;
 }
@@ -13,11 +27,9 @@
   min-height: 100vh;
 }
 
-/* 1. 상단 배너 섹션 */
 .banner-section {
   height: 550px;
   background-color: #1a1a1a;
-  /* 실제 이미지 연동 전 샘플 배경 */
   background-image: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.8)), 
                     url('https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2070&auto=format&fit=crop');
   background-size: cover;
@@ -35,31 +47,20 @@
   max-width: 800px;
 }
 
-/* 상영 중인 플랫폼 (장르 위쪽) */
 .platform-row {
   display: flex;
-  gap: 15px;
-  margin-bottom: 15px;
-}
-
-.platform-link {
-  transition: transform 0.3s ease;
-}
-
-.platform-link:hover {
-  transform: translateY(-5px);
+  gap: 12px;
+  margin-bottom: 10px;
+  align-items: center;
 }
 
 .platform-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%; /* 프로토타입처럼 원형 유지 */
-  object-fit: cover;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  height: 24px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
 }
 
 .genre-label {
-  color: #d1b9ff; /* 연보라 포인트 */
+  color: #d1b9ff;
   font-weight: 700;
   font-size: 1.2rem;
   display: block;
@@ -67,10 +68,12 @@
 }
 
 .movie-title {
-  font-size: 4rem;
-  margin: 0 0 25px 0;
-  font-weight: 800;
-  text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+  color: #ffffff !important;
+  font-size: 4rem !important;
+  font-weight: 800 !important;
+  margin: 10px 0 !important;
+  line-height: 1.1 !important;
+  text-shadow: 2px 2px 10px rgba(0,0,0,0.5) !important;
 }
 
 .action-buttons {
@@ -84,13 +87,11 @@
   border: none;
   font-weight: 700;
   cursor: pointer;
-  font-size: 1rem;
-  transition: opacity 0.2s;
 }
 
 .btn-trailer {
   background-color: #ffffff;
-  color: #000000;
+  color: #000;
 }
 
 .btn-rating {
@@ -99,7 +100,6 @@
   backdrop-filter: blur(5px);
 }
 
-/* 2. 메인 콘텐츠 그리드 레이아웃 */
 .content-grid {
   display: grid;
   grid-template-columns: 1.5fr 1fr;
@@ -113,14 +113,12 @@
   font-size: 1.8rem;
   font-weight: 700;
   margin-bottom: 30px;
-  color: #000;
 }
 
 .detail-section {
   margin-bottom: 60px;
 }
 
-/* 3. 주요 출연진 */
 .cast-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -128,7 +126,7 @@
 }
 
 .cast-card .photo-placeholder {
-  aspect-ratio: 1 / 1.3;
+  aspect-ratio: 1/1.3;
   background-color: #e9ecef;
   border-radius: 15px;
   margin-bottom: 12px;
@@ -137,8 +135,6 @@
 
 .cast-card .name {
   font-weight: 700;
-  font-size: 0.95rem;
-  margin: 0 0 4px 0;
   text-align: center;
 }
 
@@ -146,10 +142,8 @@
   font-size: 0.8rem;
   color: #868e96;
   text-align: center;
-  margin: 0;
 }
 
-/* 4. 줄거리 */
 .synopsis-text {
   line-height: 1.8;
   color: #495057;
@@ -157,31 +151,6 @@
   word-break: keep-all;
 }
 
-/* 5. 공통 리뷰 박스 디자인 (보라색 테두리) */
-.review-box {
-  border: 2px solid #d1b9ff; /* 프로토타입 보라색 */
-  border-radius: 15px;
-  padding: 20px;
-  background-color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #868e96;
-  font-size: 0.9rem;
-  transition: background-color 0.2s;
-}
-
-.expert-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
-}
-
-.expert-box {
-  height: 120px;
-}
-
-/* 6. 우측 섹션 (AI 추천 & 리뷰 목록) */
 .ai-pick-list {
   list-style: none;
   padding: 0;
@@ -190,7 +159,6 @@
 .ai-pick-list li {
   margin-bottom: 20px;
   color: #495057;
-  font-size: 0.95rem;
   padding-left: 15px;
   position: relative;
 }
@@ -203,17 +171,298 @@
   font-weight: bold;
 }
 
-.user-review-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+.compact-card-container {
+  border: 1px solid #e0e0e0;
+  border-radius: 15px;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.compact-card-content {
+  padding: 15px 25px;
+  max-height: 400px; 
+  overflow-y: auto;
+}
+
+.compact-review-row {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 0;
+  gap: 6px;
+}
+
+.compact-review-row:not(:last-child) {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.compact-reviewer-meta {
+  display: flex;
+  align-items: center;
   gap: 15px;
 }
 
-.user-box {
-  height: 100px;
+.compact-reviewer-name {
+  width: 75px;
+  font-weight: 600;
+  color: #333;
 }
 
-/* 반응형 처리 */
+.star-wrapper.compact {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.star-wrapper.compact.icon-based {
+  gap: 1px;
+}
+
+.star-icon.compact {
+  font-size: 1.2rem;
+  color: #FFD700; 
+  text-shadow: none !important; 
+}
+
+.star-icon.compact.empty {
+  color: #e9ecef; 
+}
+
+.rating-num.compact {
+  margin-left: 15px;
+  font-size: 1rem;
+  color: #888;
+  font-weight: 500;
+}
+
+.compact-comment-text {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #555;
+  line-height: 1.5;
+  white-space: pre-wrap; 
+  word-break: break-all;
+  max-height: 100px; 
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.compact-controller {
+  background-color: #f8f9fa;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 0;
+  gap: 20px;
+}
+
+.page-indicator {
+  font-size: 0.9rem;
+  color: #999;
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  color: #ccc;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.nav-btn:hover:not(:disabled) {
+  color: #666;
+}
+
+.nav-btn:disabled {
+  color: #f0f0f0;
+  cursor: default;
+}
+
+.review-write-section {
+  margin-top: -20px;
+  padding: 20px;
+  background-color: #fcfcfc;
+  border: 1px solid #eee;
+  border-radius: 15px;
+}
+
+.write-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.title-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.write-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.info-icon-wrapper {
+  position: relative;
+  cursor: pointer;
+}
+
+.info-icon {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.info-modal {
+  position: absolute;
+  bottom: 30px;
+  left: 0;
+  width: 260px;
+  background-color: #333;
+  color: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  z-index: 100;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.info-icon-wrapper:hover .info-modal {
+  visibility: visible;
+  opacity: 1;
+  bottom: 25px;
+}
+
+.write-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.interactive-rating-stars-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.interactive-star-area {
+  position: relative;
+  width: 2.5rem; 
+  height: 2.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+}
+
+.interactive-star-area:hover {
+  transform: scale(1.2);
+}
+
+.visible-star {
+  font-size: 2.5rem; 
+  color: #e9ecef; 
+  position: absolute;
+  pointer-events: none; 
+  transition: color 0.15s ease;
+}
+
+.visible-star.filled,
+.visible-star.half {
+  color: #FFD700;
+  filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.3));
+}
+
+.click-zones-wrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.click-zone {
+  width: 50%;
+  height: 100%;
+}
+
+.interactive-rating-stars-wrapper .rating-num.compact {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #333;
+  margin-left: 12px;
+  min-width: 50px;
+}
+
+.textarea-container {
+  position: relative;
+  width: 100%;
+}
+
+.write-textarea {
+  width: 100%;
+  height: 100px;
+  padding: 15px 15px 30px 15px; 
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  resize: none;
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.char-counter {
+  position: absolute;
+  bottom: 10px;
+  right: 15px;
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+.btn-submit-review {
+  align-self: flex-end;
+  background-color: #ffd700;
+  color: #333;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-submit-review:hover {
+  background-color: #fcc400;
+}
+
+/* 중복 리뷰 작성 시 보여줄 안내 문구 스타일 */
+.already-reviewed-msg {
+  background-color: #f8f9fa;
+  border: 1px dashed #ced4da;
+  border-radius: 10px;
+  padding: 40px 20px;
+  text-align: center;
+  color: #6c757d;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
 @media (max-width: 1024px) {
   .content-grid {
     grid-template-columns: 1fr;

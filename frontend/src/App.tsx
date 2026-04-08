@@ -7,7 +7,7 @@ import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Chatbot from './components/chatbot/Chatbot';
 import LoginModal from './components/common/LoginModal';
-import { useAuthCheck } from './hooks/useAuthCheck';
+import { useAuthCheck } from './hooks/useAuthCheck'; // ✨ URL 파라미터를 가로채는 훅
 
 // 페이지들
 import Home from './pages/Home/Home';

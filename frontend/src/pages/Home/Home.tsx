@@ -172,7 +172,7 @@ const Home = () => {
                 <span>포스터 이미지 {i + 1}</span>
                 <div className="movie-rating">★ 4.{9 - i}</div>
               </div>
-              <p className="movie-title">{movie}</p>
+              <p className="movie-title_main">{movie}</p>
               <p className="movie-info">2024 • 영화</p>
             </div>
           ))}
