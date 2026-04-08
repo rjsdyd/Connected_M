@@ -3,12 +3,12 @@ package com.Connectedm.backend.domain.content.service;
 import java.util.List;
 import java.util.Map;
 
-import com.Connectedm.backend.domain.content.dto.TmdbMovieResponseDto;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import com.Connectedm.backend.domain.content.dto.TmdbMovieResponseDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -58,14 +58,11 @@ public class TmdbService {
     /**
      * 영화 상세 정보 가져오기
      */
-    public TmdbMovieResponseDto getMovieDetails(Long tmdbId) {
-        String url = UriComponentsBuilder.fromHttpUrl(baseUrl)
-                .path("/movie/{movieId}")
-                .queryParam("api_key", apiKey)
-                .queryParam("language", "ko-KR") // 한국어 설정
-                .queryParam("append_to_response", "watch/providers")
-                .buildAndExpand(tmdbId)
-                .toUriString();
+    public TmdbMovieResponseDto getMovieDetail(String tmdbId) {
+        String url = "https://api.themoviedb.org/3/movie/" + tmdbId +
+                    "?api_key=" + apiKey +
+                    "&language=ko-KR" +
+                    "&append_to_response=credits,watch/providers";
 
         return restTemplate.getForObject(url, TmdbMovieResponseDto.class);
     }
