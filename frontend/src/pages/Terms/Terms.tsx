@@ -1,8 +1,38 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Terms: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 20px', lineHeight: '1.8', color: '#333', fontFamily: 'sans-serif' }}>
+    
+
+
+
+    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '150px 20px 60px', lineHeight: '1.8', color: '#333', fontFamily: 'sans-serif' ,position: 'relative',
+      minHeight: '100vh'}}>
+      <button 
+        onClick={() => navigate('/')} 
+        style={{
+          position: 'absolute',
+          top: '125px', // 헤더 아래쪽 적당한 위치에 배치
+          right: '20px',
+          fontSize: '35px',
+          fontWeight: '300',
+          border: 'none',
+          background: 'none',
+          cursor: 'pointer',
+          color: '#999',
+          transition: 'color 0.2s',
+          lineHeight: '1',
+          zIndex: 1000 // ⭐ 헤더보다 위에 보이게 함
+        }}
+        onMouseOver={(e) => (e.currentTarget.style.color = '#000')}
+        onMouseOut={(e) => (e.currentTarget.style.color = '#999')}
+      >
+        &times;
+      </button>
+      
       <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '40px', borderBottom: '2px solid #5b21b6', paddingBottom: '10px' }}>이용약관</h1>
 
       <section style={{ marginBottom: '40px' }}>
