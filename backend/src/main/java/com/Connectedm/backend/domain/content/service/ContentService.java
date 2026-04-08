@@ -1,6 +1,21 @@
 package com.Connectedm.backend.domain.content.service;
 
-import com.Connectedm.backend.domain.content.dto.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.Connectedm.backend.domain.content.dto.ContentCreateRequestDto;
+import com.Connectedm.backend.domain.content.dto.ContentDetailResponseDto;
+import com.Connectedm.backend.domain.content.dto.ContentSummaryDto;
+import com.Connectedm.backend.domain.content.dto.MainPageResponseDto;
+import com.Connectedm.backend.domain.content.dto.ReviewResponseDto;
+import com.Connectedm.backend.domain.content.dto.TmdbMovieResponseDto;
 import com.Connectedm.backend.domain.content.entity.Content;
 import com.Connectedm.backend.domain.content.entity.ContentGenre;
 import com.Connectedm.backend.domain.content.entity.Genre;
@@ -8,16 +23,8 @@ import com.Connectedm.backend.domain.content.repository.AnalysisCacheRepository;
 import com.Connectedm.backend.domain.content.repository.ContentGenreRepository;
 import com.Connectedm.backend.domain.content.repository.ContentRepository;
 import com.Connectedm.backend.domain.content.repository.GenreRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @Transactional
@@ -46,11 +53,11 @@ public class ContentService {
         }
 
         // 3. 찾은 진짜 TMDB ID로 상세 정보 가져오기
-        TmdbMovieResponseDto tmdbData = tmdbService.getMovieDetails(realTmdbId);
+        TmdbMovieResponseDto tmdbData = tmdbService.getMovieDetail(String.valueOf(realTmdbId));
 
         // 4. API 응답 데이터 중 poster_path 앞에는 "https://image.tmdb.org/t/p/w500"를 붙여서 전체 경로 생성
-        String fullPosterPath = (tmdbData.getPoster_path() != null) 
-                ? "https://image.tmdb.org/t/p/w500" + tmdbData.getPoster_path() 
+        String fullPosterPath = (tmdbData.getPoster_path() != null)
+                ? "https://image.tmdb.org/t/p/w500" + tmdbData.getPoster_path()
                 : null;
         
         // 5. OTT 로고 데이터 준비
@@ -142,10 +149,10 @@ public class ContentService {
         Map<String, List<ContentSummaryDto>> genreContents = new HashMap<>();
 
         for (Genre genre : genres) {
-            // 각 장르별로 최대 15개씩만 끊어서 가져오기
-            List<ContentSummaryDto> contents = contentGenreRepository.findByGenre(genre).stream()
-                    .limit(15)
-                    .map(cg -> {
+        // 각 장르별로 최대 15개씩만 끊어서 가져오기
+        List<ContentSummaryDto> contents = contentGenreRepository.findByGenre(genre).stream()
+                .limit(15)
+                .map(cg -> {
                         Content content = cg.getContent();
                         Double ratio = (content.getAnalysisCache() != null) ?
                                 content.getAnalysisCache().getPositiveRatio() : 0.0;
@@ -156,10 +163,10 @@ public class ContentService {
                                 .posterPath(content.getPosterPath())
                                 .positiveRatio(ratio)
                                 .build();
-                    })
-                    .collect(Collectors.toList());
+                })
+                .collect(Collectors.toList());
 
-            genreContents.put(genre.getName(), contents);
+        genreContents.put(genre.getName(), contents);
         }
 
         return MainPageResponseDto.builder()
@@ -188,16 +195,30 @@ public class ContentService {
         List<String> keywords = Collections.emptyList();
 
         // 4. 리뷰 데이터 가져오기
-        // TODO : ReviewService 구현 후 주입받어서 아래 주석 해제
         List<ReviewResponseDto> expertReviews = reviewService.getExpertReviews(id);
         List<ReviewResponseDto> userReviews = reviewService.getUserReviews(id);
+
+        // 1. 필요한 데이터를 미리 변수로 선언 (빌더 체인을 단순하게 만듦)
+        TmdbMovieResponseDto tmdbData = tmdbService.getMovieDetail(content.getTmdbId());
+        
+        // 출연진 리스트 안전하게 추출
+        // 2. 출연진 리스트 추출 및 필터링
+        List<TmdbMovieResponseDto.TmdbCastItem> majorCasts = Collections.emptyList();
+
+        if (tmdbData.getCredits() != null && tmdbData.getCredits().getCast() != null) {
+        majorCasts = tmdbData.getCredits().getCast().stream()
+                .filter(cast -> cast.getOrder() < 10)   // order가 10 미만인 배우들만
+                .limit(8)       // 상위 8명만 끊기
+                .collect(Collectors.toList());
+        }
 
         // 5. 최종 DTO 빌드
         return ContentDetailResponseDto.builder()
                 .id(content.getId())
-                .title(content.getTitle())
+                .title(String.valueOf(content.getTitle()))
                 .overview(content.getOverview())
                 .posterPath(content.getPosterPath())
+                .castList(majorCasts)
                 .ottLogos(content.getOttLogos())
                 .genres(genreNames)
                 .aiSummary(summary)

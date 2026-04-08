@@ -19,6 +19,9 @@ public class TmdbMovieResponseDto {
     // 장르 리스트 추가
     private List<TmdbGenre> genres;
 
+    // 출연진 정보 추가
+    private TmdbCreditsResponse credits;
+
     // JSON의 "watch/providers" 키를 이 필드에 매핑
     @JsonProperty("watch/providers")
     private WatchProviders watchProviders;
@@ -51,6 +54,24 @@ public class TmdbMovieResponseDto {
     public static class TmdbGenre {
         private Long id;
         private String name;
+    }
+
+    // ✨ 출연진 정보를 담을 클래스 추가
+    @Getter
+    @NoArgsConstructor
+    public static class TmdbCreditsResponse {
+        private List<TmdbCastItem> cast;
+    }
+
+    // ✨ 개별 배우 정보를 담을 클래스 추가
+    @Getter
+    @NoArgsConstructor
+    public static class TmdbCastItem {
+        private String name;
+        private String character;
+        @JsonProperty("profile_path")
+        private String profilePath;
+        private int order;
     }
 
     @Getter

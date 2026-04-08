@@ -18,6 +18,7 @@ public class ContentDetailResponseDto {
     private String posterPath;
     private String ottLogos;
     private List<String> genres;
+    private List<TmdbMovieResponseDto.TmdbCastItem> castList;
 
     // AI 분석 영역
     private String aiSummary;

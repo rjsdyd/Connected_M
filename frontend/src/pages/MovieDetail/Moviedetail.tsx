@@ -16,6 +16,7 @@ interface UserReviewData {
 }
 
 interface MovieDetailData {
+  id: number;
   title: string;
   genre: string;
   synopsis: string;
@@ -190,15 +191,18 @@ const MovieDetail: React.FC = () => {
             </div>  
             <span className="genre-label">{movie.genre}</span>
             <h1 className="movie-title">{movie.title}</h1>
+            
             <div className="action-buttons">
               <button className="btn-trailer">트레일러 재생</button>
-              <button className="btn-rating">평점</button>
+              <button className="btn-rating">평점 {movie.positiveRatio}%</button>
             </div>
           </div>
         </section>
 
         <div className="content-grid">
           <div className="left-column">
+            
+            {/* 주요 출연진 섹션 */}
             <section className="detail-section">
               <h2 className="section-title">주요 출연진</h2>
               <div className="cast-grid">
@@ -214,9 +218,10 @@ const MovieDetail: React.FC = () => {
             
             <section className="detail-section">
               <h2 className="section-title">줄거리</h2>
-              <p className="synopsis-text">{movie.synopsis}</p>
+              <p className="synopsis-text">{movie.overview}</p>
             </section>
 
+            {/* 전문가의 평가 섹션 */}
             <section className="detail-section">
               <h2 className="section-title">AI가 추천하는 PICK MOVIE</h2>
               <ul className="ai-pick-list">
@@ -321,6 +326,7 @@ const MovieDetail: React.FC = () => {
               )}
             </section>
           </div>
+
         </div>
       </main>
     </div>

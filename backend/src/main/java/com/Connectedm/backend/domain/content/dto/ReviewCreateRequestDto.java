@@ -16,5 +16,5 @@ public class ReviewCreateRequestDto {
     private String rawTitle;            // 씨네21 원본 영화 제목
     private String criticName;
     private String rating;
-    private String Comment;
+    private String comment;
 }
