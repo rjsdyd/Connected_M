@@ -48,9 +48,11 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserReview> reviews = new ArrayList<>();
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
-    private AuthProvider provider; // LOCAL, KAKAO, GOOGLE 중 하나
+    private AuthProvider provider = AuthProvider.LOCAL; // LOCAL, KAKAO, GOOGLE 중 하나 기본값은 LOCAL
 
+    @Column(name = "provider_id")
     private String providerId; // 소셜에서 주는 고유 번호 (일반 유저는 null)
 
     // Enum을 만들어서 관리하면 오타 실수를 줄일 수 있어요!

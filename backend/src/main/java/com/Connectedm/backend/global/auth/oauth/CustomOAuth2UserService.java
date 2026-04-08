@@ -56,24 +56,32 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         final AuthProvider finalProvider = authProvider;
         final String finalNickname = (nickname != null) ? nickname : "소셜유저";
 
-        // 5. [핵심 로직] 이메일이 아닌 '지문(Provider + ID)'으로 유저 식별
+        // 5. [개선된 로직] 지문(Provider+ID)으로 먼저 찾고, 없으면 이메일로 찾기
         userRepository.findByProviderAndProviderId(finalProvider, providerId)
+                // ✨ 만약 지문으로 못 찾았다면, 이메일로 기존 가입자인지 한 번 더 확인!
+                .or(() -> userRepository.findByEmail(finalEmail))
                 .map(entity -> {
-                    // 기존 유저가 있다면 닉네임만 최신화 (이메일은 유지)
+                    // [기존 유저 업데이트]
+                    // 1. 닉네임 최신화
                     entity.setNickname(finalNickname);
+
+                    // 2. 만약 기존에 일반 회원이었거나 데이터가 꼬여서 NULL이었다면 정보를 채워줌
+                    if (entity.getProvider() == null || entity.getProvider() == AuthProvider.LOCAL) {
+                        entity.setProvider(finalProvider);
+                        entity.setProviderId(providerId);
+                    }
                     return userRepository.save(entity);
                 })
                 .orElseGet(() -> {
-                    // 처음 온 사람이라면 새로 가입
+                    // [정말 처음 온 신규 유저]
                     return userRepository.save(User.builder()
                             .email(finalEmail)
                             .nickname(finalNickname)
                             .realName(finalNickname)
-                            // 암호화된 임시 비밀번호 설정 (nullable=false 대응)
                             .password(passwordEncoder.encode(UUID.randomUUID().toString()))
                             .phoneNumber("010-0000-0000")
-                            .provider(finalProvider)   // KAKAO 혹은 GOOGLE 저장
-                            .providerId(providerId)    // 고유 번호 저장
+                            .provider(finalProvider)
+                            .providerId(providerId)
                             .build());
                 });
 
