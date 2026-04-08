@@ -1,113 +1,201 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
 import './MovieDetail.css';
 
-// 크롤링 데이터 구조 정의 (타입스크립트)
+/**
+ * 1. 인터페이스 정의 (백엔드 DTO와 1:1 매칭)
+ */
+
+// TmdbMovieResponseDto.TmdbCastItem 대응
+interface CastMember {
+  name: string;
+  character: string;
+  profile_path: string; // @JsonProperty("profile_path") 매핑 결과
+  order: number;
+}
+
+// ReviewResponseDto 대응
+interface ReviewResponse {
+  id: number;
+  criticName: string;
+  rating: string;
+  comment: string;
+  sourceName: string;
+  movieTitle: string;
+}
+
+// ContentDetailResponseDto 대응
 interface MovieDetailData {
+  id: number;
   title: string;
-  genre: string;
-  synopsis: string;
-  platforms: { name: string; url: string; logo: string }[];
-  cast: { name: string; work: string; image: string }[];
-  expertReviews: string[];
-  aiRecommendations: string[];
-  userReviews: string[];
+  overview: string;
+  posterPath: string;
+  ottLogos: string;
+  genres: string[];
+  castList: CastMember[];
+  aiSummary: string;
+  positiveRatio: number;
+  topKeywords: string[];
+  expertReviews: ReviewResponse[];
+  userReviews: ReviewResponse[];
 }
 
 const MovieDetail: React.FC = () => {
-  // 임시 데이터 (나중에 크롤링 데이터로 교체)
-  const movie: MovieDetailData = {
-    title: "영화제목",
-    genre: "장르",
-    synopsis: "인간들과의 전쟁으로 첫째 아들을 잃은 후, '제이크'와 '네이티리'는 깊은 슬픔에 빠진다. 상심에 빠진 이들 앞에 '키리'가 이끄는 새로운 부족이 등장하면서 판도라는 더욱 큰 위협에 처하게 되는데...",
-    platforms: [
-      { name: "Netflix", url: "https://netflix.com", logo: "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" },
-      { name: "Watcha", url: "https://watcha.com", logo: "https://upload.wikimedia.org/wikipedia/commons/b/b8/Watcha_logo.png" }
-    ],
-    cast: Array(4).fill({ name: "출연진 이름", work: "출연진 작품의 이름", image: "" }),
-    expertReviews: Array(4).fill("전문가의 평가"),
-    aiRecommendations: [
-      "AI 가 추천하는 이유 1번",
-      "AI 가 추천하는 이유 2번",
-      "AI 가 추천하는 이유 3번"
-    ],
-    userReviews: Array(6).fill("리뷰")
-  };
+  const { id } = useParams<{ id: string }>();
+  const [movie, setMovie] = useState<MovieDetailData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMovieData = async () => {
+      try {
+        setLoading(true);
+        // Vite 개발 서버(5173)에서 스프링부트(8080)로 요청
+        const response = await axios.get(`http://localhost:8080/api/contents/${id}`);
+        
+        // 백엔드 ApiResponse 구조가 { data: { ... } }라고 가정
+        if (response.data && response.data.data) {
+          setMovie(response.data.data);
+        } else {
+          setMovie(response.data);
+        }
+      } catch (error) {
+        console.error("데이터 로딩 실패:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) fetchMovieData();
+  }, [id]);
+
+  if (loading) return <div className="loading">데이터를 불러오는 중입니다...</div>;
+  if (!movie) return <div className="error">영화를 찾을 수 없습니다.</div>;
+
+  // OTT 로고 문자열을 배열로 변환
+  const ottList = movie.ottLogos ? movie.ottLogos.split(',') : [];
 
   return (
     <div className="detail-container">
       <main className="main-content">
-        {/* 2. 상단 배너 섹션 */}
-        <section className="banner-section">
+        
+        {/* 상단 배너 섹션 (포스터 배경) */}
+        <section 
+          className="banner-section" 
+          style={{ backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0) 0%, #141414 100%), url(${movie.posterPath})` }}
+        >
           <div className="info-overlay">
-            {/* 현재 상영중인 플랫폼 (장르 위쪽) */}
+            {/* OTT 플랫폼 아이콘 리스트 */}
             <div className="platform-row">
-              {movie.platforms.map((p, i) => (
-                <a key={i} href={p.url} target="_blank" rel="noreferrer" className="platform-link">
-                  <img src={p.logo} alt={p.name} className="platform-icon" />
-                </a>
+              {ottList.map((logoPath, i) => (
+                <div key={i} className="platform-link">
+                  <img src={`https://image.tmdb.org/t/p/original${logoPath}`} alt="OTT" className="platform-icon" />
+                </div>
               ))}
             </div>
-            <span className="genre-label">{movie.genre}</span>
+            
+            <div className="genre-list">
+              {movie.genres?.map((genre, i) => (
+                <span key={i} className="genre-label">{genre}</span>
+              ))}
+            </div>
+            
             <h1 className="movie-title">{movie.title}</h1>
+            
             <div className="action-buttons">
               <button className="btn-trailer">트레일러 재생</button>
-              <button className="btn-rating">평점</button>
+              <button className="btn-rating">평점 {movie.positiveRatio}%</button>
             </div>
           </div>
         </section>
 
-        {/* 3. 메인 그리드 레이아웃 */}
+        {/* 하단 콘텐츠 그리드 */}
         <div className="content-grid">
-          {/* 왼쪽 컬럼 */}
+          
+          {/* 왼쪽 컬럼: 출연진, 줄거리, 전문가 리뷰 */}
           <div className="left-column">
+            
+            {/* 주요 출연진 섹션 */}
             <section className="detail-section">
               <h2 className="section-title">주요 출연진</h2>
               <div className="cast-grid">
-                {movie.cast.map((person, i) => (
+                {movie.castList?.map((actor, i) => (
                   <div key={i} className="cast-card">
-                    <div className="photo-placeholder" />
-                    <p className="name">{person.name}</p>
-                    <p className="work">{person.work}</p>
+                    {actor.profile_path ? (
+                      <img 
+                        src={`https://image.tmdb.org/t/p/w200${actor.profile_path}`} 
+                        alt={actor.name} 
+                        className="cast-photo" 
+                      />
+                    ) : (
+                      <div className="photo-placeholder" />
+                    )}
+                    <p className="name">{actor.name}</p>
+                    <p className="work">{actor.character}</p>
                   </div>
                 ))}
               </div>
             </section>
 
+            {/* 줄거리 섹션 */}
             <section className="detail-section">
               <h2 className="section-title">줄거리</h2>
-              <p className="synopsis-text">{movie.synopsis}</p>
+              <p className="synopsis-text">{movie.overview}</p>
             </section>
 
+            {/* 전문가의 평가 섹션 */}
             <section className="detail-section">
               <h2 className="section-title">전문가의 평가</h2>
               <div className="expert-grid">
-                {movie.expertReviews.map((review, i) => (
-                  <div key={i} className="review-box expert-box">{review}</div>
+                {movie.expertReviews?.map((review, i) => (
+                  <div key={i} className="review-box expert-box">
+                    <div className="user-info">
+                      <span>{review.criticName} ({review.sourceName})</span>
+                      <span className="rating">⭐ {review.rating}</span>
+                    </div>
+                    <p>{review.comment}</p>
+                  </div>
                 ))}
               </div>
             </section>
           </div>
 
-          {/* 오른쪽 컬럼 */}
+          {/* 오른쪽 컬럼: AI 분석 및 유저 리뷰 */}
           <div className="right-column">
             <section className="detail-section">
-              <h2 className="section-title">AI가 추천하는 PICK MOVIE</h2>
+              <h2 className="section-title">AI 분석 요약</h2>
+              <div className="ai-summary-box">
+                <p className="ai-text">{movie.aiSummary}</p>
+              </div>
+              
+              <h3 className="sub-title">핵심 키워드</h3>
               <ul className="ai-pick-list">
-                {movie.aiRecommendations.map((reason, i) => (
-                  <li key={i}>{reason}</li>
+                {movie.topKeywords?.map((keyword, i) => (
+                  <li key={i}># {keyword}</li>
                 ))}
               </ul>
             </section>
 
             <section className="detail-section">
-              <h2 className="section-title">리뷰 목록</h2>
+              <h2 className="section-title">유저 리뷰 목록</h2>
               <div className="user-review-grid">
-                {movie.userReviews.map((review, i) => (
-                  <div key={i} className="review-box user-box">{review}</div>
-                ))}
+                {movie.userReviews?.length > 0 ? (
+                  movie.userReviews.map((review, i) => (
+                    <div key={i} className="review-box user-box">
+                      <div className="user-info">
+                        <span>{review.criticName}</span>
+                        <span className="rating">⭐ {review.rating}</span>
+                      </div>
+                      <p>{review.comment}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="no-data">작성된 리뷰가 없습니다.</p>
+                )}
               </div>
             </section>
           </div>
+
         </div>
       </main>
     </div>

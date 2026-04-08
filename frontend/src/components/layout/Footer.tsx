@@ -6,11 +6,11 @@ const Footer: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
   const teamMembers = [
-    { id: 1, name: 'Member 1', github: 'https://github.com/LMJ-01', img: 'image/KakaoTalk_20260407_100625430.png', color: '#fbbf24' },
-    { id: 2, name: 'Member 2', github: 'https://github.com/Joohang', img: 'image/KakaoTalk_20260407_100625430_01.png', color: '#60a5fa' },
-    { id: 3, name: 'Member 3', github: 'https://github.com/rjsdyd', img: 'image/KakaoTalk_20260407_100625430_02.png', color: '#f472b6' },
-    { id: 4, name: 'Member 4', github: 'https://github.com/Sleep404NF', img: 'image/KakaoTalk_20260407_100625430_03.png', color: '#e5e7eb' },
-    { id: 5, name: 'Member 5', github: 'https://github.com/dnwls0022', img: 'image/KakaoTalk_20260407_100625430_04.png', color: '#4b5563' },
+    { id: 1, name: 'Member 1', github: 'https://github.com/LMJ-01', img: '/image/KakaoTalk_20260407_100625430.png', color: '#fbbf24' },
+    { id: 2, name: 'Member 2', github: 'https://github.com/Joohang', img: '/image/KakaoTalk_20260407_100625430_01.png', color: '#60a5fa' },
+    { id: 3, name: 'Member 3', github: 'https://github.com/rjsdyd', img: '/image/KakaoTalk_20260407_100625430_02.png', color: '#f472b6' },
+    { id: 4, name: 'Member 4', github: 'https://github.com/Sleep404NF', img: '/image/KakaoTalk_20260407_100625430_03.png', color: '#e5e7eb' },
+    { id: 5, name: 'Member 5', github: 'https://github.com/dnwls0022', img: '/image/KakaoTalk_20260407_100625430_04.png', color: '#4b5563' },
   ];
 
   const goToUrl = (url: string) => {
@@ -27,7 +27,7 @@ const Footer: React.FC = () => {
         
         {/* 1. 팀 로고 */}
         <div onClick={() => navigateTo('/')} style={{ cursor: 'pointer', flexShrink: 0 }}>
-          <img src="image/화면_캡처_2026-04-07_110635-removebg-preview (2).png" alt="Logo" style={{ width: '120px', height: '120px', objectFit: 'contain' }} />
+          <img src="/image/화면_캡처_2026-04-07_110635-removebg-preview (2).png" alt="Logo" style={{ width: '120px', height: '120px', objectFit: 'contain' }} />
         </div>
 
         {/* 2. 중앙 텍스트 정보 */}
