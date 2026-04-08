@@ -1,19 +1,25 @@
 package com.Connectedm.backend.domain.user.controller;
 
+import java.util.Map;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.Connectedm.backend.domain.user.dto.UserLoginRequest;
 import com.Connectedm.backend.domain.user.dto.UserResponse;
 import com.Connectedm.backend.domain.user.dto.UserSignupRequest;
-import com.Connectedm.backend.domain.user.service.UserService;
-import com.Connectedm.backend.global.common.ApiResponse;
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
-
-
 import com.Connectedm.backend.domain.user.entity.User;
 import com.Connectedm.backend.domain.user.repository.UserRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import com.Connectedm.backend.domain.user.service.UserService;
+import com.Connectedm.backend.global.common.ApiResponse;
 
-import java.util.Map;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -40,7 +46,7 @@ public class UserController {
 
     // 3. 마이페이지 정보 조회 API
     @GetMapping("/{userId}")
-    public ApiResponse<UserResponse> getMyPage(@PathVariable Long userId) {
+    public ApiResponse<UserResponse> getMyPage(@PathVariable("userId") Long userId) {
         UserResponse response = userService.getUserInfo(userId);
         return ApiResponse.success(response);
     }

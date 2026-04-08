@@ -26,44 +26,31 @@ const AppContent = () => {
   useAuthCheck();
 
   return (
-    <BrowserRouter>
-      <div className="app-container">
-        {/* 1. 상단 헤더 */}
-        <Header onOpenLogin={() => setIsLoginModalOpen(true)} />
-        
-        {/* 2. 메인 콘텐츠 영역 (모든 Route는 이 안으로 모아야 합니다) */}
-        <div className="main-content" style={{ minHeight: '80vh' }}> 
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/mypage" element={<MyPage />} />
-            {/* 상세페이지 경로 - 반드시 여기에 위치해야 합니다 */}
-            <Route path="/movie/:id" element={<MovieDetail />} />
-            <Route path="/terms" element={<Terms />} /> 
-            <Route path="/privacy" element={<Privacy />} />
-
-
-
-          </Routes>
-        </div>
-        
-        {/* 3. 하단 푸터 */}
-        <Footer />
-        
-        {/* 4. 챗봇 */}
-        <Chatbot />
-        
-        {/* 5. 로그인 모달 */}
-        {isLoginModalOpen && (
-          <LoginModal onClose={() => setIsLoginModalOpen(false)} />
-        )}
+    <div className="app-container">
+      <Header onOpenLogin={() => setIsLoginModalOpen(true)} />
+      
+      <div className="main-content" style={{ minHeight: '80vh' }}> 
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/extra-info" element={<ExtraInfo />} />
+          <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
+          <Route path="/mypage" element={<MyPage />} />
+          <Route path="/movie/:id" element={<MovieDetail />} />
+          <Route path="/terms" element={<Terms />} /> 
+          <Route path="/privacy" element={<Privacy />} />
+        </Routes>
       </div>
-
-    </BrowserRouter>
+      
+      <Footer />
+      <Chatbot />
+      
+      {isLoginModalOpen && (
+        <LoginModal onClose={() => setIsLoginModalOpen(false)} />
+      )}
+    </div>
   );
 };
-    {/* </BrowserRouter> */}
-
 
 // 최상단에서 한 번만 감싸줍니다.
 const App = () => (
