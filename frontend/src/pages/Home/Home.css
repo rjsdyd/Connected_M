@@ -13,6 +13,7 @@
   width: 100%; 
   min-height: 100vh; 
   overflow-x: hidden; 
+  
 }
 
 /* 전체 코드 */
@@ -20,6 +21,7 @@
   box-sizing: border-box; 
   margin: 0; 
   padding: 0; 
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
 }
 
 /* 바디 영역 */
@@ -28,6 +30,10 @@ body {
   background-color: #f8f9fa; 
   color: #333; 
   overflow-x: hidden; 
+}
+
+input, button, textarea, select {
+  font-family: inherit;
 }
 
 /* a 태그에 대한 전체적인 css */
@@ -427,31 +433,38 @@ a {
 
 .movie-grid { 
   display: grid; 
+  /* 반응형을 위해 repeat(5, 1fr) 대신 minmax를 쓰면 더 안전합니다 */
   grid-template-columns: repeat(5, 1fr); 
   gap: 24px; 
 }
 
-.movie-item { 
-  cursor: pointer; 
+.movie-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* 👈 왼쪽 정렬 강제 */
+    width: 100%;
 }
 
 .movie-item:hover .movie-poster { 
   transform: translateY(-8px); 
 }
 
-.movie-poster { 
-  aspect-ratio: 2/3; 
-  background: #e5e7eb; 
-  border-radius: 8px;
+.movie-poster {
+  width: 100%;
+  aspect-ratio: 2 / 3;
   position: relative; 
-  margin-bottom: 8px; 
   display: flex; 
   justify-content: center;
-  align-items: center; 
-  color: #9ca3af; 
-  font-weight: 500; 
-  transition: transform 0.2s ease; 
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+  align-items: center;
+  background: #e5e7eb;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.movie-poster span {
+  position: absolute;
+  font-size: 12px;
 }
 
 .movie-rating { 
@@ -466,18 +479,31 @@ a {
   font-weight: bold; 
 }
 
-.movie-title { 
-  font-weight: 700; 
-  font-size: 14px;
-  margin-bottom: 4px;
-  overflow: hidden;
-  text-overflow: ellipsis; 
-  white-space: nowrap; 
+.movie-title_main {
+    /* 3. 그림자 및 기타 효과 완전 제거 */
+  text-shadow: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+
+  /* 2. 제목 크기 축소 및 검정색 변경 */
+  font-size: 15px !important; 
+  font-weight: 700 !important;
+  color: #111111 !important;  /* 선명한 검정 */
+  text-align: left !important;
+  
+  display: block !important;
+  margin: 4px 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
-.movie-info { 
-  font-size: 12px; 
-  color: #6b7280; 
+.movie-info {
+  text-shadow: none !important;
+  font-size: 13px !important;
+  color: #888 !important;
+  text-align: left !important;
+  margin: 0 !important;
 }
 
 /* ================= 브랜드 컬러 대비 닉네임 스타일 ================= */

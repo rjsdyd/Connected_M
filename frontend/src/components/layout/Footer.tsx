@@ -35,8 +35,8 @@ const Footer: React.FC = () => {
           <p style={{ fontWeight: 'bold', fontSize: '18px', marginBottom: '8px' }}>이 사이트는 TMDB와 씨네21 데이터를 기반으로 하여 제작되었습니다.</p>
           <p style={{ fontSize: '16px', marginBottom: '20px' }}>이윤을 추구하지않는 비영리 프로젝트로써 <span style={{ color: '#5b21b6', fontWeight: 'bold' }}>Connected_M</span>은 무료입니다.</p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '30px' }}>
-             <span style={{ color: '#01b4e4', fontWeight: '900', cursor: 'pointer' }} onClick={() => goToUrl('https://www.themoviedb.org/')}>TMDB</span>
-             <span style={{ fontWeight: '900', cursor: 'pointer' }} onClick={() => goToUrl('http://www.cine21.com/')}>씨네<span style={{ color: 'red' }}>21</span></span>
+            <span style={{ color: '#01b4e4', fontWeight: '900', cursor: 'pointer' }} onClick={() => goToUrl('https://www.themoviedb.org/')}>TMDB</span>
+            <span style={{ fontWeight: '900', cursor: 'pointer' }} onClick={() => goToUrl('http://www.cine21.com/')}>씨네<span style={{ color: 'red' }}>21</span></span>
           </div>
         </div>
 
