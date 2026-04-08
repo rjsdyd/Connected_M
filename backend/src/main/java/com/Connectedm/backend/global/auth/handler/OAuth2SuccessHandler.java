@@ -39,13 +39,22 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             AuthProvider authProvider = AuthProvider.valueOf(registrationId.toUpperCase());
 
             // 2. ✨ [핵심 수정] 서비스별로 다른 ID 키값 처리
-            String providerId;
+            String providerId = null;
+
             if ("kakao".equals(registrationId)) {
-                providerId = attributes.get("id").toString(); // 카카오는 'id'
+                // 카카오는 보통 'id'라는 키로 Long 타입을 줌
+                Object idObj = attributes.get("id");
+                providerId = (idObj != null) ? idObj.toString() : null;
             } else if ("google".equals(registrationId)) {
-                providerId = attributes.get("sub").toString(); // 구글은 'sub'
-            } else {
-                throw new RuntimeException("지원하지 않는 소셜 서비스입니다: " + registrationId);
+                // 구글은 보통 'sub'라는 키로 String 타입을 줌
+                Object subObj = attributes.get("sub");
+                providerId = (subObj != null) ? subObj.toString() : null;
+            }
+
+            // 🚨 ID를 못 가져왔을 경우에 대한 예외 처리
+            if (providerId == null) {
+                log.error("소셜 제공자({})로부터 고유 ID를 가져오지 못했습니다. 속성값: {}", registrationId, attributes);
+                throw new RuntimeException("소셜 로그인 정보 추출 실패!");
             }
 
             // 3. 지문(Provider + ID)으로 유저 찾기
