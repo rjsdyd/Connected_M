@@ -1,88 +1,106 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import './ExtraInfo.css';
 
 const ExtraInfo = () => {
   const [formData, setFormData] = useState({
     email: '',
-    phoneNumber: '',
-    password: '',
-    confirmPassword: ''
+    phoneNumber: ''
   });
-  const navigate = useNavigate();
+
+  const storedUserStr = localStorage.getItem('user');
+  const storedUser = storedUserStr ? JSON.parse(storedUserStr) : null;
+  const isTempEmail = storedUser?.email?.includes('@connectedm.temp');
+
+  useEffect(() => {
+    if (storedUser && !isTempEmail) {
+      setFormData(prev => ({ ...prev, email: storedUser.email }));
+    }
+  }, [isTempEmail]);
+
+  // ✨ [추가] 실시간 전화번호 하이픈 자동 생성 핸들러
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 남기기
+    
+    let formattedValue = '';
+    if (value.length <= 3) {
+      formattedValue = value;
+    } else if (value.length <= 7) {
+      formattedValue = `${value.slice(0, 3)}-${value.slice(3)}`;
+    } else {
+      formattedValue = `${value.slice(0, 3)}-${value.slice(3, 7)}-${value.slice(7, 11)}`;
+    }
+
+    setFormData({ ...formData, phoneNumber: formattedValue });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert("비밀번호가 일치하지 않습니다.");
-      return;
+
+    // ✨ [추가] 전화번호 유효성 검사 (010-XXXX-XXXX 형식)
+    const phoneRegex = /^01(?:0|1|[6-9])-(?:\d{3,4})-\d{4}$/;
+    
+    if (!phoneRegex.test(formData.phoneNumber)) {
+      alert("올바른 전화번호 형식이 아닙니다.\n번호를 다시 확인해주세요! (예: 010-1234-5678)");
+      return; // ❌ 여기서 중단! 서버에 요청을 보내지 않습니다.
     }
 
     try {
       const token = localStorage.getItem('token');
-      const storedUserStr = localStorage.getItem('user');
-      
-      if (!storedUserStr) {
-        alert("로그인 정보가 없습니다. 다시 로그인해주세요.");
-        window.location.href = "/";
-        return;
-      }
-      
-      const storedUser = JSON.parse(storedUserStr);
-
       const requestData = {
         id: storedUser.id,
         email: formData.email,
         phoneNumber: formData.phoneNumber,
-        password: formData.password
+        password: null 
       };
 
       const response = await axios.put('http://localhost:8080/api/auth/update-extra-info', requestData, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      // ✨ [중요] 성공 조건문 수정
-      // 백엔드의 ApiResponse가 status: 200 이거나 status: "SUCCESS"인 경우 모두 허용
-      if (response.data.status === "SUCCESS" || response.data.status === 200 || response.status === 200) {
-        
-        // 1. 로컬 스토리지의 유저 정보를 실제 입력한 이메일로 갱신
-        // 이게 안 되면 App.tsx가 계속 kakao_ 인 줄 알고 일로 보냅니다.
-        const updatedUser = { 
-          ...storedUser, 
-          email: formData.email // 임시(kakao_...)를 진짜 이메일로 교체
-        };
+      if (response.status === 200 || response.data.status === "SUCCESS") {
+        const updatedUser = { ...storedUser, email: formData.email, phoneNumber: formData.phoneNumber };
         localStorage.setItem('user', JSON.stringify(updatedUser));
-
-        alert("정보 수정이 완료되었습니다! 이제 서비스를 정상적으로 이용할 수 있습니다.");
-        
-        // 2. 홈으로 강제 이동 (완전 새로고침을 위해 href 사용)
+        alert("모든 정보가 등록되었습니다. 환영합니다!");
         window.location.href = "/";
-      } else {
-        // 백엔드에서 보낸 에러 메시지 출력
-        alert("알림: " + (response.data.message || "정보를 저장할 수 없습니다."));
       }
-      
     } catch (error) {
-      console.error("에러 발생:", error);
-      alert("정보 업데이트 중 오류가 발생했습니다. 다시 시도해주세요.");
+      alert("정보 업데이트 중 오류가 발생했습니다. 번호가 너무 길거나 형식이 틀릴 수 있습니다.");
     }
   };
 
   return (
     <div className="extra-info-container">
       <form onSubmit={handleSubmit} className="extra-info-form">
-        <h2 className="extra-info-title">추가 정보 입력</h2>
-        <p className="extra-info-description">서비스 이용을 위해 실제 정보를 입력해주세요.</p>
-        <input className="extra-info-input" type="email" placeholder="실제 이메일 주소" required 
-               onChange={(e) => setFormData({...formData, email: e.target.value})} />
-        <input className="extra-info-input" type="text" placeholder="전화번호 (010-0000-0000)" required
-               onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})} />
-        <input className="extra-info-input" type="password" placeholder="새 비밀번호 설정" required
-               onChange={(e) => setFormData({...formData, password: e.target.value})} />
-        <input className="extra-info-input" type="password" placeholder="비밀번호 확인" required
-               onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})} />
-        <button className="extra-info-button" type="submit">저장하고 시작하기</button>
+        <h2 className="extra-info-title">반가워요, {storedUser?.nickname}님!</h2>
+        <p className="extra-info-description">마지막으로 연락처만 확인하면 가입이 완료됩니다.</p>
+
+        {isTempEmail ? (
+          <div className="input-group">
+            <label className="input-label">실제 이메일 주소</label>
+            <input className="extra-info-input" type="email" placeholder="example@email.com" required 
+                   onChange={(e) => setFormData({...formData, email: e.target.value})} />
+          </div>
+        ) : (
+          <div className="extra-info-readonly-badge">
+            인증된 이메일: <strong>{storedUser?.email}</strong>
+          </div>
+        )}
+
+        <div className="input-group">
+          <label className="input-label">휴대폰 번호</label>
+          <input 
+            className="extra-info-input" 
+            type="text" 
+            placeholder="010-0000-0000" 
+            value={formData.phoneNumber} // ✨ 상태값 연결
+            onChange={handlePhoneChange} // ✨ 하이픈 생성기 연결
+            maxLength={13} // ✨ 하이픈 포함 최대 13자 제한
+            required 
+          />
+        </div>
+
+        <button className="extra-info-button" type="submit">지금 바로 시작하기</button>
       </form>
     </div>
   );
