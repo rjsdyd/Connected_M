@@ -33,27 +33,37 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
             Map<String, Object> attributes = oAuth2User.getAttributes();
 
-            // 1. 소셜 서비스 구분 (kakao, google 등)
-            String registrationId = ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
+            // 1. 어떤 서비스(kakao, google)인지 확인
+            OAuth2AuthenticationToken authToken = (OAuth2AuthenticationToken) authentication;
+            String registrationId = authToken.getAuthorizedClientRegistrationId();
             AuthProvider authProvider = AuthProvider.valueOf(registrationId.toUpperCase());
 
-            // 2. 소셜 고유 ID 추출 (절대 바뀌지 않는 값)
-            String providerId = attributes.get("id").toString();
+            // 2. ✨ [핵심 수정] 서비스별로 다른 ID 키값 처리
+            String providerId;
+            if ("kakao".equals(registrationId)) {
+                providerId = attributes.get("id").toString(); // 카카오는 'id'
+            } else if ("google".equals(registrationId)) {
+                providerId = attributes.get("sub").toString(); // 구글은 'sub'
+            } else {
+                throw new RuntimeException("지원하지 않는 소셜 서비스입니다: " + registrationId);
+            }
 
-            // 3. ✨ [핵심 수정] 이메일이 아닌 '지문(Provider + ID)'으로 유저 찾기
-            // 사용자가 이메일을 수정했더라도 소셜 ID는 변하지 않으므로 로그인이 성공합니다.
+            // 3. 지문(Provider + ID)으로 유저 찾기
             User user = userRepository.findByProviderAndProviderId(authProvider, providerId)
                     .orElseThrow(() -> new RuntimeException("해당 소셜 계정으로 가입된 유저를 찾을 수 없습니다."));
 
             // 4. 토큰 생성
             String accessToken = tokenProvider.createAccessToken(authentication);
 
-            // 5. 리다이렉트 (현재 유저의 실제 최신 정보 전달)
+            // 5. 리다이렉트 (최신 유저 정보 전달)
+            boolean needInfo = user.getPhoneNumber() == null || user.getPhoneNumber().equals("010-0000-0000");
+
             String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/oauth2/redirect")
                     .queryParam("token", accessToken)
                     .queryParam("id", user.getId())
-                    .queryParam("email", user.getEmail()) // 이제 lmjkakao@test.com 같은 최신 이메일이 전달됩니다.
+                    .queryParam("email", user.getEmail())
                     .queryParam("nickname", user.getNickname())
+                    .queryParam("needInfo", needInfo) // ✨ 이 신호를 리액트에 보냅니다!
                     .build()
                     .encode(StandardCharsets.UTF_8)
                     .toUriString();
