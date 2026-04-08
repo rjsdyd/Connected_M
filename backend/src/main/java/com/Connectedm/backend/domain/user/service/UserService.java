@@ -39,6 +39,7 @@ public class UserService {
                 .nickname(request.getNickname())
                 .realName(request.getRealName())
                 .phoneNumber(request.getPhoneNumber())
+                .provider(User.AuthProvider.LOCAL)
                 .build();
 
         return userRepository.save(user).getId();

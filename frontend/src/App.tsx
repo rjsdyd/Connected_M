@@ -7,7 +7,7 @@ import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Chatbot from './components/chatbot/Chatbot';
 import LoginModal from './components/common/LoginModal';
-import { useAuthCheck } from './hooks/useAuthCheck'; // ✨ 커스텀 훅 가져오기
+import { useAuthCheck } from './hooks/useAuthCheck';
 
 // 페이지들
 import Home from './pages/Home/Home';
@@ -16,16 +16,17 @@ import Register from './pages/Register/Register';
 import MovieDetail from './pages/MovieDetail/Moviedetail';
 import Terms from './pages/Terms/Terms';
 import Privacy from './pages/Privacy/Privacy';
-
+import OAuth2RedirectHandler from './pages/Auth/OAuth2RedirectHandler';
+import ExtraInfo from './pages/Auth/ExtraInfo';
 
 const AppContent = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   
-  // ✨ 여기서 훅을 실행하면 모든 로직이 돌아갑니다!
+  // ✨ 이제 부모인 <App>이 BrowserRouter를 감싸고 있어서 이 훅이 정상 작동합니다!
   useAuthCheck();
 
   return (
-    // <BrowserRouter>
+    <BrowserRouter>
       <div className="app-container">
         {/* 1. 상단 헤더 */}
         <Header onOpenLogin={() => setIsLoginModalOpen(true)} />
@@ -57,11 +58,14 @@ const AppContent = () => {
           <LoginModal onClose={() => setIsLoginModalOpen(false)} />
         )}
       </div>
+
+    </BrowserRouter>
   );
 };
     {/* </BrowserRouter> */}
 
 
+// 최상단에서 한 번만 감싸줍니다.
 const App = () => (
   <BrowserRouter>
     <AppContent />
