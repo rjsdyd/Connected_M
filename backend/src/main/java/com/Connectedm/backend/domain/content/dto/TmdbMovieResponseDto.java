@@ -14,6 +14,8 @@ public class TmdbMovieResponseDto {
     private Long id;
     private String title;
     private String overview;
+
+    @JsonProperty("poster_path")
     private String poster_path;
 
     // 장르 리스트 추가

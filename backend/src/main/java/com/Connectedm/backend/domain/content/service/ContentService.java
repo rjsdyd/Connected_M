@@ -47,7 +47,7 @@ public class ContentService {
 
         // 2. 영화 제목으로 진짜 TMDB ID 찾아오기
         Long realTmdbId = tmdbService.searchMovieIdByTitle(content.getTitle());
-        
+
         if (realTmdbId == null) {
             throw new RuntimeException("TMDB에서 해당 영화를 찾을 수 없습니다: " + content.getTitle());
         }
@@ -59,7 +59,7 @@ public class ContentService {
         String fullPosterPath = (tmdbData.getPoster_path() != null)
                 ? "https://image.tmdb.org/t/p/w500" + tmdbData.getPoster_path()
                 : null;
-        
+
         // 5. OTT 로고 데이터 준비
         String logos = tmdbData.getOttLogos() != null ? tmdbData.getOttLogos() : "";
 
@@ -89,18 +89,21 @@ public class ContentService {
 
         // 7. 진짜 TMDB ID와 함께 모든 정보 업데이트
         content.updateTmdbInfo(
-            String.valueOf(realTmdbId), // 진짜 TMDB ID로 교체
-            tmdbData.getOverview(), 
-            fullPosterPath, 
-            logos
+                String.valueOf(realTmdbId), // 진짜 TMDB ID로 교체
+                tmdbData.getOverview(),
+                fullPosterPath,
+                logos
         );
-
         // 8. 명시적으로 변경 사항 저장 (변경 감지에 의존하나 확실한 반영을 위해 호출)
         contentRepository.save(content);
     }
 
+
+
     // 크롤링 데이터 DB저장
+
     public void saveCrawledContent(ContentCreateRequestDto dto) {
+
         // 1. 중복 체크(TMDB ID 기준)
         if (contentRepository.findByTmdbId(dto.getTmdbId()).isPresent()) return;
 
@@ -111,7 +114,6 @@ public class ContentService {
         for (String genreName : dto.getGenres()) {
             Genre genre = genreRepository.findByName(genreName)
                     .orElseThrow(() -> new RuntimeException("장르 미정 : " + genreName));
-
             ContentGenre cg = ContentGenre.builder()
                     .content(content)
                     .genre(genre)
@@ -126,6 +128,7 @@ public class ContentService {
         // 1. 배경용 랜덤 영화 (포스터 경로만)
         List<Content> allContents = contentRepository.findAll();
         String backgroundImage = "";
+
         if (!allContents.isEmpty()) {
             Collections.shuffle(allContents);
             backgroundImage = allContents.get(0).getPosterPath();
@@ -133,8 +136,8 @@ public class ContentService {
 
         // 2. 오늘의 추천작 (평점 높은 순 10개)
         List<ContentSummaryDto> todayRecommendations = analysisCacheRepository.findAll(
-                Sort.by(Sort.Direction.DESC, "positiveRatio")
-        ).stream()
+                        Sort.by(Sort.Direction.DESC, "positiveRatio")
+                ).stream()
                 .limit(10)
                 .map(cache -> ContentSummaryDto.builder()
                         .id(cache.getContent().getId())
@@ -144,78 +147,93 @@ public class ContentService {
                         .build())
                 .collect(Collectors.toList());
 
+
+
         // 3. 장르별 3줄 리스트 (5대 장르별 그룹화)
         List<Genre> genres = genreRepository.findAll();
         Map<String, List<ContentSummaryDto>> genreContents = new HashMap<>();
 
         for (Genre genre : genres) {
-        // 각 장르별로 최대 15개씩만 끊어서 가져오기
-        List<ContentSummaryDto> contents = contentGenreRepository.findByGenre(genre).stream()
-                .limit(15)
-                .map(cg -> {
+
+            // 각 장르별로 최대 15개씩만 끊어서 가져오기
+            List<ContentSummaryDto> contents = contentGenreRepository.findByGenre(genre).stream()
+                    .limit(15)
+                    .map(cg -> {
                         Content content = cg.getContent();
                         Double ratio = (content.getAnalysisCache() != null) ?
                                 content.getAnalysisCache().getPositiveRatio() : 0.0;
-
                         return ContentSummaryDto.builder()
                                 .id(content.getId())
                                 .title(content.getTitle())
                                 .posterPath(content.getPosterPath())
                                 .positiveRatio(ratio)
                                 .build();
-                })
-                .collect(Collectors.toList());
-
-        genreContents.put(genre.getName(), contents);
+                    })
+                    .collect(Collectors.toList());
+            genreContents.put(genre.getName(), contents);
         }
-
         return MainPageResponseDto.builder()
                 .backgroundImage(backgroundImage)
                 .todayRecommendations(todayRecommendations)
                 .genreContents(genreContents)
                 .build();
     }
-
     // 콘텐츠 상세 조회
-    @Transactional(readOnly = true)
+    @Transactional
     public ContentDetailResponseDto getContentDetail(Long id) {
-        // 1. 콘텐츠 본체와 AI분석 캐시를 한 번에 가져오기
+        // 1. DB 조회
         Content content = contentRepository.findWithCacheById(id)
                 .orElseThrow(() -> new RuntimeException("해당 콘텐츠를 찾을 수 없습니다. ID: " + id));
 
-        // 2. 장르 이름들만 리스트로 뽑기
+        // 2. TMDB API 호출
+        TmdbMovieResponseDto tmdbData = tmdbService.getMovieDetail(content.getTmdbId());
+
+        // 3. 데이터 업데이트 로직 (더 꼼꼼한 체크)
+        // null이거나, 비어있거나, 포스터 주소가 불완전할 때 업데이트 실행
+        boolean isOverviewEmpty = content.getOverview() == null || content.getOverview().isBlank();
+        boolean isPosterBroken = content.getPosterPath() == null || content.getPosterPath().endsWith("/w500/");
+
+        if ((isOverviewEmpty || isPosterBroken) && tmdbData != null) {
+            System.out.println(">>> DB 업데이트 조건 충족: " + content.getTitle());
+
+            String realPosterPath = (tmdbData.getPoster_path() != null)
+                    ? "https://image.tmdb.org/t/p/w500" + tmdbData.getPoster_path()
+                    : content.getPosterPath();
+
+            String logos = tmdbData.getOttLogos() != null ? tmdbData.getOttLogos() : "";
+
+            // 엔티티 업데이트 (4개 인자 버전 사용)
+            content.updateTmdbInfo(content.getTmdbId(), tmdbData.getOverview(), realPosterPath, logos);
+
+            // 명시적으로 Flush까지 실행해서 즉시 확인
+            contentRepository.saveAndFlush(content);
+            System.out.println(">>> DB 저장 완료!");
+        }
+
+        // 4. 빌더에서 쓸 변수 준비 (기존 코드 유지)
         List<String> genreNames = content.getContentGenres().stream()
                 .map(cg -> cg.getGenre().getName())
                 .collect(Collectors.toList());
 
-        // 3. AI 분석 데이터 가져오기 (Null 체크)
         String summary = (content.getAnalysisCache() != null) ? content.getAnalysisCache().getSummary() : "분석 중입니다.";
         Double ratio = (content.getAnalysisCache() != null) ? content.getAnalysisCache().getPositiveRatio() : 0.0;
-        // 키워드는 나중에 AnalysisCache에 필드 추가되면 매핑
         List<String> keywords = Collections.emptyList();
 
-        // 4. 리뷰 데이터 가져오기
         List<ReviewResponseDto> expertReviews = reviewService.getExpertReviews(id);
         List<ReviewResponseDto> userReviews = reviewService.getUserReviews(id);
 
-        // 1. 필요한 데이터를 미리 변수로 선언 (빌더 체인을 단순하게 만듦)
-        TmdbMovieResponseDto tmdbData = tmdbService.getMovieDetail(content.getTmdbId());
-        
-        // 출연진 리스트 안전하게 추출
-        // 2. 출연진 리스트 추출 및 필터링
         List<TmdbMovieResponseDto.TmdbCastItem> majorCasts = Collections.emptyList();
-
-        if (tmdbData.getCredits() != null && tmdbData.getCredits().getCast() != null) {
-        majorCasts = tmdbData.getCredits().getCast().stream()
-                .filter(cast -> cast.getOrder() < 10)   // order가 10 미만인 배우들만
-                .limit(8)       // 상위 8명만 끊기
-                .collect(Collectors.toList());
+        if (tmdbData != null && tmdbData.getCredits() != null && tmdbData.getCredits().getCast() != null) {
+            majorCasts = tmdbData.getCredits().getCast().stream()
+                    .filter(cast -> cast.getOrder() < 10)
+                    .limit(8)
+                    .collect(Collectors.toList());
         }
 
-        // 5. 최종 DTO 빌드
+        // 5. 빌더 호출
         return ContentDetailResponseDto.builder()
                 .id(content.getId())
-                .title(String.valueOf(content.getTitle()))
+                .title(content.getTitle())
                 .overview(content.getOverview())
                 .posterPath(content.getPosterPath())
                 .castList(majorCasts)
