@@ -11,7 +11,7 @@ const Footer: React.FC = () => {
   const navigate = useNavigate();
   const teamMembers = [
     { id: 1, name: 'Member 1', github: 'https://github.com/LMJ-01', img: '/image/팀장님 깃허브로고.png', color: '#fbbf24' },
-    { id: 2, name: 'Member 2', github: 'https://github.com/Joohang', img: '/image/한규대팀원 깃허브로고.png', color: '#cfcf13' },
+    { id: 2, name: 'Member 2', github: 'https://github.com/Joohang', img: '/image/한규대팀원 깃허브로고.png', color: '#FFFF99' },
     { id: 3, name: 'Member 3', github: 'https://github.com/rjsdyd', img: '/image/이건용팀원 깃허브로고.png', color: '#f472b6' },
     { id: 4, name: 'Member 4', github: 'https://github.com/Sleep404NF', img: '/image/이승우팀원 깃허브로고.png', color: '#e5e7eb' },
     { id: 5, name: 'Member 5', github: 'https://github.com/dnwls0022', img: '/image/조우진 팀원깃허브로고.png', color: '#4b5563' },
@@ -46,7 +46,7 @@ const Footer: React.FC = () => {
       onClick={() => goToUrl('https://www.themoviedb.org/')}
     />
     <img 
-      src={'image/씨네21로고.png'} /* 👈 여기에 씨네21 이미지 경로를 넣으세요! */
+      src={'/image/씨네21로고.png'} /* 👈 여기에 씨네21 이미지 경로를 넣으세요! */
       alt="씨네21"
       className="cine21-logo-img"
       onClick={() => goToUrl('http://www.cine21.com/')}
