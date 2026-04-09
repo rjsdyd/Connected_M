@@ -54,7 +54,7 @@ const ExtraInfo = () => {
         password: null 
       };
 
-      const response = await axios.put('http://localhost:8080/api/auth/update-extra-info', requestData, {
+      const response = await axios.put('http://localhost:8080/api/user/update-extra-info', requestData, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
