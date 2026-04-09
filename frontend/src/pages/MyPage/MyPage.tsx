@@ -48,7 +48,7 @@ const MyPage = () => {
         const parsedUser = JSON.parse(storedUser);
         const userId = parsedUser.id;
         // 백엔드 API 호출
-        const response = await axios.get(`http://localhost:8080/api/auth/${userId}`);
+        const response = await axios.get(`http://localhost:8080/api/user/${userId}`);
         setUser(response.data.data); // ApiResponse 형태에 맞춰 데이터 세팅
       } catch (error) {
         console.error("유저 정보를 불러오는데 실패했습니다.", error);

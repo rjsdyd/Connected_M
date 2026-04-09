@@ -22,38 +22,40 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
   };
 
   // 2. ✨ 로그인 처리 함수
+  // 2. ✨ 로그인 처리 함수
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  try {
-    const response = await axios.post('http://localhost:8080/api/auth/login', {
-      email,
-      password
-    });
+    e.preventDefault();
+    try {
+      const response = await axios.post('http://localhost:8080/api/auth/login', {
+        email,
+        password
+      });
 
-    console.log("서버 응답 확인:", response.data);
+      console.log("서버 응답 확인:", response.data);
 
-    // ✨ 데이터 위치를 유연하게 찾는 로직
-    const data = response.data.data ? response.data.data : response.data;
-    const nick = data.nickname;
-    const token = data.token || data.accessToken;
+      // 📦 백엔드 구조: { success: true, data: { token: "...", user: { nickname: "...", ... } } }
+      const loginData = response.data.data; 
+      const token = loginData.token;
+      const user = loginData.user; // UserResponse 객체
+      const nick = user.nickname;
 
-    if (nick) {
-      localStorage.setItem('nickname', nick);
-      localStorage.setItem('token', token);
-
-      localStorage.setItem('user', JSON.stringify(data));
-      
-      alert(`${nick}님, 환영합니다!`);
-      onClose();
-      window.location.reload(); 
-    } else {
-      console.error("닉네임을 찾을 수 없습니다. 콘솔에 찍힌 객체 구조를 확인하세요.");
+      if (nick && token) {
+        // 로컬 스토리지 저장
+        localStorage.setItem('token', token);
+        localStorage.setItem('nickname', nick);
+        localStorage.setItem('user', JSON.stringify(user)); // 유저 객체 통째로 저장
+        
+        alert(`${nick}님, 환영합니다!`);
+        onClose();
+        window.location.reload(); // 새로고침해서 MovieDetail에 로그인 상태 반영
+      } else {
+        console.error("데이터 구조 에러: 닉네임이나 토큰이 없습니다.", loginData);
+      }
+    } catch (error) {
+      console.error('로그인 실패:', error);
+      alert('아이디 또는 비밀번호가 틀렸습니다.');
     }
-  } catch (error) {
-    console.error('로그인 실패:', error);
-    alert('아이디 또는 비밀번호가 틀렸습니다.');
-  }
-};
+  };
 
   const goToRegister = (e: React.MouseEvent) => {
     e.preventDefault();
