@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
 
+
 // 컴포넌트 & 페이지 임포트
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
