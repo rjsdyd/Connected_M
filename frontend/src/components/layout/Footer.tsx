@@ -82,11 +82,12 @@ const Footer: React.FC = () => {
 
       {/* 모달 */}
       {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3>Connected_M </h3>
-            <p>안녕하세요!  Connected_M은 OTT 시대에 사용자에게 최적화된 콘텐츠 분석을 제공하고 보여주기 위해서 시작된 
-              비상업적 OTT 플랫폼 서비스입니다</p>
+        <div className="modal-overlay-footer">
+          <div className="modal-content-footer">
+            <h3>Connected_M</h3>
+            <p>안녕하세요! Connected_M은 OTT 시대에 사용자에게<br />
+            최적화된 콘텐츠 분석을 제공하고 보여주기 위해서 시작된<br />
+            비상업적 OTT 플랫폼 서비스입니다</p>
             <button className="modal-close-btn" onClick={() => setIsModalOpen(false)}>닫기</button>
           </div>
         </div>
