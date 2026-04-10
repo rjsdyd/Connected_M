@@ -14,4 +14,8 @@ public interface UserReviewRepository extends JpaRepository<UserReview, Long> {
 
     // 특정유저가 쓴 리뷰의 갯수
     Long countByUserId(Long userId);
+
+    // [핵심 추가] 1인 1영화 1리뷰 검증용
+    boolean existsByUserIdAndContentId(Long userId, Long contentId);
+
 }
