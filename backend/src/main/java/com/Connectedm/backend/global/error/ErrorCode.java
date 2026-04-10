@@ -13,6 +13,7 @@ public enum ErrorCode {
     ALREADY_USED_NICKNAME(HttpStatus.BAD_REQUEST, "U002", "이미 사용 중인 닉네임이에요!"),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U003", "해당 사용자를 찾을 수 없습니다!"),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "U004", "비밀번호가 일치하지 않습니다!"),
+    ALREADY_REGISTERED_PHONE(HttpStatus.BAD_REQUEST, "U005", "이미 등록된 전화번호입니다!"),
 
     // --- 공통 에러 ---
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C001", "서버에 문제가 생겼어요!");
