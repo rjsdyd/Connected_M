@@ -1,8 +1,10 @@
 package com.Connectedm.backend.domain.user.controller;
 
+import com.Connectedm.backend.domain.user.dto.MyPageResponseDto;
 import com.Connectedm.backend.domain.user.dto.UserResponse;
 import com.Connectedm.backend.domain.user.entity.User;
 import com.Connectedm.backend.domain.user.repository.UserRepository;
+import com.Connectedm.backend.domain.user.service.MyPageService;
 import com.Connectedm.backend.domain.user.service.UserService;
 import com.Connectedm.backend.global.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,12 +20,13 @@ public class UserController {
 
     private final UserService userService;
     private final UserRepository userRepository;
+    private final MyPageService myPageService;
     private final BCryptPasswordEncoder passwordEncoder;
 
     // 마이페이지 정보 조회
     @GetMapping("/{userId}")
-    public ApiResponse<UserResponse> getMyPage(@PathVariable("userId") Long userId) {
-        UserResponse response = userService.getUserInfo(userId);
+    public ApiResponse<MyPageResponseDto> getMyPage(@PathVariable("userId") Long userId) {
+        MyPageResponseDto response = myPageService.getMyPageInfo(userId);
         return ApiResponse.success(response);
     }
 

@@ -11,4 +11,7 @@ public interface UserReviewRepository extends JpaRepository<UserReview, Long> {
 
     // 특정 유저가 쓴 리뷰들만 모아보기 - 마이페이지용
     List<UserReview> findByUserId(Long userId);
+
+    // 특정유저가 쓴 리뷰의 갯수
+    Long countByUserId(Long userId);
 }
