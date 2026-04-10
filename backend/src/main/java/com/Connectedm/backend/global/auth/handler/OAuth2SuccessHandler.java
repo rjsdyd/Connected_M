@@ -59,7 +59,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
             // 3. 지문(Provider + ID)으로 유저 찾기
             User user = userRepository.findByProviderAndProviderId(authProvider, providerId)
-                    .orElseThrow(() -> new RuntimeException("해당 소셜 계정으로 가입된 유저를 찾을 수 없습니다."));
+                    .orElseGet(() -> userRepository.findByEmail((String) attributes.get("email"))
+                            .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다.")));
 
             // 4. 토큰 생성
             String accessToken = tokenProvider.createAccessToken(authentication);

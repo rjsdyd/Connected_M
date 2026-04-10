@@ -1,11 +1,11 @@
-import { useEffect, useRef } from 'react'; // ✨ 1. useRef 추가
+import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom'; // ✨ useNavigate 추가
 
 const OAuth2RedirectHandler = () => {
-    // ✨ 2. 처리 완료 여부를 기억할 '도장' (리렌더링 시에도 유지됨)
     const hasProcessed = useRef(false);
+    const navigate = useNavigate(); // ✨ 훅 생성
     
     useEffect(() => {
-        // 3. 만약 이미 도장이 찍혀있다면(true), 뒤도 돌아보지 말고 나감
         if (hasProcessed.current) return;
 
         const params = new URLSearchParams(window.location.search);
@@ -16,7 +16,6 @@ const OAuth2RedirectHandler = () => {
         const needInfo = params.get('needInfo') === 'true'; 
 
         if (token) {
-            // 4. ✨ 처리 시작하자마자 도장을 쾅! 찍습니다.
             hasProcessed.current = true;
 
             localStorage.setItem('token', token);
@@ -31,14 +30,21 @@ const OAuth2RedirectHandler = () => {
 
             if (needInfo) {
                 alert("정상적인 서비스 이용을 위해 전화번호 등록이 필요합니다.");
-                window.location.href = "/extra-info"; 
+                // 🚨 href 대신 navigate를 쓰면 리액트 내부에서 안전하게 이동합니다.
+                navigate("/extra-info", { replace: true }); 
             } else {
-                window.location.href = "/"; 
+                navigate("/", { replace: true });
             }
+            // 🚨 새로고침은 이동 후에 한 번만!
+            window.location.reload(); 
         } else {
-            window.location.href = "/";
+            // 에러 파라미터가 있으면 알림 띄워주기
+            if (params.get('error')) {
+                alert("로그인 중 오류가 발생했습니다.");
+            }
+            navigate("/", { replace: true });
         }
-    }, []);
+    }, [navigate]);
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f3f4f6' }}>

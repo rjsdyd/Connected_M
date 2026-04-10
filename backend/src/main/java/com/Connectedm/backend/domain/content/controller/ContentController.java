@@ -7,6 +7,7 @@ import com.Connectedm.backend.domain.content.dto.ReviewResponseDto;
 import com.Connectedm.backend.domain.content.repository.ExpertReviewRepository;
 import com.Connectedm.backend.domain.content.service.ContentService;
 import com.Connectedm.backend.domain.content.service.ReviewService;
+import com.Connectedm.backend.global.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -32,12 +33,12 @@ public class ContentController {
 
     // 메인페이지 데이터 조회
     @GetMapping("/main")
-    public ResponseEntity<MainPageResponseDto> getMainPage() {
-        return ResponseEntity.ok(contentService.getMainPageData());
+    public ApiResponse<MainPageResponseDto> getMainPage() {
+        return ApiResponse.success(contentService.getMainPageData());
     }
     // 상세페이지 데이터 조회 (줄거리, 장르, OTT 정보 포함)
     @GetMapping("/{id}")
-        public ResponseEntity<ContentDetailResponseDto> getContentDetail(@PathVariable("id") Long id) {
+        public ApiResponse<ContentDetailResponseDto> getContentDetail(@PathVariable("id") Long id) {
             // 1. DB에서 현재 상세 데이터 가져오기
             ContentDetailResponseDto detail = contentService.getContentDetail(id);
 
@@ -51,21 +52,21 @@ public class ContentController {
                 detail = contentService.getContentDetail(id);
             }
 
-            return ResponseEntity.ok(detail);
+            return ApiResponse.success(detail);
         }
 
     // 전문가 리뷰 전체 API 조회
     @GetMapping("/reviews")
-    public ResponseEntity<List<ReviewResponseDto>> getAllExpertReviews() {
+    public ApiResponse<List<ReviewResponseDto>> getAllExpertReviews() {
 
 
-        return ResponseEntity.ok(reviewService.getAllExpertReviews());
+        return ApiResponse.success(reviewService.getAllExpertReviews());
     }
 
     //  크롤링 데이터 수신용 POST API
     @PostMapping("/reviews")
-    public ResponseEntity<String> saveExpertReview(@RequestBody ExpertReviewCreateRequestDto dto) {
+    public ApiResponse<String> saveExpertReview(@RequestBody ExpertReviewCreateRequestDto dto) {
         reviewService.saveExpertReview(dto);
-        return ResponseEntity.ok("씨네21 리뷰 저장 완료! ㅋㅋㅋㅋ");
+        return ApiResponse.success("씨네21 리뷰 저장 완료! ㅋㅋㅋㅋ");
     }
 }

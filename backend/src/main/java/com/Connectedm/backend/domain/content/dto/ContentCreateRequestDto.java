@@ -1,6 +1,7 @@
 package com.Connectedm.backend.domain.content.dto;
 
 import com.Connectedm.backend.domain.content.entity.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,6 +29,7 @@ public class ContentCreateRequestDto {
     private Double positiveRatio; // AI 평점 (예: 8.5)
 
     // DTO를 엔티티로 변환해주는 메서드
+    @Schema(hidden = true)
     public Content toEntity() {
         return Content.builder()
                 .tmdbId(this.tmdbId)

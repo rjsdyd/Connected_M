@@ -1,5 +1,6 @@
 package com.Connectedm.backend.domain.content.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,6 +19,7 @@ public class ContentDetailResponseDto {
     private String posterPath;
     private String ottLogos;
     private List<String> genres;
+    @Schema(hidden = true)
     private List<TmdbMovieResponseDto.TmdbCastItem> castList;
     private String backdropPath;
 
