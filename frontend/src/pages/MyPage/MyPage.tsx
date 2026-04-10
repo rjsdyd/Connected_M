@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // ✨ 페이지 이동을 위한 훅 추가
-import './MyPage.css'; // ✨ 전용 CSS 연결
+import { useNavigate } from 'react-router-dom';
+import './MyPage.css';
 
-// 백엔드에서 넘겨주는 데이터 규격
 interface UserInfo {
   id: number;
   email: string;
@@ -12,26 +11,17 @@ interface UserInfo {
   phoneNumber: string;
 }
 
-const MyPage = () => {
+const MyPage: React.FC = () => {
   const [user, setUser] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  
-  const navigate = useNavigate(); // ✨ 페이지 이동 객체 생성
+  const navigate = useNavigate();
 
-  // ✨ 로그아웃 처리 함수 생성
   const handleLogout = () => {
-    // 1. 로컬 스토리지에 있는 정보 싹 지우기
     localStorage.removeItem('user');
     localStorage.removeItem('nickname');
     localStorage.removeItem('token');
-    
-    // 2. 알림 띄우기
     alert("로그아웃 되었습니다.");
-    
-    // 3. 홈 화면으로 이동
     navigate('/');
-    
-    // 4. 헤더(상단바) 상태 변경을 위해 새로고침
     window.location.reload();
   };
 
@@ -42,62 +32,83 @@ const MyPage = () => {
         const storedUser = localStorage.getItem('user');
         if (!storedUser) {
           alert("로그인이 필요합니다.");
-          navigate('/login'); // ✨ 로그인 정보가 없으면 로그인 창으로 보내기 (선택사항)
+          navigate('/');
           return;
         }
         const parsedUser = JSON.parse(storedUser);
         const userId = parsedUser.id;
         // 백엔드 API 호출
         const response = await axios.get(`http://localhost:8080/api/user/${userId}`);
-        setUser(response.data.data); // ApiResponse 형태에 맞춰 데이터 세팅
+        setUser(response.data.data);
       } catch (error) {
         console.error("유저 정보를 불러오는데 실패했습니다.", error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchUser();
-  }, [navigate]); // ✨ 의존성 배열에 navigate 추가
+  }, [navigate]);
 
   if (loading) return <div className="mypage-loading">데이터를 불러오는 중...</div>;
   if (!user) return <div className="mypage-error">사용자 정보를 찾을 수 없습니다.</div>;
 
   return (
-    <div className="mypage-container">
-      <div className="mypage-card">
-        <h2 className="mypage-title">마이페이지</h2>
-        
-        {/* 프로필 요약 (아바타, 닉네임, 이메일) */}
-        <div className="mypage-profile-header">
-          <div className="mypage-avatar">
-            {user.nickname.charAt(0)}
+    <div className="mypage-layout">
+      <main className="mypage-container">
+        {/* 상단 프로필 섹션 (image_11 상단 구조) */}
+        <section className="profile-summary-card">
+          <div className="profile-avatar">{user.nickname.charAt(0)}</div>
+          <div className="profile-text">
+            <h2 className="nickname">{user.nickname} 님</h2>
+            <p className="email">{user.email}</p>
           </div>
-          <div className="mypage-profile-info">
-            <h3>{user.nickname} 님</h3>
-            <p>{user.email}</p>
+        </section>
+
+        {/* 하단 메인 콘텐츠: 좌측(계정정보) / 우측(메뉴 카드) */}
+        <div className="mypage-main-content">
+          
+          {/* 좌측: 계정정보 카드 */}
+          <aside className="content-side-left">
+            <section className="account-card-fixed">
+              <h3 className="card-title-fixed">계정정보</h3>
+              <div className="info-divider"></div>
+              <div className="info-body-fixed">
+                <div className="info-row-fixed">
+                  <span className="info-label-fixed">이름</span>
+                  <span className="info-value-fixed">{user.realName}</span>
+                </div>
+                <div className="info-row-fixed">
+                  <span className="info-label-fixed">전화번호</span>
+                  <span className="info-value-fixed">{user.phoneNumber || '010-7777-7777'}</span>
+                </div>
+                <button className="btn-edit-action-fixed">정보 수정</button>
+              </div>
+            </section>
+          </aside>
+
+          {/* 우측: 세로로 쌓이는 이동 메뉴 카드 (image_11 우측 구조) */}
+          <div className="content-side-right">
+            <section className="simple-link-card" onClick={() => navigate('/recent')}>
+              <span className="link-title">최근에 본 목록</span>
+              <span className="link-arrow">❯</span>
+            </section>
+
+            <section className="simple-link-card" onClick={() => navigate('/wishlist')}>
+              <span className="link-title">찜 목록</span>
+              <span className="link-arrow">❯</span>
+            </section>
+
+            <section className="simple-link-card" onClick={() => navigate('/my-reviews')}>
+              <span className="link-title">내가 작성한 리뷰</span>
+              <span className="link-arrow">❯</span>
+            </section>
           </div>
         </div>
 
-        {/* 상세 정보 (이름, 전화번호) */}
-        <div className="mypage-details">
-          <div className="detail-row">
-            <span className="detail-label">이름</span>
-            <span className="detail-value">{user.realName}</span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-label">연락처</span>
-            <span className="detail-value">{user.phoneNumber || '미등록'}</span>
-          </div>
+        <div className="mypage-footer">
+          <button className="logout-link" onClick={handleLogout}>로그아웃</button>
         </div>
-
-        {/* 액션 버튼 */}
-        <div className="mypage-actions">
-          <button className="btn-edit">정보 수정</button>
-          {/* ✨ onClick 이벤트에 handleLogout 함수 연결 */}
-          <button className="btn-logout" onClick={handleLogout}>로그아웃</button>
-        </div>
-      </div>
+      </main>
     </div>
   );
 };

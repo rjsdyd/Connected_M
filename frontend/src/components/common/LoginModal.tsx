@@ -74,7 +74,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
         
         {/* 4. ✨ onSubmit 연결 및 value/onChange 설정 */}
         <form className="login-form" onSubmit={handleSubmit}>
-          <div className="input-group">
+          <div className="input-group_login">
             <label>이메일</label>
             <input 
               type="email" 
@@ -84,7 +84,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
               required
             />
           </div>
-          <div className="input-group">
+          <div className="input-group_login">
             <label>비밀번호</label>
             <input 
               type="password" 
