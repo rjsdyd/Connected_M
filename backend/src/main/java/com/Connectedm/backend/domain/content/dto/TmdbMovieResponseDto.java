@@ -28,6 +28,9 @@ public class TmdbMovieResponseDto {
     @JsonProperty("watch/providers")
     private WatchProviders watchProviders;
 
+    @JsonProperty("backdrop_path")
+    private String backdrop_path;
+
     /**
      * 한국(KR)의 OTT 플랫폼 로고 경로들을 쉼표로 구분된 문자열로 반환
      */

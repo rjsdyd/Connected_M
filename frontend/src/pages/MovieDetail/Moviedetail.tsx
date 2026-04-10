@@ -23,16 +23,17 @@ interface ReviewData {
 interface MovieDetailData {
   id: number;
   title: string;
-  overview: string;      // synopsis -> overview
-  posterPath: string;    // 추가
-  ottLogos: string;      // platforms -> ottLogos (쉼표 문자열)
-  genres: string[];      // genre -> genres (배열)
-  castList: CastMember[]; // cast -> castList
-  aiSummary: string;     // 추가
-  positiveRatio: number; // 추가
-  topKeywords: string[]; // 추가
+  overview: string;
+  posterPath: string;    
+  ottLogos: string;      
+  genres: string[];      
+  castList: CastMember[]; 
+  aiSummary: string;     
+  positiveRatio: number; 
+  topKeywords: string[]; 
   expertReviews: ReviewData[];
   userReviews: ReviewData[];
+  backdropPath: string;
 }
 
 const MovieDetail: React.FC = () => {
@@ -145,7 +146,12 @@ const MovieDetail: React.FC = () => {
   return (
     <div className="detail-container">
       <main className="main-content">
-        <section className="banner-section" style={{ backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url(${movie.posterPath})` }}>
+        <section 
+                  className="banner-section" 
+                  style={{ 
+                    backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url(https://image.tmdb.org/t/p/original${movie.backdropPath})` 
+                  }}
+                >
           <div className="info-overlay">
             <div className="platform-row">
               {ottLogos.map((logo, i) => (

@@ -38,45 +38,54 @@ public class ContentService {
     private final ReviewService reviewService;
     private final TmdbService tmdbService;
 
-
+    /**
+     * TMDB 상세 정보를 강제로 업데이트하고 장르를 동기화함
+     */
     @Transactional
     public void updateContentWithTmdb(Long id) {
         // 1. DB에서 해당 콘텐츠 조회
         Content content = contentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("콘텐츠를 찾을 수 없습니다. ID: " + id));
 
-        // 2. 영화 제목으로 진짜 TMDB ID 찾아오기
-        Long realTmdbId = tmdbService.searchMovieIdByTitle(content.getTitle());
-
-        if (realTmdbId == null) {
-            throw new RuntimeException("TMDB에서 해당 영화를 찾을 수 없습니다: " + content.getTitle());
+        // 2. TMDB ID 결정 (기존 ID 우선, 없으면 제목 검색)
+        String tmdbIdToUse = content.getTmdbId();
+        if (tmdbIdToUse == null || tmdbIdToUse.isBlank()) {
+            Long searchedId = tmdbService.searchMovieIdByTitle(content.getTitle().trim());
+            if (searchedId == null) {
+                throw new RuntimeException("TMDB에서 해당 영화 제목을 찾을 수 없습니다: " + content.getTitle());
+            }
+            tmdbIdToUse = String.valueOf(searchedId);
         }
 
-        // 3. 찾은 진짜 TMDB ID로 상세 정보 가져오기
-        TmdbMovieResponseDto tmdbData = tmdbService.getMovieDetail(String.valueOf(realTmdbId));
+        // 3. TMDB API 호출
+        TmdbMovieResponseDto tmdbData = tmdbService.getMovieDetail(tmdbIdToUse);
+        if (tmdbData == null) {
+            throw new RuntimeException("TMDB 상세 정보를 불러올 수 없습니다. ID: " + tmdbIdToUse);
+        }
 
-        // 4. API 응답 데이터 중 poster_path 앞에는 "https://image.tmdb.org/t/p/w500"를 붙여서 전체 경로 생성
+        // 4. 이미지 경로 생성 (포스터: w500, 배경: w1280)
         String fullPosterPath = (tmdbData.getPoster_path() != null)
                 ? "https://image.tmdb.org/t/p/w500" + tmdbData.getPoster_path()
-                : null;
+                : content.getPosterPath();
+
+        String fullBackdropPath = (tmdbData.getBackdrop_path() != null)
+                ? "https://image.tmdb.org/t/p/w1280" + tmdbData.getBackdrop_path()
+                : content.getBackdropPath();
 
         // 5. OTT 로고 데이터 준비
-        String logos = tmdbData.getOttLogos() != null ? tmdbData.getOttLogos() : "";
+        String logos = (tmdbData.getOttLogos() != null) ? tmdbData.getOttLogos() : "";
 
-        // 6. 장르 동기화 로직 추가
+        // 6. 장르 동기화 로직
         if (tmdbData.getGenres() != null) {
             for (TmdbMovieResponseDto.TmdbGenre tmdbGenre : tmdbData.getGenres()) {
                 String genreName = tmdbGenre.getName();
 
-                // 6-1. 장르가 DB에 없는 경우 새로 생성 후 저장
                 Genre genre = genreRepository.findByName(genreName)
                         .orElseGet(() -> genreRepository.save(Genre.builder().name(genreName).build()));
 
-                // 6-2. 현재 영화와 해당 장르가 이미 연결되어 있는지 확인
                 boolean alreadyLinked = content.getContentGenres().stream()
                         .anyMatch(cg -> cg.getGenre().getName().equals(genreName));
 
-                // 6-3. 연결되어 있지 않다면 ContentGenre 생성 및 추가
                 if (!alreadyLinked) {
                     ContentGenre contentGenre = ContentGenre.builder()
                             .content(content)
@@ -87,30 +96,92 @@ public class ContentService {
             }
         }
 
-        // 7. 진짜 TMDB ID와 함께 모든 정보 업데이트
-        content.updateTmdbInfo(
-                String.valueOf(realTmdbId), // 진짜 TMDB ID로 교체
+        // 7. 통합 업데이트 메서드 호출 (Content.java에서 수정한 FullInfo 메서드)
+        content.updateFullInfo(
+                tmdbIdToUse,
                 tmdbData.getOverview(),
                 fullPosterPath,
+                fullBackdropPath,
                 logos
         );
-        // 8. 명시적으로 변경 사항 저장 (변경 감지에 의존하나 확실한 반영을 위해 호출)
+
         contentRepository.save(content);
     }
 
+    /**
+     * 콘텐츠 상세 조회 및 누락된 데이터 자동 보완
+     */
+    @Transactional
+    public ContentDetailResponseDto getContentDetail(Long id) {
+        Content content = contentRepository.findWithCacheById(id)
+                .orElseThrow(() -> new RuntimeException("해당 콘텐츠를 찾을 수 없습니다. ID: " + id));
 
+        TmdbMovieResponseDto tmdbData = tmdbService.getMovieDetail(content.getTmdbId());
 
-    // 크롤링 데이터 DB저장
+        // 데이터 업데이트 조건 확인 (줄거리, 포스터, 또는 배경 이미지가 비어있는 경우)
+        boolean isOverviewEmpty = content.getOverview() == null || content.getOverview().isBlank();
+        boolean isPosterBroken = content.getPosterPath() == null || content.getPosterPath().endsWith("/w500/");
+        boolean isBackdropEmpty = content.getBackdropPath() == null || content.getBackdropPath().isBlank();
+
+        if ((isOverviewEmpty || isPosterBroken || isBackdropEmpty) && tmdbData != null) {
+            String realPosterPath = (tmdbData.getPoster_path() != null)
+                    ? "https://image.tmdb.org/t/p/w500" + tmdbData.getPoster_path()
+                    : content.getPosterPath();
+
+            String realBackdropPath = (tmdbData.getBackdrop_path() != null)
+                    ? "https://image.tmdb.org/t/p/w1280" + tmdbData.getBackdrop_path()
+                    : content.getBackdropPath();
+
+            String logos = tmdbData.getOttLogos() != null ? tmdbData.getOttLogos() : "";
+
+            // DB 업데이트 (최신화된 5개 인자 메서드 사용)
+            content.updateFullInfo(content.getTmdbId(), tmdbData.getOverview(), realPosterPath, realBackdropPath, logos);
+            contentRepository.saveAndFlush(content);
+        }
+
+        // DTO 조립용 변수 준비
+        List<String> genreNames = content.getContentGenres().stream()
+                .map(cg -> cg.getGenre().getName())
+                .collect(Collectors.toList());
+
+        String summary = (content.getAnalysisCache() != null) ? content.getAnalysisCache().getSummary() : "분석 중입니다.";
+        Double ratio = (content.getAnalysisCache() != null) ? content.getAnalysisCache().getPositiveRatio() : 0.0;
+        List<String> keywords = Collections.emptyList();
+
+        List<ReviewResponseDto> expertReviews = reviewService.getExpertReviews(id);
+        List<ReviewResponseDto> userReviews = reviewService.getUserReviews(id);
+
+        List<TmdbMovieResponseDto.TmdbCastItem> majorCasts = Collections.emptyList();
+        if (tmdbData != null && tmdbData.getCredits() != null && tmdbData.getCredits().getCast() != null) {
+            majorCasts = tmdbData.getCredits().getCast().stream()
+                    .filter(cast -> cast.getOrder() < 10)
+                    .limit(8)
+                    .collect(Collectors.toList());
+        }
+
+        // 최종 DTO 빌드 (backdropPath 추가됨)
+        return ContentDetailResponseDto.builder()
+                .id(content.getId())
+                .title(content.getTitle())
+                .overview(content.getOverview())
+                .posterPath(content.getPosterPath())
+                .backdropPath(content.getBackdropPath()) // ✨ 추가
+                .castList(majorCasts)
+                .ottLogos(content.getOttLogos())
+                .genres(genreNames)
+                .aiSummary(summary)
+                .positiveRatio(ratio)
+                .topKeywords(keywords)
+                .expertReviews(expertReviews)
+                .userReviews(userReviews)
+                .build();
+    }
+
+    // --- 이하 기존 메인페이지 및 저장 로직 (유지) ---
 
     public void saveCrawledContent(ContentCreateRequestDto dto) {
-
-        // 1. 중복 체크(TMDB ID 기준)
         if (contentRepository.findByTmdbId(dto.getTmdbId()).isPresent()) return;
-
-        // 2. Content 본체 저장
         Content content = contentRepository.save(dto.toEntity());
-
-        // 3. 장르 연결 (ContentGenre 매핑)
         for (String genreName : dto.getGenres()) {
             Genre genre = genreRepository.findByName(genreName)
                     .orElseThrow(() -> new RuntimeException("장르 미정 : " + genreName));
@@ -122,19 +193,15 @@ public class ContentService {
         }
     }
 
-    // 메인페이지 데이터
     @Transactional(readOnly = true)
     public MainPageResponseDto getMainPageData() {
-        // 1. 배경용 랜덤 영화 (포스터 경로만)
         List<Content> allContents = contentRepository.findAll();
         String backgroundImage = "";
-
         if (!allContents.isEmpty()) {
             Collections.shuffle(allContents);
             backgroundImage = allContents.get(0).getPosterPath();
         }
 
-        // 2. 오늘의 추천작 (평점 높은 순 10개)
         List<ContentSummaryDto> todayRecommendations = analysisCacheRepository.findAll(
                         Sort.by(Sort.Direction.DESC, "positiveRatio")
                 ).stream()
@@ -147,15 +214,9 @@ public class ContentService {
                         .build())
                 .collect(Collectors.toList());
 
-
-
-        // 3. 장르별 3줄 리스트 (5대 장르별 그룹화)
         List<Genre> genres = genreRepository.findAll();
         Map<String, List<ContentSummaryDto>> genreContents = new HashMap<>();
-
         for (Genre genre : genres) {
-
-            // 각 장르별로 최대 15개씩만 끊어서 가져오기
             List<ContentSummaryDto> contents = contentGenreRepository.findByGenre(genre).stream()
                     .limit(15)
                     .map(cg -> {
@@ -176,74 +237,6 @@ public class ContentService {
                 .backgroundImage(backgroundImage)
                 .todayRecommendations(todayRecommendations)
                 .genreContents(genreContents)
-                .build();
-    }
-    // 콘텐츠 상세 조회
-    @Transactional
-    public ContentDetailResponseDto getContentDetail(Long id) {
-        // 1. DB 조회
-        Content content = contentRepository.findWithCacheById(id)
-                .orElseThrow(() -> new RuntimeException("해당 콘텐츠를 찾을 수 없습니다. ID: " + id));
-
-        // 2. TMDB API 호출
-        TmdbMovieResponseDto tmdbData = tmdbService.getMovieDetail(content.getTmdbId());
-
-        // 3. 데이터 업데이트 로직 (더 꼼꼼한 체크)
-        // null이거나, 비어있거나, 포스터 주소가 불완전할 때 업데이트 실행
-        boolean isOverviewEmpty = content.getOverview() == null || content.getOverview().isBlank();
-        boolean isPosterBroken = content.getPosterPath() == null || content.getPosterPath().endsWith("/w500/");
-
-        if ((isOverviewEmpty || isPosterBroken) && tmdbData != null) {
-            System.out.println(">>> DB 업데이트 조건 충족: " + content.getTitle());
-
-            String realPosterPath = (tmdbData.getPoster_path() != null)
-                    ? "https://image.tmdb.org/t/p/w500" + tmdbData.getPoster_path()
-                    : content.getPosterPath();
-
-            String logos = tmdbData.getOttLogos() != null ? tmdbData.getOttLogos() : "";
-
-            // 엔티티 업데이트 (4개 인자 버전 사용)
-            content.updateTmdbInfo(content.getTmdbId(), tmdbData.getOverview(), realPosterPath, logos);
-
-            // 명시적으로 Flush까지 실행해서 즉시 확인
-            contentRepository.saveAndFlush(content);
-            System.out.println(">>> DB 저장 완료!");
-        }
-
-        // 4. 빌더에서 쓸 변수 준비 (기존 코드 유지)
-        List<String> genreNames = content.getContentGenres().stream()
-                .map(cg -> cg.getGenre().getName())
-                .collect(Collectors.toList());
-
-        String summary = (content.getAnalysisCache() != null) ? content.getAnalysisCache().getSummary() : "분석 중입니다.";
-        Double ratio = (content.getAnalysisCache() != null) ? content.getAnalysisCache().getPositiveRatio() : 0.0;
-        List<String> keywords = Collections.emptyList();
-
-        List<ReviewResponseDto> expertReviews = reviewService.getExpertReviews(id);
-        List<ReviewResponseDto> userReviews = reviewService.getUserReviews(id);
-
-        List<TmdbMovieResponseDto.TmdbCastItem> majorCasts = Collections.emptyList();
-        if (tmdbData != null && tmdbData.getCredits() != null && tmdbData.getCredits().getCast() != null) {
-            majorCasts = tmdbData.getCredits().getCast().stream()
-                    .filter(cast -> cast.getOrder() < 10)
-                    .limit(8)
-                    .collect(Collectors.toList());
-        }
-
-        // 5. 빌더 호출
-        return ContentDetailResponseDto.builder()
-                .id(content.getId())
-                .title(content.getTitle())
-                .overview(content.getOverview())
-                .posterPath(content.getPosterPath())
-                .castList(majorCasts)
-                .ottLogos(content.getOttLogos())
-                .genres(genreNames)
-                .aiSummary(summary)
-                .positiveRatio(ratio)
-                .topKeywords(keywords)
-                .expertReviews(expertReviews)
-                .userReviews(userReviews)
                 .build();
     }
 }
