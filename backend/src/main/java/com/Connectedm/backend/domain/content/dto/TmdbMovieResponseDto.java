@@ -17,6 +17,8 @@ public class TmdbMovieResponseDto {
     private Long id;
     private String title;
     private String overview;
+
+    @JsonProperty("poster_path")
     private String poster_path;
 
     // 장르 리스트 추가
@@ -28,6 +30,9 @@ public class TmdbMovieResponseDto {
     // JSON의 "watch/providers" 키를 이 필드에 매핑
     @JsonProperty("watch/providers")
     private WatchProviders watchProviders;
+
+    @JsonProperty("backdrop_path")
+    private String backdrop_path;
 
     /**
      * 한국(KR)의 OTT 플랫폼 로고 경로들을 쉼표로 구분된 문자열로 반환

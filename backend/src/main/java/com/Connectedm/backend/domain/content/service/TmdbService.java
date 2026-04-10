@@ -63,6 +63,7 @@ public class TmdbService {
                     "?api_key=" + apiKey +
                     "&language=ko-KR" +
                     "&append_to_response=credits,watch/providers";
+//https://api.themoviedb.org/3/movie/{tmdbId}?api_key={apiKey}&language=ko-KR&append_to_response=credits,watch/providers
 
         return restTemplate.getForObject(url, TmdbMovieResponseDto.class);
     }

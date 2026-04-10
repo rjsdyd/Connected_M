@@ -21,6 +21,7 @@ public class ContentDetailResponseDto {
     private List<String> genres;
     @Schema(hidden = true)
     private List<TmdbMovieResponseDto.TmdbCastItem> castList;
+    private String backdropPath;
 
     // AI 분석 영역
     private String aiSummary;

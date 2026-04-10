@@ -49,6 +49,9 @@ public class Content {
     @Column(name = "ott_logos")
     private String ottLogos;
 
+    @Column(name = "backdrop_path")
+    private String backdropPath;
+
     // 장르와 연결 (1:N)
     @Builder.Default
     @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true )
@@ -67,30 +70,25 @@ public class Content {
     }
 
     /**
-     * TMDB 정보를 한꺼번에 업데이트하는 메서드
-     * (사용자 요청에 따라 overview, posterPath, ottLogos 3개 필드 업데이트)
+     * 1. TMDB 상세 정보 전용 업데이트 (가장 많이 사용)
+     * tmdbId는 유지하고 내용물만 업데이트할 때 사용합니다.
      */
-    public void updateTmdbInfo(String overview, String posterPath, String ottLogos) {
+    public void updateTmdbInfo(String overview, String posterPath, String backdropPath, String ottLogos) {
         this.overview = overview;
         this.posterPath = posterPath;
+        this.backdropPath = backdropPath;
         this.ottLogos = ottLogos;
     }
 
     /**
-     * 진짜 TMDB ID와 상세 정보를 함께 업데이트하는 메서드
+     * 2. ID 교체 포함 전체 업데이트
+     * 씨네21 ID를 TMDB ID로 바꾸면서 상세 정보까지 넣을 때 사용합니다.
      */
-    public void updateTmdbInfo(String tmdbId, String overview, String posterPath, String ottLogos) {
-        this.tmdbId = tmdbId; // 임시 씨네21 ID를 진짜 TMDB ID로 교체
+    public void updateFullInfo(String tmdbId, String overview, String posterPath, String backdropPath, String ottLogos) {
+        this.tmdbId = tmdbId;
         this.overview = overview;
         this.posterPath = posterPath;
-        this.ottLogos = ottLogos;
-    }
-
-    // 기존 4개 인자 버전 (title 포함)
-    public void updateTmdbInfo1(String title, String overview, String posterPath, String ottLogos) {
-        this.title = title;
-        this.overview = overview;
-        this.posterPath = posterPath;
+        this.backdropPath = backdropPath;
         this.ottLogos = ottLogos;
     }
 }
