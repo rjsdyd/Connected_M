@@ -1,6 +1,7 @@
 package com.Connectedm.backend.domain.content.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -8,8 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+
 @Getter
 @NoArgsConstructor
+@Schema(hidden = true)
 public class TmdbMovieResponseDto {
     private Long id;
     private String title;
@@ -29,6 +32,7 @@ public class TmdbMovieResponseDto {
     /**
      * 한국(KR)의 OTT 플랫폼 로고 경로들을 쉼표로 구분된 문자열로 반환
      */
+    @Schema(hidden = true)
     public String getOttLogos() {
         if (watchProviders == null || watchProviders.getResults() == null) {
             return "";
@@ -51,6 +55,7 @@ public class TmdbMovieResponseDto {
 
     @Getter
     @NoArgsConstructor
+    @Schema(hidden = true)
     public static class TmdbGenre {
         private Long id;
         private String name;
@@ -59,6 +64,7 @@ public class TmdbMovieResponseDto {
     // ✨ 출연진 정보를 담을 클래스 추가
     @Getter
     @NoArgsConstructor
+    @Schema(hidden = true)
     public static class TmdbCreditsResponse {
         private List<TmdbCastItem> cast;
     }
@@ -66,6 +72,7 @@ public class TmdbMovieResponseDto {
     // ✨ 개별 배우 정보를 담을 클래스 추가
     @Getter
     @NoArgsConstructor
+    @Schema(hidden = true)
     public static class TmdbCastItem {
         private String name;
         private String character;
@@ -76,18 +83,21 @@ public class TmdbMovieResponseDto {
 
     @Getter
     @NoArgsConstructor
+    @Schema(hidden = true)
     public static class WatchProviders {
         private Map<String, CountryResult> results;
     }
 
     @Getter
     @NoArgsConstructor
+    @Schema(hidden = true)
     public static class CountryResult {
         private List<ProviderDetail> flatrate;
     }
 
     @Getter
     @NoArgsConstructor
+    @Schema(hidden = true)
     public static class ProviderDetail {
         private String logo_path;
         private String provider_name;
