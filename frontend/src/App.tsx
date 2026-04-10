@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
-import 'pretendard/dist/web/static/pretendard.css';
 
 
 // 컴포넌트 & 페이지 임포트

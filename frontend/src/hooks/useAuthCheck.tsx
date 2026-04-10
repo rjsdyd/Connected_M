@@ -7,6 +7,11 @@ export const useAuthCheck = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+
+    if (!location.pathname.includes('/oauth2/redirect')) {
+      return; 
+    }
+
     const params = new URLSearchParams(location.search);
     const token = params.get("token") || params.get("accessToken") || params.get("jwt"); 
     const nickname = params.get("nickname");

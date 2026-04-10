@@ -36,4 +36,15 @@ public class AuthController {
         String token = jwtTokenProvider.createAccessToken(auth);
         return ResponseEntity.ok(ApiResponse.success(new LoginResponse(token, userResponse)));
     }
+
+    @PostMapping("/password-reset/request")
+    public ResponseEntity<?> requestPasswordReset(
+            @RequestParam String email,
+            @RequestParam String realName,
+            @RequestParam String phoneNumber
+    ) {
+        userService.verifyAndSendResetLink(email, realName, phoneNumber);
+
+        return ResponseEntity.ok(ApiResponse.success("입력하신 이메일로 비밀번호 재설정 링크를 발송했습니다."));
+    }
 }

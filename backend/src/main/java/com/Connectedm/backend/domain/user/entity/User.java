@@ -34,7 +34,7 @@ public class User {
 
     // 전화번호 추가
     //@Column(length = 20)
-    @Column(name = "phone_number", length = 20)
+    @Column(name = "phone_number", unique = true, length = 20)
     private String phoneNumber;
 
     @Column(nullable = false, length = 50)

@@ -15,13 +15,33 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  // 비밀번호 찾기
+  const [isFindMode, setIsFindMode] = useState(false); 
+  const [realName, setRealName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+
   // 1. ✨ 이 함수를 handleSubmit 위에 추가하세요!
   const handleSocialLogin = (provider: 'kakao' | 'google') => {
     // 8080(백엔드)의 시큐리티가 기다리고 있는 주소로 보냅니다.
     window.location.href = `http://localhost:8080/oauth2/authorization/${provider}`;
   };
 
-  // 2. ✨ 로그인 처리 함수
+  // 2. ✨ 비밀번호 찾기(이메일 발송) 처리 함수 추가
+  const handleFindPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      // 백엔드 컨트롤러가 @RequestParam을 사용하므로 params에 실어 보냅니다.
+      await axios.post('http://localhost:8080/api/auth/password-reset/request', null, {
+        params: { email, realName, phoneNumber }
+      });
+      alert("입력하신 이메일로 인증 링크를 발송했습니다!");
+      setIsFindMode(false); // 성공 시 다시 로그인 모드로 변경
+    } catch (error) {
+      console.error('인증 실패:', error);
+      alert('일치하는 사용자 정보를 찾을 수 없습니다.');
+    }
+  };
+
   // 2. ✨ 로그인 처리 함수
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final MailService mailService;
 
     @Transactional
     public Long signUp(UserSignupRequest request) {
@@ -31,7 +32,12 @@ public class UserService {
             throw new CustomException(ErrorCode.ALREADY_USED_NICKNAME);
         }
 
-        // 3. 암호화 및 빌더로 저장
+        // 3. 전화번호 중복 체크 (010-1234-1234 중복 방지)
+        if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+            throw new CustomException(ErrorCode.ALREADY_REGISTERED_PHONE);
+        }
+
+        // 4. 암호화 및 빌더로 저장
         String encodedPassword = passwordEncoder.encode(request.getPassword());
         User user = User.builder()
                 .email(request.getEmail())
@@ -43,6 +49,17 @@ public class UserService {
                 .build();
 
         return userRepository.save(user).getId();
+    }
+
+    @Transactional
+    public void verifyAndSendResetLink(String email, String realName, String phoneNumber) {
+        // DB에서 세 가지 정보가 모두 일치하는 유저가 있는지 확인
+        User user = userRepository.findByEmailAndRealNameAndPhoneNumber(email, realName, phoneNumber)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 일치하면 토큰 생성 후 메일 발송
+        String resetToken = java.util.UUID.randomUUID().toString();
+        mailService.sendResetLink(user.getEmail(), resetToken);
     }
 
     public UserResponse login(UserLoginRequest request) {
