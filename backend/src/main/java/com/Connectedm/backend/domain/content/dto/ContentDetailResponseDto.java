@@ -30,5 +30,5 @@ public class ContentDetailResponseDto {
 
     // 리뷰 영역
     private List<ReviewResponseDto> expertReviews;
-    private List<ReviewResponseDto> userReviews;
+    private List<UserReviewResponseDto> userReviews;
 }
