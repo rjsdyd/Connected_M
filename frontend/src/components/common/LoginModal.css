@@ -74,10 +74,10 @@ input, button, textarea, select {
 }
 
 /* ============== input-group ============== */
-.input-group { 
+.input-group_login { 
   margin-bottom: 16px; 
 }
-.input-group label { 
+.input-group_login label { 
   display: block; 
   font-size: 11px; 
   font-weight: 900; 
@@ -86,7 +86,7 @@ input, button, textarea, select {
   margin-left: 10px; 
 }
 
-.input-group input { 
+.input-group_login input { 
   width: 100%; 
   padding: 14px 20px; 
   background-color: #f9fafb; 
@@ -97,7 +97,7 @@ input, button, textarea, select {
   transition: border 0.2s; 
 }
 
-.input-group input:focus { 
+.input-group_login input:focus { 
   border-color: #4b0082; 
   background-color: white; 
 }

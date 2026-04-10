@@ -2,3 +2,11 @@ button {
     outline: none !important;
     border: none !important;
 }
+
+:root {
+    --main-font: 'Your Font Name', sans-serif;
+}
+
+body {
+    font-family: var(--main-font);
+}

@@ -1,154 +1,161 @@
-/* 1. 폰트 불러오기 (CSS 파일 최상단에 위치해야 함) */
-@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;700;900&display=swap');
-
-/* 2. 전체 요소에 폰트 적용 */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  /* 모든 요소에 Pretendard 적용, 없을 경우 샌세리프 계열 사용 */
-  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+:root {
+  --main-purple: #4b0082;
+  --bg-gray: #f9fafb;
+  --text-gray: #9ca3af;
+  --border-light: #e5e7eb;
 }
 
-/* 3. input, button 등 기본 폰트가 상속되지 않는 요소들까지 강제 적용 */
-input, button, textarea, select {
-  font-family: inherit;
-}
-
-/* 전체 배경 및 정렬 */
-.mypage-container {
+.mypage-layout {
+  background-color: var(--bg-gray);
   min-height: 100vh;
-  padding: 100px 20px 50px;
-  background-color: #f9fafb;
+  width: 100%;  
+  padding-bottom: 60px;
+}
+
+.mypage-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-top: 120px;
+}
+
+/* 1. 상단 프로필 요약 */
+.profile-summary-card {
+  background: white;
+  border: 2px solid var(--main-purple);
+  border-radius: 25px;
+  padding: 30px;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-/* 하얀색 프로필 카드 영역 */
-.mypage-card {
-  width: 100%;
-  max-width: 500px;
-  background-color: white;
-  border-radius: 16px;
-  padding: 40px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-  margin-top: 50px;
-}
-
-.mypage-title {
-  color: #4b0082;
-  font-size: 24px;
-  font-weight: bold;
+  align-items: center;
+  gap: 20px;
   margin-bottom: 30px;
+  margin-top: 100px;
+}
+
+.profile-avatar {
+  width: 65px; height: 65px;
+  background-color: var(--main-purple);
+  color: white;
+  border-radius: 50%;
+  display: flex; justify-content: center; align-items: center;
+  font-size: 28px; font-weight: 800;
+}
+
+.nickname { font-size: 20px; font-weight: 700; color: #111; }
+.email { color: var(--text-gray); font-size: 14px; }
+
+/* 2. 하단 메인 레이아웃 (높이 동기화의 핵심) */
+.mypage-main-content {
+  display: flex;
+  gap: 25px;
+  align-items: stretch; /* ⭐ 자식 요소들의 높이를 동일하게 맞춤 */
+}
+
+/* 좌측 영역 */
+.content-side-left {
+  flex: 1;
+}
+
+.account-card-fixed {
+  background: white;
+  border: 2px solid var(--main-purple);
+  border-radius: 25px;
+  height: 100%; /* ⭐ 부모의 stretch 덕분에 우측과 높이가 같아짐 */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.card-title-fixed {
+  padding: 25px;
+  font-size: 18px;
+  font-weight: 700;
   text-align: center;
 }
 
-/* 프로필 헤더 (아바타 + 닉네임 + 이메일) */
-.mypage-profile-header {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 30px;
-  padding-bottom: 30px;
-  border-bottom: 1px solid #f3f4f6;
+.info-divider {
+  height: 1px;
+  background-color: var(--border-light);
 }
 
-.mypage-avatar {
-  width: 70px;
-  height: 70px;
-  background-color: #4b0082;
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.mypage-profile-info h3 {
-  margin: 0 0 5px 0;
-  font-size: 20px;
-  color: #111827;
-}
-
-.mypage-profile-info p {
-  margin: 0;
-  color: #6b7280;
-  font-size: 14px;
-}
-
-/* 상세 정보 리스트 */
-.mypage-details {
+.info-body-fixed {
+  padding: 30px 25px;
+  flex-grow: 1; /* 나머지 공간 차지 */
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  margin-bottom: 40px;
+  justify-content: center; /* ⭐ 내용물을 세로 중앙에 배치하여 여백 밸런스 조정 */
 }
 
-.detail-row {
+.info-row-fixed {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 25px;
+}
+
+.info-label-fixed { color: var(--text-gray); font-weight: 600; }
+.info-value-fixed { font-weight: 500; }
+
+.btn-edit-action-fixed {
+  width: 100%;
+  background-color: var(--main-purple);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: auto; /* 버튼을 항상 카드 하단 쪽으로 밀어냄 */
+}
+
+/* 우측 영역 */
+.content-side-right {
+  flex: 1.2;
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* 카드 사이 간격 */
+}
+
+.simple-link-card {
+  background: white;
+  border: 2px solid var(--main-purple);
+  border-radius: 20px;
+  padding: 25px 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex: 1; /* ⭐ 3개의 카드가 우측 높이를 균등하게 나눠 가짐 */
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.detail-label {
-  color: #6b7280;
-  font-weight: 500;
-  font-size: 15px;
+.simple-link-card:hover {
+  transform: translateX(5px);
+  background-color: #f8f5ff;
 }
 
-.detail-value {
-  color: #111827;
-  font-weight: 600;
+.link-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #111;
+}
+
+.link-arrow {
+  color: #333;
   font-size: 16px;
 }
 
-/* 하단 버튼 영역 */
-.mypage-actions {
-  display: flex;
-  gap: 15px;
+/* 하단 로그아웃 */
+.mypage-footer {
+  margin-top: 40px;
+  text-align: right;
 }
 
-.btn-edit {
-  flex: 1;
-  padding: 14px;
-  background-color: #4b0082;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: bold;
+.logout-link {
+  background: none; border: none;
+  color: var(--text-gray); font-size: 13px; text-decoration: underline;
   cursor: pointer;
-  transition: background-color 0.2s;
 }
 
-.btn-edit:hover {
-  background-color: #3a0066;
-}
-
-.btn-logout {
-  flex: 1;
-  padding: 14px;
-  background-color: white;
-  color: #4b0082;
-  border: 1px solid #4b0082;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.btn-logout:hover {
-  background-color: #f3e8ff;
-}
-
-/* 로딩 & 에러 상태 */
+/* 로딩/에러 */
 .mypage-loading, .mypage-error {
-  text-align: center;
-  padding: 100px;
-  font-size: 18px;
-  color: #6b7280;
+  padding-top: 200px; text-align: center; font-weight: 700; color: var(--main-purple);
 }
