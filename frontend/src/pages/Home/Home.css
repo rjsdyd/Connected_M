@@ -32,7 +32,7 @@ body {
   overflow-x: hidden; 
 }
 
-input,  textarea, select {
+input, button, textarea, select {
   font-family: inherit;
 }
 
