@@ -44,6 +44,11 @@ public class UserController {
             User user = userRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("해당 유저를 찾을 수 없습니다."));
 
+            // 전화번호 중복 체크
+            if (phoneNumber != null && !phoneNumber.isEmpty() && userRepository.existsByPhoneNumber(phoneNumber) && !phoneNumber.equals(user.getPhoneNumber())) {
+                return ApiResponse.error("이미 등록된 전화번호입니다.");
+            }
+
             user.setEmail(email);
             user.setPhoneNumber(phoneNumber);
             if (password != null && !password.isEmpty()) {
@@ -56,5 +61,12 @@ public class UserController {
             e.printStackTrace();
             return ApiResponse.error("서버 내부 에러: " + e.getMessage());
         }
+    }
+
+    // 닉네임 중복 확인 API
+    @GetMapping("/check-nickname")
+    public ApiResponse<Boolean> checkNickname(@RequestParam String nickname) {
+        boolean exists = userRepository.existsByNickname(nickname);
+        return ApiResponse.success(exists);
     }
 }

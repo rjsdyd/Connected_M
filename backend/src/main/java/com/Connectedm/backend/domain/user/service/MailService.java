@@ -20,7 +20,7 @@ public class MailService {
         message.setSubject("[Connected M] 비밀번호 재설정 안내");
 
         // 사용자가 클릭할 링크 (프론트엔드 주소)
-        String resetUrl = "http://localhost:5173/reset-password?token=" + token;
+        String resetUrl = "http://localhost:5173/reset-password?token=" + token; // 발급된 토큰을 URL 쿼리로 전달
 
         message.setText("안녕하세요. Connected M입니다.\n\n" +
                 "비밀번호 재설정을 위해 아래 링크를 클릭해 주세요.\n" +
