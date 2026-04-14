@@ -1,6 +1,8 @@
 /* 1. 폰트 불러오기 (CSS 파일 최상단에 위치해야 함) */
 @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;700;900&display=swap');
 
+
+
 /* 2. 전체 요소에 폰트 적용 */
 * {
   margin: 0;
@@ -28,17 +30,20 @@ input, button, textarea, select {
 }
 
 .banner-section {
-  height: 550px;
+  width: 100%;
+  height: 700px;
   background-color: #1a1a1a;
   background-image: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.8)), 
                     url('https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2070&auto=format&fit=crop');
-  background-size: cover;
+  background-size: contain;
+  background-repeat: no-repeat;
   background-position: center;
+  background-color: #1a1a1a;
   position: relative;
   display: flex;
   align-items: flex-end;
   padding: 0 80px 60px;
-  margin-top: 90px;
+  margin-top: 94px;
 }
 
 .info-overlay {
@@ -62,14 +67,14 @@ input, button, textarea, select {
 .genre-label {
   color: #d1b9ff;
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   display: block;
   margin-bottom: 8px;
 }
 
 .movie-title {
   color: #ffffff !important;
-  font-size: 4rem !important;
+  font-size: 3.05rem !important;
   font-weight: 800 !important;
   margin: 10px 0 !important;
   line-height: 1.1 !important;
@@ -377,7 +382,7 @@ input, button, textarea, select {
 
 .visible-star {
   font-size: 2.5rem; 
-  color: #e9ecef; 
+  color: #FFD700;
   position: absolute;
   pointer-events: none; 
   transition: color 0.15s ease;
@@ -385,7 +390,7 @@ input, button, textarea, select {
 
 .visible-star.filled,
 .visible-star.half {
-  color: #FFD700;
+  color: #FFD700 ;
   filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.3));
 }
 
@@ -472,3 +477,4 @@ input, button, textarea, select {
     padding: 0 40px 40px;
   }
 }
+
