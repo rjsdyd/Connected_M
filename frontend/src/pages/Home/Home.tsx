@@ -4,9 +4,11 @@ import './Home.css'
 const Home = () => {
   // ================= 1. 상태 관리 =================
   const [activeGenre, setActiveGenre] = useState<string>('action');
-  const [currentSlide, setCurrentSlide] = useState(5);
-  const [isTransitioning, setIsTransitioning] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(2); // 중앙에 올 인덱스
   const [isSliderPaused, setIsSliderPaused] = useState(false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const minSwipeDistance = 50;
 
   // ================= 2. 영화 & 슬라이더 데이터 =================
   const movies: Record<string, string[]> = {
@@ -25,48 +27,69 @@ const Home = () => {
     { id: 5, title: '추천 포스터 5', bg: '#fecaca', color: '#7f1d1d', rating: 4.7 }
   ];
 
-  const extendedSlides = [
-    ...slideItems.map(item => ({ ...item, uniqueId: `prev-${item.id}` })),
-    ...slideItems.map(item => ({ ...item, uniqueId: `curr-${item.id}` })),
-    ...slideItems.map(item => ({ ...item, uniqueId: `next-${item.id}` }))
-  ];
-
-  // ================= 3. 무한 슬라이더 로직 =================
-  useEffect(() => {
-    if (currentSlide === 10) {
-      setTimeout(() => {
-        setIsTransitioning(false);
-        setCurrentSlide(5);
-      }, 500); 
-    } else if (currentSlide === 4) {
-      setTimeout(() => {
-        setIsTransitioning(false); 
-        setCurrentSlide(9);
-      }, 500);
-    }
-  }, [currentSlide]);
-
-  useEffect(() => {
-    if (!isTransitioning) {
-      const timer = setTimeout(() => setIsTransitioning(true), 50);
-      return () => clearTimeout(timer);
-    }
-  }, [isTransitioning]);
-
+  // ================= 3. 3D 슬라이더 로직 =================
   useEffect(() => {
     if (isSliderPaused) return;
     const interval = setInterval(() => {
-      if (isTransitioning) setCurrentSlide(prev => prev + 1);
+      setCurrentSlide(prev => (prev + 1) % slideItems.length);
     }, 3200);
     return () => clearInterval(interval);
-  }, [isSliderPaused, isTransitioning]);
+  }, [isSliderPaused, slideItems.length]);
 
   const moveSlider = (direction: number) => {
-    if (!isTransitioning) return;
-    setCurrentSlide((prev) => prev + direction);
+    setCurrentSlide((prev) => (prev + direction + slideItems.length) % slideItems.length);
   };
 
-  // ================= 4. 화면 렌더링 (JSX) =================
+ // 2. 3D 스타일 계산 함수 (가장 중요)
+const getSlideStyle = (index: number) => {
+    const diff = index - currentSlide;
+    let offset = diff;
+    
+    // 무한 루프 계산
+    if (diff > 2) offset = diff - slideItems.length;
+    if (diff < -2) offset = diff + slideItems.length;
+
+    const absOffset = Math.abs(offset);
+    const isActive = offset === 0;
+
+    return {
+      // translateX(250px)로 설정하여 카드 사이 여백 확보
+      transform: `translateX(${offset * 200}px) scale(${1 - absOffset * 0.15})`,
+      zIndex: 10 - absOffset,
+      opacity: isActive ? 1 : absOffset === 1 ? 0.8 : 0.4,
+      filter: isActive ? 'none' : 'brightness(0.8)',
+      transition: 'all 0.5s ease-in-out',
+      position: 'absolute' as const,
+      backgroundColor: slideItems[index].bg
+    };
+  };
+
+  const onTouchStart = (e: React.MouseEvent | React.TouchEvent) => {
+  setTouchEnd(null); // 초기화
+  const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+  setTouchStart(clientX);
+};
+
+  const onTouchMove = (e: React.MouseEvent | React.TouchEvent) => {
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    setTouchEnd(clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      moveSlider(1); // 다음 슬라이드
+    } else if (isRightSwipe) {
+      moveSlider(-1); // 이전 슬라이드
+    }
+  };
+
+  // ================= 4. 화면 렌더링 =================
   return (
     <main>
       {/* ---------------- 메인 배너 ---------------- */}
@@ -78,61 +101,40 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ---------------- 키워드 섹션 ---------------- */}
-      <section className="content-section">
-        <h2 className="section-title"># 키워드</h2>
-        <div className="keyword-grid">
-          <div className="keyword-card">키워드 카드 영역</div>
-          <div className="keyword-card">회의 후 확정 예정</div>
-          <div className="keyword-card">카드 형식 배치</div>
-          <div className="keyword-card">데이터 대기 중</div>
-        </div>
-      </section>
+      {/* ---------------- 오늘의 추천작 (3D 슬라이더로 변경) ---------------- */}
 
-      {/* ---------------- 오늘의 추천작 (슬라이더) ---------------- */}
-      <section className="slider-section" style={{ padding: '48px 0', background: '#f9fafb' }}>
-        <div className="slider-header-wrapper" style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
-          <h2 className="section-title" style={{ marginBottom: '24px' }}>오늘의 추천작</h2>
-          
+      <section className="slider-section">
+        <div className="slider-header-wrapper">
+          <h2 className="section-title">오늘의 추천작</h2>
           <div 
-            className="slider-flex-wrapper" 
-            style={{ display: 'flex', alignItems: 'center', gap: '20px' }}
+            className="slider-3d-wrapper"
             onMouseEnter={() => setIsSliderPaused(true)}
-            onMouseLeave={() => setIsSliderPaused(false)}
+            onMouseLeave={() => 
+              { setIsSliderPaused(false);
+                setTouchStart(null);
+              }
+            }
+            // 마우스 이벤트
+            onMouseDown={onTouchStart}
+            onMouseMove={(e) => touchStart && onTouchMove(e)}
+            onMouseUp={onTouchEnd}
+            // 터치 이벤트 (모바일 대응)
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+            style={{ cursor: touchStart ? 'grabbing' : 'grab' }}
           >
-            <button 
-              onClick={() => moveSlider(-1)}
-              style={{ flexShrink: 0, width: '48px', height: '48px', borderRadius: '50%', background: 'white', border: '1px solid #e5e7eb', color: '#4b0082', cursor: 'pointer', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            >
-              ◀
-            </button>
+            <button className="nav-btn-3d left" onClick={() => moveSlider(-1)}>◀</button>
             
-            <div className="slider-container" style={{ overflow: 'hidden', flex: 1 }}>
-              <div 
-                className="slider-track" 
-                style={{ 
-                  display: 'flex',
-                  transform: `translateX(-${currentSlide * 320}px)`, 
-                  transition: isTransitioning ? 'transform 0.5s ease-in-out' : 'none'
-                }}
-              >
-                {extendedSlides.map((item) => (
-                  <div key={item.uniqueId} className="slide-card" style={{ flex: '0 0 300px', height: '400px', margin: '0 10px', backgroundColor: item.bg, borderRadius: '12px', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ color: item.color, fontWeight: 'bold' }}>{item.title}</span>
-                    <div className="rating-badge" style={{ position: 'absolute', bottom: '10px', right: '10px', background: 'rgba(0,0,0,0.7)', color: '#facc15', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
-                      ★ {item.rating}
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <div className="slider-3d-container">
+              {slideItems.map((item, index) => (
+                <div key={item.id} className="slide-card-3d" style={{ ...getSlideStyle(index), backgroundColor: item.bg }}>
+                  <span style={{ color: item.color, fontWeight: 'bold' }}>{item.title}</span>
+                </div>
+              ))}
             </div>
 
-            <button 
-              onClick={() => moveSlider(1)}
-              style={{ flexShrink: 0, width: '48px', height: '48px', borderRadius: '50%', background: 'white', border: '1px solid #e5e7eb', color: '#4b0082', cursor: 'pointer', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            >
-              ▶
-            </button>
+            <button className="nav-btn-3d right" onClick={() => moveSlider(1)}>▶</button>
           </div>
         </div>
       </section>
@@ -152,6 +154,7 @@ const Home = () => {
               <button 
                 key={genre.id}
                 onClick={() => setActiveGenre(genre.id)}
+                className={`genre-btn ${activeGenre === genre.id ? 'active' : ''}`}
                 style={{
                   padding: '8px 20px', borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px',
                   background: activeGenre === genre.id ? '#4b0082' : 'white',
@@ -176,6 +179,17 @@ const Home = () => {
               <p className="movie-info">2024 • 영화</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ---------------- 키워드 섹션 ---------------- */}
+      <section className="content-section">
+        <h2 className="section-title"># 키워드</h2>
+        <div className="keyword-grid">
+          <div className="keyword-card">키워드 카드 영역</div>
+          <div className="keyword-card">회의 후 확정 예정</div>
+          <div className="keyword-card">카드 형식 배치</div>
+          <div className="keyword-card">데이터 대기 중</div>
         </div>
       </section>
     </main>
