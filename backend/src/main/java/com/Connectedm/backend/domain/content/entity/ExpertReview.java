@@ -1,25 +1,14 @@
 package com.Connectedm.backend.domain.content.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-//@Table(name = "ExpertReview")
 @Table(name = "expert_review")
 public class ExpertReview {
 
@@ -39,6 +28,9 @@ public class ExpertReview {
     @JoinColumn(name = "source_id")
     private Cine21Source cine21Source;
 
+    @Column(name = "movie_title", length = 255)
+    private String movieTitle;
+
     @Column(name = "critic_name", nullable = false, length = 50)
     private String criticName;
 
@@ -50,5 +42,8 @@ public class ExpertReview {
 
     @Builder.Default
     @Column(length = 50)
-    private String source = "cine21"; // 출처 기본값
+    private String source = "cine21";
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 }
