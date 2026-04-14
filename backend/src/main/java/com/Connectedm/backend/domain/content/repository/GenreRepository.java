@@ -12,12 +12,4 @@ import java.util.Optional;
 public interface GenreRepository extends JpaRepository<Genre, Long> {
     // 장르 이름으로 찾는 기능 (예: "ACTION")
     Optional<Genre> findByName(String name);
-
-    // 오늘의 추천작 : 최신등록순 10개
-    List<Content> findTop10OrderByIdDesc();
-
-    @Query("SELECT c FROM Content c " +
-            "JOIN c.contentGenres cg " +
-            "WHERE cg.genre.id = :genreId")
-    List<Content> findByGenreId(@Param("genreId") Long genreId);
 }

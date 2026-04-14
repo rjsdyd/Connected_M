@@ -11,5 +11,5 @@ public class MovieMainDto {
     private Long id;
     private String title;
     private String posterPath;
-    private String averageRating;
+    private Double averageRating;
 }

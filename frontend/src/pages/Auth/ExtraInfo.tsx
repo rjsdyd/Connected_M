@@ -78,7 +78,7 @@ const ExtraInfo = () => {
           <div className="input-group">
             <label className="input-label">실제 이메일 주소</label>
             <input className="extra-info-input" type="email" placeholder="example@email.com" required 
-                   onChange={(e) => setFormData({...formData, email: e.target.value})} />
+                    onChange={(e) => setFormData({...formData, email: e.target.value})} />
           </div>
         ) : (
           <div className="extra-info-readonly-badge">

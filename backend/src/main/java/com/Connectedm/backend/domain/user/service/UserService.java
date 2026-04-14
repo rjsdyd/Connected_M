@@ -14,9 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -57,6 +60,7 @@ public class UserService {
     public void verifyAndSendResetLink(String email, String realName, String phoneNumber) {
         // 전화번호를 DB 저장 형식(010-0000-0000)으로 통일
         String normalizedPhone = normalizePhoneNumber(phoneNumber);
+        log.info("비밀번호 재설정 요청: email={}, realName={}, originalPhone={}, normalizedPhone={}", email, realName, phoneNumber, normalizedPhone);
 
         // DB에서 이메일+이름+전화번호가 일치하는지 확인
         User user = userRepository.findByEmailAndRealNameAndPhoneNumber(email, realName, normalizedPhone)

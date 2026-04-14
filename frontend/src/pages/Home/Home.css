@@ -313,92 +313,102 @@ a {
 /* ================= 오늘의 추천작 (슬라이더) ================= */
 .slider-section { 
   background: #f9fafb; 
-  padding: 48px 0; 
+  padding: 60px 0 80px 0;
+  width: 100%;
 }
 
+/* 제목 왼쪽 정렬 고정 */
 .slider-header-wrapper { 
   max-width: 1280px; 
   margin: 0 auto; 
-  padding: 0 24px; 
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
 }
 
-.slider-header { 
-  margin-bottom: 24px; 
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  text-align: left;
 }
 
-.slider-main-area {
-  position: relative;
-}
-
-.slider-container { 
-  position: relative; 
-  overflow: hidden; 
+/* 3D 슬라이더와 버튼을 감싸는 컨테이너 - 여기가 기준점입니다 */
+.slider-3d-wrapper {
+  position: relative; /* 버튼 position: absolute의 기준점 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
-  height: 450px; 
+  height: 450px;
+  cursor: grab;
+  user-select: none; /* 드래그 시 텍스트 선택 방지 */
+  -webkit-user-drag: none; /* 이미지 드래그 방지 */
 }
 
-.slider-controls {
+.slider-3d-wrapper:active {
+  cursor: grabbing; /* 클릭 시 잡는 모양으로 변경 */
+}
+
+/* 카드들이 모여있는 중앙 영역 */
+.slider-3d-container {
+  position: relative;
+  width: 300px; /* 카드 기본 너비 */
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1200px;
+}
+
+.slide-card-3d {
+  width: 300px;
+  height: 400px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  position: absolute; /* getSlideStyle의 position과 일치 */
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none; /* 카드 내부 요소가 드래그를 방해하지 않도록 설정 */
+}
+
+/* 좌우 버튼 공통 - 절대 위치로 양끝 배치 */
+.nav-btn-3d {
   position: absolute;
   top: 50%;
-  transform: translateY(-50%);
-  width: 100%; 
+  transform: translateY(-50%); /* 세로 중앙 정렬 */
+  z-index: 999; /* 카드보다 무조건 위로 */
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid #ddd;
+  color: #4b0082;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   display: flex;
-  justify-content: space-between;
-  padding: 0 10px;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: all 0.2s ease;
 }
 
-.slider-controls button { 
-  padding: 12px; 
-  background: white; 
-  border: none; 
-  border-radius: 50%; 
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
-  cursor: pointer; font-size: 20px; 
-  transition: background 0.2s, transform 0.2s; 
-  outline: none;
+/* 왼쪽 버튼을 wrapper의 왼쪽 끝으로 */
+.nav-btn-3d.left {
+  left: 20px; 
 }
 
-.slider-controls button:focus {
-  outline: none;
+/* 오른쪽 버튼을 wrapper의 오른쪽 끝으로 */
+.nav-btn-3d.right {
+  right: 20px;
 }
 
-.slider-controls button:focus:not(:focus-visible) {
-  outline: none;
-}
-
-.slider-controls button:hover { 
-  background: #eee; 
-  transform: scale(1.1); 
-}
-
-.slider-track { 
-  display: flex; 
-  transition: transform 0.5s ease-in-out; 
-  height: 100%;
-}
-
-.slide-card { 
-  min-width: 300px; 
-  margin-right: 20px; 
-  border-radius: 12px; 
-  position: relative; 
-  overflow: hidden; 
-  height: 400px; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-}
-
-.rating-badge { 
-  position: absolute; 
-  bottom: 10px; 
-  right: 10px; 
-  background: rgba(0,0,0,0.7); 
-  color: #facc15; 
-  padding: 4px 8px; 
-  border-radius: 4px; 
-  font-size: 12px; 
-  font-weight: 700; 
+.nav-btn-3d:hover {
+  background: #4b0082;
+  color: white;
+  transform: translateY(-50%) scale(1.1);
 }
 
 /* ================= 카테고리별 영화 ================= */
