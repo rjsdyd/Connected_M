@@ -40,15 +40,29 @@ public class UserController {
             String email = (String) request.get("email");
             String phoneNumber = (String) request.get("phoneNumber");
             String password = (String) request.get("password");
+            String nickname = (String) request.get("nickname");
 
             User user = userRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("해당 유저를 찾을 수 없습니다."));
 
-            // 전화번호 중복 체크
-            if (phoneNumber != null && !phoneNumber.isEmpty() && userRepository.existsByPhoneNumber(phoneNumber) && !phoneNumber.equals(user.getPhoneNumber())) {
-                return ApiResponse.error("이미 등록된 전화번호입니다.");
+            String currentPhone = user.getPhoneNumber();
+            String normalizedCurrentPhone = currentPhone == null ? null : currentPhone.replaceAll("[^0-9]", "");
+            String normalizedPhoneNumber = phoneNumber == null ? null : phoneNumber.replaceAll("[^0-9]", "");
+
+            // 전화번호 중복 체크. 본인 전화번호와 동일하면 허용, 다른 사용자에 의해 이미 등록된 번호이면 에러 처리.
+            if (normalizedPhoneNumber != null && !normalizedPhoneNumber.isEmpty()) {
+                if (!normalizedPhoneNumber.equals(normalizedCurrentPhone) && userRepository.existsByPhoneNumber(phoneNumber)) {
+                    return ApiResponse.error("이미 등록된 전화번호입니다. 다른 번호를 입력해 주세요.");
+                }
             }
 
+            if (nickname != null && !nickname.isEmpty() && userRepository.existsByNickname(nickname) && !nickname.equals(user.getNickname())) {
+                return ApiResponse.error("이미 사용 중인 닉네임입니다.");
+            }
+
+            if (nickname != null && !nickname.isEmpty()) {
+                user.setNickname(nickname);
+            }
             user.setEmail(email);
             user.setPhoneNumber(phoneNumber);
             if (password != null && !password.isEmpty()) {

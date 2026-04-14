@@ -18,18 +18,23 @@ public class MailService {
     // 파라미터로 이메일(String)과 토큰(String) 두 개를 받습니다.
     public void sendResetLink(String toEmail, String token) {
         try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(toEmail);
-            message.setFrom("Connected M <dlaudwns0903@gmail.com>"); // 보내는 사람
-            message.setSubject("[Connected M] 비밀번호 재설정 안내");
+            jakarta.mail.internet.MimeMessage message = mailSender.createMimeMessage();
+            org.springframework.mail.javamail.MimeMessageHelper helper = new org.springframework.mail.javamail.MimeMessageHelper(message, false, "UTF-8");
+            helper.setTo(toEmail);
+            helper.setFrom("Connected M <dlaudwns0903@gmail.com>");
+            helper.setSubject("[Connected M] 비밀번호 재설정 안내");
 
-            // 사용자가 클릭할 링크 (프론트엔드 주소)
-            String resetUrl = "http://localhost:5173/reset-password?token=" + token; // 발급된 토큰을 URL 쿼리로 전달
+            String resetUrl = "http://localhost:5173/reset-password?token=" + token;
+            String html = "<html><body>" +
+                    "<p>안녕하세요. Connected M입니다.</p>" +
+                    "<p>비밀번호 재설정을 위해 아래 링크를 클릭해 주세요.</p>" +
+                    "<p><a href=\"" + resetUrl + "\" target=\"_blank\">비밀번호 재설정 바로가기</a></p>" +
+                    "<p>또는 아래 URL을 복사하여 브라우저에 붙여넣어 주세요:</p>" +
+                    "<p><span style=\"word-break: break-all;\">" + resetUrl + "</span></p>" +
+                    "<p>이 링크는 <strong>30분 동안만 유효</strong>합니다.</p>" +
+                    "</body></html>";
 
-            message.setText("안녕하세요. Connected M입니다.\n\n" +
-                    "비밀번호 재설정을 위해 아래 링크를 클릭해 주세요.\n" +
-                    resetUrl + "\n\n" +
-                    "이 링크는 30분 동안만 유효합니다.");
+            helper.setText(html, true);
 
             mailSender.send(message);
             log.info("비밀번호 재설정 이메일 발송 성공: {}", toEmail);
