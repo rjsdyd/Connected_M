@@ -67,13 +67,16 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
             // 5. 리다이렉트 (최신 유저 정보 전달)
             boolean needInfo = user.getPhoneNumber() == null || user.getPhoneNumber().equals("010-0000-0000");
+            boolean needNickname = user.getNickname() != null && user.getNickname().startsWith("tmp_social_");
 
             String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/oauth2/redirect")
                     .queryParam("token", accessToken)
                     .queryParam("id", user.getId())
                     .queryParam("email", user.getEmail())
                     .queryParam("nickname", user.getNickname())
-                    .queryParam("needInfo", needInfo) // ✨ 이 신호를 리액트에 보냅니다!
+                    .queryParam("realName", user.getRealName())
+                    .queryParam("needInfo", needInfo)
+                    .queryParam("needNickname", needNickname)
                     .build()
                     .encode(StandardCharsets.UTF_8)
                     .toUriString();

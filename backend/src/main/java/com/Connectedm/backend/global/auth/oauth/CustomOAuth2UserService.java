@@ -44,7 +44,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         // 3. 소셜에서 제공하는 고유 식별 데이터 추출
         String providerId = oAuth2UserInfo.getProviderId();
-        String nickname = oAuth2UserInfo.getName();
         String email = oAuth2UserInfo.getEmail();
 
         // 4. 최초 가입 시 사용할 임시 이메일 생성
@@ -54,7 +53,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         final String finalEmail = email;
         final AuthProvider finalProvider = authProvider;
-        final String finalNickname = generateUniqueNickname(oAuth2UserInfo.getName(), finalProvider);
+        final String socialName = oAuth2UserInfo.getName();
+        final String realName = (socialName != null && !socialName.isEmpty()) ? socialName : "소셜유저";
 
         // 5. [개선된 로직] 지문(Provider+ID)으로 먼저 찾고, 없으면 이메일로 찾기
         userRepository.findByProviderAndProviderId(finalProvider, providerId)
@@ -62,9 +62,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 .or(() -> userRepository.findByEmail(finalEmail))
                 .map(entity -> {
                     // [기존 유저 업데이트]
-                    // 1. 닉네임 최신화 (중복 방지)
-                    String updatedNickname = generateUniqueNickname(finalNickname, finalProvider);
-                    entity.setNickname(updatedNickname);
+                    if (entity.getNickname() == null || entity.getNickname().isEmpty()) {
+                        if (socialName != null && !socialName.isEmpty() && !userRepository.existsByNickname(socialName)) {
+                            entity.setNickname(socialName);
+                        } else {
+                            entity.setNickname("tmp_social_" + UUID.randomUUID().toString().substring(0, 8));
+                        }
+                    }
+
+                    entity.setRealName(realName);
 
                     // 2. 만약 기존에 일반 회원이었거나 데이터가 꼬여서 NULL이었다면 정보를 채워줌
                     if (entity.getProvider() == null || entity.getProvider() == AuthProvider.LOCAL) {
@@ -74,11 +80,19 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     return userRepository.save(entity);
                 })
                 .orElseGet(() -> {
-                    // [정말 처음 온 신규 유저]
+                    String finalNickname;
+                    if (socialName == null || socialName.isEmpty()) {
+                        finalNickname = "tmp_social_" + UUID.randomUUID().toString().substring(0, 8);
+                    } else if (userRepository.existsByNickname(socialName)) {
+                        finalNickname = "tmp_social_" + UUID.randomUUID().toString().substring(0, 8);
+                    } else {
+                        finalNickname = socialName;
+                    }
+
                     return userRepository.save(User.builder()
                             .email(finalEmail)
                             .nickname(finalNickname)
-                            .realName(finalNickname)
+                            .realName(realName)
                             .password(passwordEncoder.encode(UUID.randomUUID().toString()))
                             .phoneNumber(null)
                             .provider(finalProvider)
