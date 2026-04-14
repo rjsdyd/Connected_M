@@ -37,7 +37,13 @@ public class User {
     @Column(name = "phone_number", unique = true, length = 20)
     private String phoneNumber;
 
-    @Column(nullable = false, length = 50)
+    @Column(name = "password_reset_token", unique = true, length = 255)
+    private String passwordResetToken; // 비밀번호 재설정용 토큰 저장
+
+    @Column(name = "password_reset_token_expiry")
+    private LocalDateTime passwordResetTokenExpiry; // 토큰 만료 시간 저장
+
+    @Column(nullable = true, length = 50)
     private String nickname;
 
     @CreationTimestamp

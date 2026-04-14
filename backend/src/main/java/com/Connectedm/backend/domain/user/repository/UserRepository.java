@@ -35,6 +35,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // 이메일 + 실명 + 전화번호가 모두 일치하는 유저 찾기 (3중 검증)
     Optional<User> findByEmailAndRealNameAndPhoneNumber(String email, String realName, String phoneNumber);
 
+    // 비밀번호 재설정 토큰으로 유저 찾기 (토큰 검증용)
+    Optional<User> findByPasswordResetToken(String resetToken);
+
     // ==========================================================
     // 3. 소셜 로그인용 (카카오, 구글)
     // ==========================================================

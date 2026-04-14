@@ -12,6 +12,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -53,13 +55,48 @@ public class UserService {
 
     @Transactional
     public void verifyAndSendResetLink(String email, String realName, String phoneNumber) {
-        // DB에서 세 가지 정보가 모두 일치하는 유저가 있는지 확인
-        User user = userRepository.findByEmailAndRealNameAndPhoneNumber(email, realName, phoneNumber)
+        // 전화번호를 DB 저장 형식(010-0000-0000)으로 통일
+        String normalizedPhone = normalizePhoneNumber(phoneNumber);
+
+        // DB에서 이메일+이름+전화번호가 일치하는지 확인
+        User user = userRepository.findByEmailAndRealNameAndPhoneNumber(email, realName, normalizedPhone)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        // 일치하면 토큰 생성 후 메일 발송
+        // 비밀번호 재설정 토큰을 생성하여 DB에 저장하고, 이메일로 링크 전송
         String resetToken = java.util.UUID.randomUUID().toString();
+        user.setPasswordResetToken(resetToken);
+        user.setPasswordResetTokenExpiry(LocalDateTime.now().plusMinutes(30));
+        userRepository.save(user);
         mailService.sendResetLink(user.getEmail(), resetToken);
+    }
+
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        // 이메일 링크의 토큰으로 유저 조회
+        User user = userRepository.findByPasswordResetToken(token)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_PASSWORD_RESET_TOKEN));
+
+        if (user.getPasswordResetTokenExpiry() == null || user.getPasswordResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new CustomException(ErrorCode.EXPIRED_PASSWORD_RESET_TOKEN);
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPasswordResetToken(null);
+        user.setPasswordResetTokenExpiry(null);
+        userRepository.save(user);
+    }
+
+    private String normalizePhoneNumber(String phoneNumber) {
+        if (phoneNumber == null) {
+            return null;
+        }
+        String digits = phoneNumber.replaceAll("[^0-9]", "");
+        if (digits.length() == 11) {
+            return digits.replaceFirst("(\\d{3})(\\d{4})(\\d{4})", "$1-$2-$3");
+        } else if (digits.length() == 10) {
+            return digits.replaceFirst("(\\d{3})(\\d{3})(\\d{4})", "$1-$2-$3");
+        }
+        return phoneNumber;
     }
 
     public UserResponse login(UserLoginRequest request) {

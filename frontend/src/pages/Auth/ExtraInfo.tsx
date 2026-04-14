@@ -7,7 +7,6 @@ const ExtraInfo = () => {
     email: '',
     phoneNumber: ''
   });
-
   const storedUserStr = localStorage.getItem('user');
   const storedUser = storedUserStr ? JSON.parse(storedUserStr) : null;
   const isTempEmail = storedUser?.email?.includes('@connectedm.temp');
