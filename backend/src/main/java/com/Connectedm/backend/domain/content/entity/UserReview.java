@@ -49,8 +49,18 @@ public class UserReview {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "updatedAt")
+    private LocalDateTime updatedAt;
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
     }
+
+    public void update(String rating, String comment) {
+        this.rating = rating;
+        this.comment = comment;
+        this.updatedAt = LocalDateTime.now();
+    }
+
 }

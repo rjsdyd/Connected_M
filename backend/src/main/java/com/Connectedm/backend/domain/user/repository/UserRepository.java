@@ -1,7 +1,7 @@
 package com.Connectedm.backend.domain.user.repository;
 
 import com.Connectedm.backend.domain.user.entity.User;
-// ✨ 핵심: User 클래스 '내부'에 있는 AuthProvider를 쓰겠다고 명시해야 합니다.
+// User 엔티티 내부에 선언된 AuthProvider(LOCAL, KAKAO, GOOGLE)를 가져옵니다.
 import com.Connectedm.backend.domain.user.entity.User.AuthProvider;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -11,14 +11,37 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    // 1. 일반 로그인/이메일 중복 체크용
+    // ==========================================================
+    // 1. 회원가입 및 로그인용 (중복 체크)
+    // ==========================================================
+
+    // 이메일로 유저 찾기 (로그인 시 사용)
     Optional<User> findByEmail(String email);
+
+    // 이메일 중복 확인
     boolean existsByEmail(String email);
 
-    // 2. 닉네임 중복 체크
+    // 닉네임 중복 확인
     boolean existsByNickname(String nickname);
 
-    // 3. 소셜 로그인 유저 식별용 (지문 확인)
-    // 위에서 import를 정확히 해줬기 때문에 이제 에러가 나지 않습니다.
+    // 전화번호 중복 확인 (회원가입 시 010-1234-1234 중복 방지용)
+    boolean existsByPhoneNumber(String phoneNumber);
+
+
+    // ==========================================================
+    // 2. 비밀번호 찾기 (본인 인증용)
+    // ==========================================================
+
+    // 이메일 + 실명 + 전화번호가 모두 일치하는 유저 찾기 (3중 검증)
+    Optional<User> findByEmailAndRealNameAndPhoneNumber(String email, String realName, String phoneNumber);
+
+    // 비밀번호 재설정 토큰으로 유저 찾기 (토큰 검증용)
+    Optional<User> findByPasswordResetToken(String resetToken);
+
+    // ==========================================================
+    // 3. 소셜 로그인용 (카카오, 구글)
+    // ==========================================================
+
+    // 소셜 서비스 공급자(provider)와 해당 서비스의 고유 ID(providerId)로 유저 찾기
     Optional<User> findByProviderAndProviderId(AuthProvider provider, String providerId);
 }

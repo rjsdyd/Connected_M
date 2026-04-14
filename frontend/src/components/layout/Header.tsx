@@ -13,15 +13,19 @@ const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const savedNickname = localStorage.getItem('nickname');
-    
-    if (token) {
-      setIsLoggedIn(true);
-      // 소셜 로그인 시 닉네임이 없을 수 있으므로 기본값 설정
-      setNickname(savedNickname || "사용자"); 
-    }
-  }, []);
+  const token = localStorage.getItem('token');
+  const savedNickname = localStorage.getItem('nickname');
+  
+  // 토큰이 존재하고, 단순히 빈 문자열이 아닐 때만 로그인 처리
+  if (token && token.trim() !== "") {
+    setIsLoggedIn(true);
+    setNickname(savedNickname || "사용자"); 
+  } else {
+    // 🚨 토큰이 없으면 확실하게 로그아웃 상태로 밀어버려야 합니다.
+    setIsLoggedIn(false);
+    setNickname(null);
+  }
+}, []);
 
   const handleLogout = () => {
     localStorage.removeItem('user'); 

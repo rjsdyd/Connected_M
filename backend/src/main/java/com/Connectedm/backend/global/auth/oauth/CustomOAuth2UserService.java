@@ -54,7 +54,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         final String finalEmail = email;
         final AuthProvider finalProvider = authProvider;
-        final String finalNickname = (nickname != null) ? nickname : "소셜유저";
+        final String finalNickname = generateUniqueNickname(oAuth2UserInfo.getName(), finalProvider);
 
         // 5. [개선된 로직] 지문(Provider+ID)으로 먼저 찾고, 없으면 이메일로 찾기
         userRepository.findByProviderAndProviderId(finalProvider, providerId)
@@ -62,8 +62,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 .or(() -> userRepository.findByEmail(finalEmail))
                 .map(entity -> {
                     // [기존 유저 업데이트]
-                    // 1. 닉네임 최신화
-                    entity.setNickname(finalNickname);
+                    // 1. 닉네임 최신화 (중복 방지)
+                    String updatedNickname = generateUniqueNickname(finalNickname, finalProvider);
+                    entity.setNickname(updatedNickname);
 
                     // 2. 만약 기존에 일반 회원이었거나 데이터가 꼬여서 NULL이었다면 정보를 채워줌
                     if (entity.getProvider() == null || entity.getProvider() == AuthProvider.LOCAL) {
@@ -79,12 +80,35 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                             .nickname(finalNickname)
                             .realName(finalNickname)
                             .password(passwordEncoder.encode(UUID.randomUUID().toString()))
-                            .phoneNumber("010-0000-0000")
+                            .phoneNumber(null)
                             .provider(finalProvider)
                             .providerId(providerId)
                             .build());
                 });
 
         return oAuth2User;
+    }
+
+    private String generateUniqueNickname(String baseNickname, AuthProvider provider) {
+        if (baseNickname == null || baseNickname.isEmpty()) {
+            baseNickname = "소셜유저";
+        }
+
+        String candidate = baseNickname;
+        int counter = 1;
+
+        // 중복되지 않을 때까지 숫자를 붙여서 시도
+        while (userRepository.existsByNickname(candidate)) {
+            candidate = baseNickname + counter;
+            counter++;
+            // 무한 루프 방지를 위해 최대 100번 시도
+            if (counter > 100) {
+                // 마지막 수단으로 UUID 일부 사용
+                candidate = baseNickname + "_" + UUID.randomUUID().toString().substring(0, 8);
+                break;
+            }
+        }
+
+        return candidate;
     }
 }

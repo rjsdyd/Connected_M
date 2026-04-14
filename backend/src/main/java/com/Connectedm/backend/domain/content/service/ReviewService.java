@@ -6,23 +6,13 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.Connectedm.backend.domain.content.dto.ExpertReviewCreateRequestDto;
-import com.Connectedm.backend.domain.content.dto.ReviewCreateRequestDto;
-import com.Connectedm.backend.domain.content.dto.ReviewResponseDto;
-import com.Connectedm.backend.domain.content.entity.Cine21Source;
-import com.Connectedm.backend.domain.content.entity.Content;
-import com.Connectedm.backend.domain.content.entity.ExpertReview;
-import com.Connectedm.backend.domain.content.entity.UserReview;
-import com.Connectedm.backend.domain.content.repository.Cine21SourceRepository;
-import com.Connectedm.backend.domain.content.repository.ContentRepository;
-import com.Connectedm.backend.domain.content.repository.ExpertReviewRepository;
-import com.Connectedm.backend.domain.content.repository.UserReviewRepository;
+import com.Connectedm.backend.domain.content.dto.*; // DTO들 소환 ㅋ
+import com.Connectedm.backend.domain.content.entity.*;
+import com.Connectedm.backend.domain.content.repository.*;
 import com.Connectedm.backend.domain.user.entity.User;
 import com.Connectedm.backend.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
-
-
 
 @Service
 @Transactional(readOnly = true)
@@ -35,9 +25,12 @@ public class ReviewService {
     private final ContentRepository contentRepository;
     private final UserRepository userRepository;
 
+    // ==========================================================
+    // 1. 전문가 리뷰 영역 (크롤링 데이터)
+    // ==========================================================
+
     @Transactional
     public void saveExpertReview(ExpertReviewCreateRequestDto dto) {
-        // 1. 씨네21 소스 확보(없으면 생성)
         Cine21Source source = cine21SourceRepository.findByExternalMovieId(dto.getExternalMovieId())
                 .orElseGet(() -> cine21SourceRepository.save(
                         Cine21Source.builder()
@@ -46,11 +39,9 @@ public class ReviewService {
                                 .build()
                 ));
 
-        // 2. 우리 DB의 Content 확보
         Content content = contentRepository.findById(dto.getContentId())
                 .orElseThrow(() -> new RuntimeException("콘텐츠 없음 ID:" + dto.getContentId()));
 
-        // 3. 리뷰 저장
         ExpertReview review = ExpertReview.builder()
                 .content(content)
                 .cine21Source(source)
@@ -61,7 +52,7 @@ public class ReviewService {
 
         expertReviewRepository.save(review);
     }
-    // 전문가 리뷰 가져오기
+
     public List<ReviewResponseDto> getExpertReviews(Long contentId) {
         return expertReviewRepository.findByContentId(contentId).stream()
                 .map(review -> ReviewResponseDto.builder()
@@ -70,22 +61,60 @@ public class ReviewService {
                         .comment(review.getComment())
                         .rating(review.getRating())
                         .sourceName(review.getSource())
-                        .movieTitle(review.getContent().getTitle()) // 엔티티 수정에 따라 수정
+                        .movieTitle(review.getContent().getTitle())
                         .build())
                 .collect(Collectors.toList());
     }
 
-    // 사용자 리뷰 가져오기
-    public List<ReviewResponseDto> getUserReviews(Long contentId) {
+    // ==========================================================
+    // 2. Connected-M 유저 리뷰 영역 (우리 유저 전용)
+    // ==========================================================
+
+    /**
+     * [조회] 영화 상세페이지용 유저 리뷰 목록 ㅋ
+     */
+    public List<UserReviewResponseDto> getUserReviews(Long contentId) {
         return userReviewRepository.findByContentId(contentId).stream()
-                .map(review -> ReviewResponseDto.builder()
-                        .criticName(review.getUser().getNickname()) // 유저 닉네임
-                        .comment(review.getComment())
-                        .rating(review.getRating()) // String 그대로 전달
-                        .build())
+                .map(UserReviewResponseDto::from) // 👈 마스터의 from 메서드 '딸깍'! ㅋ
                 .collect(Collectors.toList());
     }
 
+    /**
+     * [조회] 마이페이지용 '내가 쓴' 리뷰 목록 ㅋ
+     */
+    public List<MyPageReviewResponseDto> getMyReviews(Long userId) {
+        return userReviewRepository.findByUserId(userId).stream()
+                .map(MyPageReviewResponseDto::from) // 👈 여기도 from으로 통일! ㅋㅋㅋㅋ
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * [저장] 유저 리뷰 저장 (상세페이지 -> DB)
+     */
+    @Transactional
+    public void saveUserReview(Long userId, Long contentId, UserReviewRequestDto dto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+        Content content = contentRepository.findById(contentId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 컨텐츠입니다."));
+
+        // [중복 방지] 1인 1영화 1리뷰 원칙!
+        // Repository에 existsByUserIdAndContentId가 완성되면 아래 주석을 푸세요 ㅋ
+
+        if (userReviewRepository.existsByUserIdAndContentId(userId, contentId)) {
+            throw new IllegalStateException("이미 리뷰를 작성한 영화입니다!");
+        }
+
+
+        UserReview userReview = UserReview.builder()
+                .user(user)
+                .content(content)
+                .rating(dto.getRating()) // 프론트 별점 애니메이션 점수 수신 ㅋ
+                .comment(dto.getComment())
+                .build();
+
+        userReviewRepository.save(userReview);
+    }
     public List<ReviewResponseDto> getAllExpertReviews() {
         return expertReviewRepository.findAll().stream()
                 .map(review -> ReviewResponseDto.builder()
@@ -93,30 +122,47 @@ public class ReviewService {
                         .criticName(review.getCriticName())
                         .rating(review.getRating())
                         .comment(review.getComment())
-                        .sourceName(review.getSource())
+                        .sourceName(review.getSource()) // 씨네21 등 출처 ㅋ
                         .movieTitle(review.getContent().getTitle())
                         .build())
-                .toList();
+                .collect(Collectors.toList());
     }
-        // 사용자 리뷰 저장
-        @Transactional
-        public void saveUserReview(Long userId, ReviewCreateRequestDto dto) {
-        // 1. 유저 찾기
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
-        // 2. 컨텐츠(영화) 찾기
-        Content content = contentRepository.findById(dto.getContentId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 컨텐츠입니다."));
+    /**
+     * [수정] 유저 리뷰 수정 (본인검증 ㅋ)
+     */
+    @Transactional
+    public void updateUserReview(Long userId, Long reviewId, UserReviewRequestDto dto) {
+        UserReview review = userReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 리뷰입니다."));
 
-        // 3. 엔티티 생성 및 저장
-        UserReview userReview = UserReview.builder()
-                .user(user)
-                .content(content)
-                .rating(dto.getRating())
-                .comment(dto.getComment())
-                .build();
-
-        userReviewRepository.save(userReview);
+        // [본인검증] 리뷰 작성자와 현재 로그인 유저가 같은지 확인!
+        if (!review.getUser().getId().equals(userId)) {
+            throw new IllegalStateException("본인이 작성한 리뷰만 수정할 수 있습니다!");
         }
+
+        // 변경 감지(Dirty Check)로 업데이트
+        // UserReview 엔티티에 update 메서드가 있으면 더 좋습니다
+        // review.update(dto.getRating(), dto.getComment());
+        review.update(dto.getRating(), dto.getComment());
+    }
+
+    /**
+     * [삭제] 유저 리뷰 삭제 (권한분기: 본인 OR 관리자 ㅋ)
+     */
+    @Transactional
+    public void deleteUserReview(Long userId, String userRole, Long reviewId) {
+        UserReview review = userReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 리뷰입니다."));
+
+        // [권한분기] 1. 본인이거나 2. 관리자(ADMIN)거나
+        boolean isOwner = review.getUser().getId().equals(userId);
+        boolean isAdmin = "ADMIN".equals(userRole);
+
+        if (!isOwner && !isAdmin) {
+            throw new IllegalStateException("삭제 권한이 없습니다!");
+        }
+
+        userReviewRepository.delete(review);
+    }
 }

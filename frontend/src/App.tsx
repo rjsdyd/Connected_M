@@ -19,6 +19,7 @@ import Terms from './pages/Terms/Terms';
 import Privacy from './pages/Privacy/Privacy';
 import OAuth2RedirectHandler from './pages/Auth/OAuth2RedirectHandler';
 import ExtraInfo from './pages/Auth/ExtraInfo';
+import ResetPassword from './pages/Auth/ResetPassword'; // 비밀번호 재설정 링크 처리 페이지
 
 const AppContent = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -35,6 +36,7 @@ const AppContent = () => {
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/extra-info" element={<ExtraInfo />} />
+          <Route path="/reset-password" element={<ResetPassword />} /> {/* 이메일 토큰링크로 들어올 때 사용할 라우트 */}
           <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
           <Route path="/mypage" element={<MyPage />} />
           <Route path="/movie/:id" element={<MovieDetail />} />

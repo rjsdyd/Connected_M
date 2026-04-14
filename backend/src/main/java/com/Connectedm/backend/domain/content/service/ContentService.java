@@ -6,16 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.Connectedm.backend.domain.content.dto.*;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.Connectedm.backend.domain.content.dto.ContentCreateRequestDto;
-import com.Connectedm.backend.domain.content.dto.ContentDetailResponseDto;
-import com.Connectedm.backend.domain.content.dto.ContentSummaryDto;
-import com.Connectedm.backend.domain.content.dto.MainPageResponseDto;
-import com.Connectedm.backend.domain.content.dto.ReviewResponseDto;
-import com.Connectedm.backend.domain.content.dto.TmdbMovieResponseDto;
 import com.Connectedm.backend.domain.content.entity.Content;
 import com.Connectedm.backend.domain.content.entity.ContentGenre;
 import com.Connectedm.backend.domain.content.entity.Genre;
@@ -149,7 +144,7 @@ public class ContentService {
         List<String> keywords = Collections.emptyList();
 
         List<ReviewResponseDto> expertReviews = reviewService.getExpertReviews(id);
-        List<ReviewResponseDto> userReviews = reviewService.getUserReviews(id);
+        List<UserReviewResponseDto> userReviews = reviewService.getUserReviews(id);
 
         List<TmdbMovieResponseDto.TmdbCastItem> majorCasts = Collections.emptyList();
         if (tmdbData != null && tmdbData.getCredits() != null && tmdbData.getCredits().getCast() != null) {
