@@ -14,6 +14,9 @@ interface MovieDetailData {
 }
 
 const MovieDetail: React.FC = () => {
+  
+
+
   // 임시 데이터 (나중에 크롤링 데이터로 교체)
   const movie: MovieDetailData = {
     title: "영화제목",

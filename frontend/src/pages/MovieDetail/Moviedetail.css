@@ -474,7 +474,10 @@ input, button, textarea, select {
     padding: 40px;
   }
   .banner-section {
-    padding: 0 40px 40px;
+  padding: 0 40px 40px;
+
+
+  
   }
 }
 

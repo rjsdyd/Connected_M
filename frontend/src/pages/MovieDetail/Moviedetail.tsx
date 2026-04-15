@@ -38,6 +38,10 @@ interface MovieDetailData {
 }
 
 const MovieDetail: React.FC = () => {
+  // 🚀 페이지 이동 시 스크롤을 최상단으로 올리는 코드 추가
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [])
   const { id } = useParams<{ id: string }>(); // URL에서 영화 ID 추출
   const [movie, setMovie] = useState<MovieDetailData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
