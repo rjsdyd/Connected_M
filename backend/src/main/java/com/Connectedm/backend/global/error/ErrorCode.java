@@ -16,9 +16,14 @@ public enum ErrorCode {
     ALREADY_REGISTERED_PHONE(HttpStatus.BAD_REQUEST, "U005", "이미 등록된 전화번호입니다!"),
     INVALID_PASSWORD_RESET_TOKEN(HttpStatus.BAD_REQUEST, "U006", "유효하지 않은 비밀번호 재설정 토큰입니다."),
     EXPIRED_PASSWORD_RESET_TOKEN(HttpStatus.BAD_REQUEST, "U007", "비밀번호 재설정 토큰이 만료되었습니다."),
+    SOCIAL_USER_CANNOT_RESET_PASSWORD(HttpStatus.BAD_REQUEST, "U008", "소셜 로그인 유저는 해당 서비스에서 비밀번호를 변경해주세요!"),
+
+    // --- Content 관련 에러 ---
+    CONTENT_NOT_FOUND(HttpStatus.NOT_FOUND, "CO001", "해당 콘텐츠를 찾을 수 없습니다!"),
 
     // --- 공통 에러 ---
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C001", "서버에 문제가 생겼어요!");
+
 
     private final HttpStatus httpStatus;
     private final String code;
