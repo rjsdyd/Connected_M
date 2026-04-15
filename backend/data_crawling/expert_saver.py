@@ -42,50 +42,57 @@ class ExpertSaver:
         return pymysql.connect(**self.config)
 
     def _init_db(self):
-            """[자가 치유] 테이블 생성 및 컬럼 자동 추가"""
-            conn = self._get_connection()
-            try:
-                with conn.cursor() as cur:
-                    # 1. content 테이블에 cine21_id 컬럼이 없으면 자동으로 추가 (에러 방지 핵심!)
-                    try:
-                        cur.execute("SELECT cine21_id FROM content LIMIT 1")
-                    except pymysql.err.InternalError as e:
-                        # 1054 에러(컬럼 없음) 발생 시 컬럼 추가
-                        if e.args[0] == 1054:
-                            print("ℹ️ 'content' 테이블에 'cine21_id' 컬럼이 없어 추가합니다...")
-                            cur.execute("ALTER TABLE content ADD COLUMN cine21_id VARCHAR(50) UNIQUE")
-                            conn.commit()
-                    
-                    # 2. analysis_cache 테이블 필수 데이터 확인
-                    cur.execute('''
-                        INSERT IGNORE INTO `analysis_cache` (id, summary, positive_ratio) 
-                        VALUES (1, '데이터 수집을 위한 임시 분석 객체', 0.0);
-                    ''')
+        """[자가 치유] 테이블 생성 및 컬럼 자동 추가"""
+        conn = self._get_connection()
+        try:
+            with conn.cursor() as cur:
+                # 1. content 테이블 cine21_id 체크
+                try:
+                    cur.execute("SELECT cine21_id FROM content LIMIT 1")
+                except pymysql.err.InternalError as e:
+                    if e.args[0] == 1054:
+                        print("ℹ️ 'content' 테이블에 'cine21_id' 컬럼이 없어 추가합니다...")
+                        cur.execute("ALTER TABLE content ADD COLUMN cine21_id VARCHAR(50) UNIQUE")
+                        conn.commit()
+                
+                # 2. analysis_cache 필수 데이터 확인
+                cur.execute('''
+                    INSERT IGNORE INTO `analysis_cache` (id, summary, positive_ratio) 
+                    VALUES (1, '데이터 수집을 위한 임시 분석 객체', 0.0);
+                ''')
 
-                    # 3. expert_review 테이블 생성 (더 견고하게 수정)
-                    cur.execute('''
-                        CREATE TABLE IF NOT EXISTS `expert_review` (
-                            `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                            `content_id` BIGINT NOT NULL,
-                            `analysis_id` BIGINT NOT NULL,
-                            `movie_title` VARCHAR(255) NOT NULL,
-                            `critic_name` VARCHAR(100) NOT NULL,
-                            `rating` VARCHAR(10) NOT NULL,
-                            `comment` TEXT NOT NULL,
-                            `source` VARCHAR(50) DEFAULT 'Cine21',
-                            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            -- 성능을 위해 content_id에 인덱스 추가
-                            INDEX idx_content_id (content_id)
-                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-                    ''')
-                conn.commit()
-                print(f"✅ DB 초기화 및 컬럼 체크 완료 (포트: {self.config['port']})")
-            except Exception as e:
-                print(f"⚠️ 초기화 중 알림: {e}")
-            finally:
-                conn.close()
+                # --- [추가된 구간] 의미 좌표(벡터) 및 키워드 컬럼 자동 추가 ㅋㅋㅋㅋ ---
+                cur.execute("SHOW COLUMNS FROM analysis_cache LIKE 'embedding_vector'")
+                if not cur.fetchone():
+                    print("ℹ️ 'analysis_cache' 테이블에 '의미 좌표' 컬럼이 없어 추가합니다... ㅋㅋㅋㅋ")
+                    cur.execute("ALTER TABLE analysis_cache ADD COLUMN embedding_vector LONGTEXT")
+                    cur.execute("ALTER TABLE analysis_cache ADD COLUMN search_keywords VARCHAR(500)")
+                    conn.commit()
+                # ------------------------------------------------------------------
 
-    def save_review(self, cine21_id, analysis_id, movie_title, reviews):
+                # 3. expert_review 테이블 생성
+                cur.execute('''
+                    CREATE TABLE IF NOT EXISTS `expert_review` (
+                        `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        `content_id` BIGINT NOT NULL,
+                        `analysis_id` BIGINT NOT NULL,
+                        `movie_title` VARCHAR(255) NOT NULL,
+                        `critic_name` VARCHAR(100) NOT NULL,
+                        `rating` VARCHAR(10) NOT NULL,
+                        `comment` TEXT NOT NULL,
+                        `source` VARCHAR(50) DEFAULT 'Cine21',
+                        `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        INDEX idx_content_id (content_id)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+                ''')
+            conn.commit()
+            print(f"✅ DB 초기화 및 '의미 좌표' 컬럼 체크 완료 (포트: {self.config['port']})")
+        except Exception as e:
+            print(f"⚠️ 초기화 중 알림: {e}")
+        finally:
+            conn.close()
+
+    def save_review(self, cine21_id, analysis_id, movie_title, reviews, vector=None):
         """리뷰 저장 (부모 데이터 자동 생성 포함)"""
         if not reviews:
             return
@@ -101,6 +108,12 @@ class ExpertSaver:
                         (analysis_id, '임시 분석 데이터', 0.0)
                     )
 
+                if vector:
+                    cur.execute(
+                        "UPDATE analysis_cache SET embedding_vector = %s WHERE id = %s",
+                        (vector, analysis_id)
+                    )
+                    
                 # --- [방어 2] content 테이블 영화 정보 확인 및 재생성 (cine21_id 기준) ---
                 cur.execute("SELECT id FROM content WHERE cine21_id = %s", (cine21_id,))
                 row = cur.fetchone()
