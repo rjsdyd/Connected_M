@@ -150,10 +150,30 @@
   padding: 12px 30px; border-radius: 30px; font-weight: 700; cursor: pointer; float: right;
 }
 
-.compact-controller { background-color: #fcfcfc; border-top: 1px solid #eee; padding: 10px; display: flex; justify-content: center; align-items: center; gap: 20px; }
-.nav-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
-.already-reviewed-msg { text-align: center; padding: 30px; background: #f8f9fa; border-radius: 12px; color: #888; }
-.empty-msg { text-align: center; color: #bbb; padding: 20px; }
+/* 중복 리뷰 작성 시 보여줄 안내 문구 스타일 */
+.already-reviewed-msg {
+  background-color: #f8f9fa;
+  border: 1px dashed #ced4da;
+  border-radius: 10px;
+  padding: 40px 20px;
+  text-align: center;
+  color: #6c757d;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+@media (max-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+    padding: 40px;
+  }
+  .banner-section {
+  padding: 0 40px 40px;
+
+
+  
+  }
+}
 
 @media (max-width: 768px) {
   .content-grid { grid-template-columns: 1fr; padding: 20px; }

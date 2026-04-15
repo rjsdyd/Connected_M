@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css'
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
   // ================= 1. 상태 관리 =================
+  const navigate = useNavigate();
   const [activeGenre, setActiveGenre] = useState<string>('action');
   const [currentSlide, setCurrentSlide] = useState(2); // 중앙에 올 인덱스
   const [isSliderPaused, setIsSliderPaused] = useState(false);
@@ -20,11 +22,34 @@ const Home = () => {
   };
 
   const slideItems = [
-    { id: 1, title: '추천 포스터 1', bg: '#c7d2fe', color: '#312e81', rating: 4.8 },
-    { id: 2, title: '추천 포스터 2', bg: '#e9d5ff', color: '#581c87', rating: 4.5 },
-    { id: 3, title: '추천 포스터 3', bg: '#bfdbfe', color: '#1e3a8a', rating: 4.9 },
-    { id: 4, title: '추천 포스터 4', bg: '#bbf7d0', color: '#14532d', rating: 4.2 },
-    { id: 5, title: '추천 포스터 5', bg: '#fecaca', color: '#7f1d1d', rating: 4.7 }
+    { id: 1, title: '추천 포스터 1', imgUrl: 'https://image.tmdb.org/t/p/w500/jucHQwnRSma1O9V2bM007e4eSd7.jpg', rating: 4.8 },
+    { id: 2, title: '추천 포스터 2', imgUrl: 'https://image.tmdb.org/t/p/w500/h3LsdSBzhRnBebz4BTpAhh63PD3.jpg', rating: 4.5 },
+    { id: 3, title: '추천 포스터 3', imgUrl: 'https://image.tmdb.org/t/p/w500/jeqXUwNilvNqNXqAHsdwm5pEfae.jpg', rating: 4.9 },
+    { id: 4, title: '추천 포스터 4', imgUrl: 'https://image.tmdb.org/t/p/w500/xmD04pnMIO0FUe0FJc8rHjfi6vY.jpg', rating: 4.2 },
+    { id: 5, title: '추천 포스터 5', imgUrl: 'https://image.tmdb.org/t/p/w500/tKAlw88sEjU5bntbAfdfWcmRx6S.jpg', rating: 4.7 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
   ];
 
   // ================= 3. 3D 슬라이더 로직 =================
@@ -60,9 +85,17 @@ const getSlideStyle = (index: number) => {
       filter: isActive ? 'none' : 'brightness(0.8)',
       transition: 'all 0.5s ease-in-out',
       position: 'absolute' as const,
-      backgroundColor: slideItems[index].bg
+      backgroundColor: slideItems[index].rating >= 4.5 ? '#4b0082' : '#d1d5db', // 평점에 따른 배경색
     };
   };
+// 상세 페이지 이동 함수
+const handleCardClick = (id: number) => {
+  // 예: /movie/1, /movie/2 이런 식으로 주소를 생성해서 보냅니다.
+  // 아까 보여주신 상세페이지 주소가 /movie/4 였으니, id를 활용합니다.
+  navigate(`/movie/${id}`);
+};
+
+
 
   const onTouchStart = (e: React.MouseEvent | React.TouchEvent) => {
   setTouchEnd(null); // 초기화
@@ -76,18 +109,21 @@ const getSlideStyle = (index: number) => {
   };
 
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
+  if (touchStart === null || touchEnd === null) return;
+  
+  const distance = touchStart - touchEnd;
+  const isLeftSwipe = distance > minSwipeDistance; 
+  const isRightSwipe = distance < -minSwipeDistance;
 
-    if (isLeftSwipe) {
-      moveSlider(1); // 다음 슬라이드
-    } else if (isRightSwipe) {
-      moveSlider(-1); // 이전 슬라이드
-    }
-  };
+  if (isLeftSwipe) {
+    moveSlider(1); 
+  } else if (isRightSwipe) {
+    moveSlider(-1);
+  }
+
+  setTouchStart(null);
+  setTouchEnd(null);
+};
 
   // ================= 4. 화면 렌더링 =================
   return (
@@ -126,13 +162,29 @@ const getSlideStyle = (index: number) => {
           >
             <button className="nav-btn-3d left" onClick={() => moveSlider(-1)}>◀</button>
             
-            <div className="slider-3d-container">
-              {slideItems.map((item, index) => (
-                <div key={item.id} className="slide-card-3d" style={{ ...getSlideStyle(index), backgroundColor: item.bg }}>
-                  <span style={{ color: item.color, fontWeight: 'bold' }}>{item.title}</span>
-                </div>
-              ))}
-            </div>
+           <div className="slider-3d-container">
+  {slideItems.map((item, index) => (
+    <div 
+      key={item.id} 
+      className="slide-card-3d" 
+      style={getSlideStyle(index)
+        
+         } // 기존 배경색 코드는 여기서 빠집니다.
+    onClick={() => handleCardClick(item.id)} //  클릭 이벤트 추가
+    >
+      {/* ⭐ 바로 이 부분에 img 태그를 넣습니다! */}
+      <img 
+        src={item.imgUrl} 
+        alt={item.title} 
+        style={{ 
+          width: '100%', 
+          height: '100%', 
+          objectFit: 'cover' // 이미지가 찌그러지지 않게 꽉 채워줍니다.
+        }} 
+      />
+    </div>
+  ))}
+</div>
 
             <button className="nav-btn-3d right" onClick={() => moveSlider(1)}>▶</button>
           </div>
