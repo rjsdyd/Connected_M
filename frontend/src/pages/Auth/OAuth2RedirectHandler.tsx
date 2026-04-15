@@ -12,6 +12,7 @@ const OAuth2RedirectHandler = () => {
         const token = params.get('token');
         const id = params.get('id');
         const nickname = params.get('nickname');
+        const realName = params.get('realName');
         const email = params.get('email');
         const needInfo = params.get('needInfo') === 'true'; 
 
@@ -24,11 +25,16 @@ const OAuth2RedirectHandler = () => {
             const userObject = {
                 id: id,
                 nickname: nickname,
+                realName: realName,
                 email: email
             };
             localStorage.setItem('user', JSON.stringify(userObject));
 
-            if (needInfo) {
+            const needNickname = params.get('needNickname') === 'true';
+            if (needNickname) {
+                alert("닉네임 중복이 확인되어 직접 닉네임 입력이 필요합니다.");
+                navigate("/extra-info?needNickname=true", { replace: true });
+            } else if (needInfo) {
                 alert("정상적인 서비스 이용을 위해 전화번호 등록이 필요합니다.");
                 // 🚨 href 대신 navigate를 쓰면 리액트 내부에서 안전하게 이동합니다.
                 navigate("/extra-info", { replace: true }); 

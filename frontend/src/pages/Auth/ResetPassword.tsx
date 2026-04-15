@@ -45,8 +45,9 @@ const ResetPassword = () => {
       setTimeout(() => {
         navigate('/');
       }, 1500);
-    } catch (error: any) {
-      const message = error?.response?.data?.message || '비밀번호 재설정 중 오류가 발생했습니다.';
+    } catch (error) {
+      const err = error as { response?: { data?: { message?: string } } };
+      const message = err?.response?.data?.message || '비밀번호 재설정 중 오류가 발생했습니다.';
       setErrorMessage(message);
     }
   };

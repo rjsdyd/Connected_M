@@ -5,6 +5,7 @@ import { FaStar, FaRegStar, FaStarHalfAlt } from 'react-icons/fa';
 import './MovieDetail.css';
 import { useAuth } from '../../hooks/useAuth'; 
 
+
 // 1. 백엔드 DTO와 1:1 대응하도록 인터페이스 수정
 interface CastMember {
   name: string;
