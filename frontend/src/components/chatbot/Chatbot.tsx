@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios'; // axios 임포트 추가
 import './Chatbot.css';
 
 interface ChatMessage {
@@ -35,26 +36,47 @@ const Chatbot = () => {
   }, [isChatOpen]);
 
   // 메시지 전송
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => { // async 키워드 추가
     if (!chatInput.trim()) return;
     
-    const userMsgId = Date.now();
-    const newMsg: ChatMessage = { id: userMsgId, type: 'user', text: chatInput };
+    const userMessageText = chatInput; // 현재 입력된 메시지 텍스트 저장
+    const newUserMsg: ChatMessage = { id: Date.now(), type: 'user', text: userMessageText };
     
-    setMessages(prev => [...prev, newMsg]);
+    setMessages(prev => [...prev, newUserMsg]);
     setChatInput('');
     
     // 메시지 전송 후 다시 포커스
     setTimeout(() => inputRef.current?.focus(), 0);
 
-    // 봇 답변 시뮬레이션
-    setTimeout(() => {
+    try {
+      // 로컬 스토리지에서 JWT 토큰 가져오기
+      //const token = localStorage.getItem('accessToken');
+      const token = localStorage.getItem('token');
+
+      // 백엔드 API로 사용자의 질문(prompt) 전송
+      const response = await axios.post('http://localhost:8080/api/ai/recommend', { // 명세에 맞는 엔드포인트 사용
+        prompt: userMessageText // DTO 형식에 맞춰 prompt 필드에 메시지 전송
+      }, {
+        headers: {
+          // 헤더에 인증 토큰 추가
+          'Authorization': token ? `Bearer ${token}` : ''
+        }
+      });
+
+      // 백엔드에서 응답이 오면 봇 메시지로 추가
       setMessages(prev => [...prev, { 
-        id: userMsgId + 1, 
+        id: Date.now(), 
         type: 'bot', 
-        text: `현재 '${newMsg.text}'에 대해 학습 중입니다. 곧 더 정확한 답변을 드릴게요! 🤖` 
+        text: response.data.reply // ChatResponse DTO의 reply 필드 사용
       }]);
-    }, 1000);
+    } catch (error) {
+      console.error('Chatbot API Error:', error);
+      setMessages(prev => [...prev, { 
+        id: Date.now(), // 누락된 id 속성 추가
+        type: 'bot', 
+        text: '서버와 연결할 수 없습니다. 백엔드가 켜져 있는지 확인해주세요. 😢' 
+      }]);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

@@ -81,7 +81,7 @@ const MyPage: React.FC = () => {
                   <span className="info-label-fixed">전화번호</span>
                   <span className="info-value-fixed">{user.phoneNumber || '010-7777-7777'}</span>
                 </div>
-                <button className="btn-edit-action-fixed">정보 수정</button>
+                <button className="btn-edit-action-fixed" onClick={() => navigate('/edit-profile')}>정보 수정</button>
               </div>
             </section>
           </aside>

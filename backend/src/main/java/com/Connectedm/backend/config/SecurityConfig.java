@@ -54,6 +54,7 @@ public class SecurityConfig {
                         .requestMatchers("/", "/error", "/favicon.ico").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/user/**").permitAll()
+                        .requestMatchers("/api/ai/**").permitAll()
                         .requestMatchers("/register").permitAll()
                         // 4. OAuth2 관련 엔드포인트 허용 추가
                         .requestMatchers("/login/oauth2/**", "/oauth2/**").permitAll()

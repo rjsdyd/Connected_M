@@ -20,6 +20,8 @@ import Privacy from './pages/Privacy/Privacy';
 import OAuth2RedirectHandler from './pages/Auth/OAuth2RedirectHandler';
 import ExtraInfo from './pages/Auth/ExtraInfo';
 import ResetPassword from './pages/Auth/ResetPassword'; // 비밀번호 재설정 링크 처리 페이지
+import EditProfile from './pages/MyPage/EditProfile';
+
 
 const AppContent = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -42,6 +44,7 @@ const AppContent = () => {
           <Route path="/movie/:id" element={<MovieDetail />} />
           <Route path="/terms" element={<Terms />} /> 
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="/edit-profile" element={<EditProfile />} />
         </Routes>
       </div>
       
