@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,18 @@ public class TmdbMovieResponseDto {
 
     @JsonProperty("backdrop_path")
     private String backdrop_path;
+
+    // 런타임 추가
+    private Integer runtime;
+
+    // 시청 등급 추가
+    @Setter
+    @JsonProperty("certification")
+    private String ageRating;
+
+    // API 에서 release_date 키와 매핑
+    @JsonProperty("release_dates")
+    private TmdbReleaseDates releaseDates;
 
     /**
      * 한국(KR)의 OTT 플랫폼 로고 경로들을 쉼표로 구분된 문자열로 반환
@@ -106,5 +119,26 @@ public class TmdbMovieResponseDto {
     public static class ProviderDetail {
         private String logo_path;
         private String provider_name;
+    }
+    @Getter @NoArgsConstructor
+    public static class TmdbReleaseDates {
+        private List<ReleaseDateResult> results;
+    }
+    @Getter @NoArgsConstructor
+    public static class ReleaseDateResult {
+        @JsonProperty("iso_3166_1") // JSON의 iso_3166_1을 이 필드에 매핑
+        private String iso31661;
+
+        @JsonProperty("release_dates") // JSON의 release_dates 리스트를 이 필드에 매핑
+        private List<ReleaseDateDetail> releaseDates;
+
+        // Getter (Lombok이 만들어주지만 이름을 확인하세요: getReleaseDates)
+    }
+    @Getter @NoArgsConstructor
+    public static class ReleaseDateDetail {
+        @JsonProperty("certification") // 🎯 핵심: JSON의 certification을 ageRating에 매핑!
+        private String ageRating;
+
+        // Getter (Lombok 이름: getAgeRating)
     }
 }

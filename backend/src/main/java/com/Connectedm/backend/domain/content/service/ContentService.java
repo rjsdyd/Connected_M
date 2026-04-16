@@ -97,7 +97,9 @@ public class ContentService {
                 tmdbData.getOverview(),
                 fullPosterPath,
                 fullBackdropPath,
-                logos
+                logos,
+                tmdbData.getRuntime(),
+                tmdbData.getAgeRating()
         );
 
         contentRepository.save(content);
@@ -117,8 +119,9 @@ public class ContentService {
         boolean isOverviewEmpty = content.getOverview() == null || content.getOverview().isBlank();
         boolean isPosterBroken = content.getPosterPath() == null || content.getPosterPath().endsWith("/w500/");
         boolean isBackdropEmpty = content.getBackdropPath() == null || content.getBackdropPath().isBlank();
+        boolean isExtraInfoEmpty = content.getRuntime() == null || content.getAgeRating() == null;
 
-        if ((isOverviewEmpty || isPosterBroken || isBackdropEmpty) && tmdbData != null) {
+        if ((isOverviewEmpty || isPosterBroken || isBackdropEmpty || isExtraInfoEmpty) && tmdbData != null) {
             String realPosterPath = (tmdbData.getPoster_path() != null)
                     ? "https://image.tmdb.org/t/p/w500" + tmdbData.getPoster_path()
                     : content.getPosterPath();
@@ -129,8 +132,8 @@ public class ContentService {
 
             String logos = tmdbData.getOttLogos() != null ? tmdbData.getOttLogos() : "";
 
-            // DB 업데이트 (최신화된 5개 인자 메서드 사용)
-            content.updateFullInfo(content.getTmdbId(), tmdbData.getOverview(), realPosterPath, realBackdropPath, logos);
+            // DB 업데이트
+            content.updateFullInfo(content.getTmdbId(), tmdbData.getOverview(), realPosterPath, realBackdropPath, logos, tmdbData.getRuntime(), tmdbData.getAgeRating());
             contentRepository.saveAndFlush(content);
         }
 
@@ -154,7 +157,7 @@ public class ContentService {
                     .collect(Collectors.toList());
         }
 
-        // 최종 DTO 빌드 (backdropPath 추가됨)
+        // 최종 DTO 빌드
         return ContentDetailResponseDto.builder()
                 .id(content.getId())
                 .title(content.getTitle())
@@ -169,6 +172,8 @@ public class ContentService {
                 .topKeywords(keywords)
                 .expertReviews(expertReviews)
                 .userReviews(userReviews)
+                .runtime(content.getRuntime())
+                .ageRating(content.getAgeRating())
                 .build();
     }
 

@@ -52,6 +52,12 @@ public class Content {
     @Column(name = "backdrop_path")
     private String backdropPath;
 
+    @Column(name = "runtime")
+    private Integer runtime;
+
+    @Column(name = "age_rating")
+    private String ageRating;
+
     // 장르와 연결 (1:N)
     @Builder.Default
     @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true )
@@ -73,22 +79,26 @@ public class Content {
      * 1. TMDB 상세 정보 전용 업데이트 (가장 많이 사용)
      * tmdbId는 유지하고 내용물만 업데이트할 때 사용합니다.
      */
-    public void updateTmdbInfo(String overview, String posterPath, String backdropPath, String ottLogos) {
+    public void updateTmdbInfo(String overview, String posterPath, String backdropPath, String ottLogos, Integer runtime, String ageRating) {
         this.overview = overview;
         this.posterPath = posterPath;
         this.backdropPath = backdropPath;
         this.ottLogos = ottLogos;
+        this.runtime = runtime;
+        this.ageRating = ageRating;
     }
 
     /**
      * 2. ID 교체 포함 전체 업데이트
      * 씨네21 ID를 TMDB ID로 바꾸면서 상세 정보까지 넣을 때 사용합니다.
      */
-    public void updateFullInfo(String tmdbId, String overview, String posterPath, String backdropPath, String ottLogos) {
+    public void updateFullInfo(String tmdbId, String overview, String posterPath, String backdropPath, String ottLogos, Integer runtime, String ageRating) {
         this.tmdbId = tmdbId;
         this.overview = overview;
         this.posterPath = posterPath;
         this.backdropPath = backdropPath;
         this.ottLogos = ottLogos;
+        this.runtime = runtime;
+        this.ageRating = ageRating;
     }
 }

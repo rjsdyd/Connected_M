@@ -14,119 +14,54 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
+SET FOREIGN_KEY_CHECKS = 0;
+
+INSERT IGNORE INTO `analysis_cache` (`positive_ratio`, `summary`, `top_keywords`, `content_id`)
+VALUES (88.5, '이것은 1번 콘텐츠를 위한 AI 분석 더미 데이터입니다.', '더미,테스트,데이터', 1);
 
 INSERT IGNORE INTO `genre` (`id`, `name`) VALUES
-	(1, '액션'),
-	(2, '코미디'),
-	(3, '범죄'),
-	(4, '스릴러'),
-	(5, '드라마'),
-	(6, '가족'),
-	(7, '애니메이션'),
-	(8, '모험'),
-	(9, '판타지'),
-	(10, '미스터리');
--- 테이블 데이터 connected_m.content:~25 rows (대략적) 내보내기
-INSERT IGNORE INTO `content` (`id`, `ott_logos`, `overview`, `poster_path`, `title`, `tmdb_id`, `cine21_id`, `backdrop_path`) VALUES
-	(1, '/97yvRBw1GzX7fXprcF80er19ot.jpg', '신종 마약 사건 3년 뒤, 괴물형사 마석도와 서울 광수대는 배달앱을 이용한 마약 판매 사건을 수사하던 중 수배 중인 앱 개발자가 필리핀에서 사망한 사건이 대규모 온라인 불법 도박 조직과 연관되어 있음을 알아낸다. 필리핀에 거점을 두고 납치, 감금, 폭행, 살인 등으로 대한민국 온라인 불법 도박 시장을 장악한 특수부대 용병 출신의 빌런 백창기와 한국에서 더 큰 판을 짜고 있는 IT업계 천재 CEO 장동철. 마석도는 더 커진 판을 잡기 위해 장이수에게 뜻밖의 협력을 제안하고 광역수사대는 물론, 사이버수사대까지 합류해 범죄를 소탕하기 시작하는데…', 'https://image.tmdb.org/t/p/w500/jucHQwnRSma1O9V2bM007e4eSd7.jpg', '범죄도시4', '1017163', '61332', 'https://image.tmdb.org/t/p/w1280/mO9oOVXM8tTlC11VFM4FBBNnL3f.jpg'),
-	(2, '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/5gmEivxOGPdq4Afpq1f8ktLtEW1.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg', '죽을 위기에서 살아난 존 윅은 최고 회의를 쓰러트릴 방법을 찾아낸다. 비로소 완전한 자유의 희망을 보지만, 빌런 그라몽 후작과 전 세계의 최강 연합은 존 윅의 오랜 친구까지 적으로 만들어 버리고, 새로운 위기에 놓인 존 윅은 최후의 반격을 준비하는데...', 'https://image.tmdb.org/t/p/w500/h3LsdSBzhRnBebz4BTpAhh63PD3.jpg', '존 윅 4', '603692', '60321', 'https://image.tmdb.org/t/p/w1280/7I6VUdPj6tQECNHdviJkUHD2u89.jpg'),
-	(3, '', '최고의 파일럿이자 전설적인 인물 매버릭은 자신이 졸업한 훈련학교 교관으로 발탁된다. 그의 명성을 모르던 팀원들은 매버릭의 지시를 무시하지만 실전을 방불케 하는 상공 훈련에서 눈으로 봐도 믿기 힘든 전설적인 조종 실력에 모두가 압도된다. 매버릭의 지휘 아래 견고한 팀워크를 쌓아가던 팀원들에게 국경을 뛰어넘는 위험한 임무가 주어지자 매버릭은 자신이 가르친 동료들과 함께 마지막이 될지 모를 하늘 위 비행에 나서는데...', 'https://image.tmdb.org/t/p/w500/jeqXUwNilvNqNXqAHsdwm5pEfae.jpg', '탑건: 매버릭', '361743', '55008', 'https://image.tmdb.org/t/p/w1280/AaV1YIdWKnjAIAOe8UUKBFm327v.jpg'),
-	(4, '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg,/qHThQdkJuROK0k5QTCrknaNukWe.jpg', '불행한 사건으로 아내를 잃고 세상을 등진 채 전당포를 꾸려가며 외롭게 살아가는 전직 특수요원 태식. 찾아오는 사람이라곤 전당포에 물건을 맡기러 오는 사람들과 옆집소녀 소미뿐이다. 세상으로부터 버림받은 소미와 함께 보내는 시간이 많아지면서 태식과 소미는 서로 마음을 열며 친구가 되어간다.  그러던 어느 날 소미의 엄마가 범죄단체 연루되고 태식의 눈앞에서 소미가 납치되는데...', 'https://image.tmdb.org/t/p/w500/xmD04pnMIO0FUe0FJc8rHjfi6vY.jpg', '아저씨', '51608', '27688', 'https://image.tmdb.org/t/p/w1280/nxX9nFLDSytqfd2EaitMPa1nDRE.jpg'),
-	(5, '/97yvRBw1GzX7fXprcF80er19ot.jpg', '에단 헌트는 세계를 위협하는 테러 조직 신디케이트의 수장 솔로몬 레인을 우여곡절 끝에 체포했지만, 그의 잔당들은 여전히 세계 각지에서 테러를 일삼는다. 에단 헌트와 그의 팀은 테러조직의 핵무기 소지를 막기 위해 미션에 착수한다. 에단 헌트는 작전 수행 중 예상치 못한 결단을 내리게 되고, 중앙정보국 CIA는 그를 견제하기 위해 상급 요원 어거스트 워커를 파견한다. 최악의 테러 위기와 라이벌의 출현 속, 팀이 행한 모든 선의의 선택들이 최악의 결과로 돌아오면서 미션은 점점 더 예측할 수 없는 상황으로 치닫게 되는데...', 'https://image.tmdb.org/t/p/w500/tKAlw88sEjU5bntbAfdfWcmRx6S.jpg', '미션 임파서블: 폴 아웃', '353081', '52286', 'https://image.tmdb.org/t/p/w1280/5jnoAA74Qwb5w6B9FMvnc20n6Ie.jpg'),
-	(6, '/97yvRBw1GzX7fXprcF80er19ot.jpg', '댄스 열정을 불태우는 사춘기 딸 수아와 함께 티격태격 일상을 보내는 맹수 전문 사육사 정환. 어느 날 전 세계를 강타한 좀비 바이러스에 감염된 딸 수아를 지키기 위해 정환은 어머니 밤순이 사는 바닷가 마을 은봉리로 수아와 함께 향한다. 감염자를 색출해 내려는 사회 분위기 속에서 수아가 어렴풋이 사람 말을 알아듣고, 평소 좋아하던 춤과 할머니 밤순의 따끔한 효자손 맛에 반응하는 모습을 발견한다. 절대 수아를 포기할 수 없는 정환은 호랑이 사육사의 오랜 경험을 살려 좀비딸 트레이닝에 돌입하는데...', 'https://image.tmdb.org/t/p/w500/aASLRiO8p9xLIvG9EHXSyZ71sPl.jpg', '좀비딸', '1306816', '62252', 'https://image.tmdb.org/t/p/w1280/gT7MXlPs7ohpdefR5cdgdPx1zsf.jpg'),
-	(7, '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/5gmEivxOGPdq4Afpq1f8ktLtEW1.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg,/qHThQdkJuROK0k5QTCrknaNukWe.jpg', '불철주야 달리고 구르지만 실적은 바닥, 급기야 해체 위기를 맞는 마약반!  더 이상 물러설 곳이 없는 팀의 맏형 고반장은 국제 범죄조직의 국내 마약 밀반입 정황을 포착하고 장형사, 마형사, 영호, 재훈까지 4명의 팀원들과 함께 잠복 수사에 나선다.  마약반은 24시간 감시를 위해 범죄조직의 아지트 앞 치킨집을 인수해 위장 창업을 하게 되고, 뜻밖의 절대미각을 지닌 마형사의 숨은 재능으로 치킨집은 일약 맛집으로 입소문이 나기 시작한다.  수사는 뒷전, 치킨장사로 눈코 뜰 새 없이 바빠진 마약반에게 어느 날 절호의 기회가 찾아오는데…', 'https://image.tmdb.org/t/p/w500/jbHNkNydiZstlqhhBSvG19lm4NL.jpg', '극한직업', '567646', '52541', 'https://image.tmdb.org/t/p/w1280/3MUwpoEnsSNinnzVQ6mynvXBw7T.jpg'),
-	(8, '', '욱해서 그린 웹툰 암살요원 준의 성공으로 잠깐 흥행 작가가 된 준은 시즌2 연재 시작과 동시에 순식간에 뇌절작가로 전락하고, 오히려 망작이 된 시즌2는 준을 노리는 글로벌한 악당들의 내한 열풍을 일으킨다. 아무것도 모른 채, 다시 한번 대히트를 꿈꾸며 새 웹툰 연재에 돌입한 준. 그러나 그의 웹툰을 모방한 테러가 발생하고, 국정원은 다름 아닌 준을 범인으로 지목하는데…', 'https://image.tmdb.org/t/p/w500/cAUoVuOZONkL2GLcMc6xjjPC1mQ.jpg', '히트맨2', '1129923', '61975', 'https://image.tmdb.org/t/p/w1280/w121PdRrpzxhKZuBIvTpvq5WDq4.jpg'),
-	(9, '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/97yvRBw1GzX7fXprcF80er19ot.jpg,/5gmEivxOGPdq4Afpq1f8ktLtEW1.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg', '아무것도 하지 않는 잉여의 삶을 지향하는 인기절정의 백수, 만화가가 되겠다는 꿈을 위해 쉴 틈 없이 준비하는 생활력 강한 재수생, 대기업 입사가 목표인 최강 스펙의 엄친아이지만 술만 마시면 돌변하는 새내기 대학생까지. 인생의 가장 부끄러운 순간을 함께 한 스무살 동갑내기 세 친구의 자체발광 코미디!', 'https://image.tmdb.org/t/p/w500/hzKynyDi7NwG5Yxn3JC9eNWM9Io.jpg', '스물', '331251', '41502', 'https://image.tmdb.org/t/p/w1280/9AKN9jgCXqziM2fEFyLDOTUMCrS.jpg'),
-	(10, '', '중년 남자 량페이는 펜데믹으로 인해 도시가 봉쇄되기 직전 인생 처음으로 롤러코스터를 타본다. 동물원에서 탈출한 표범에 대한 소식을 들은 그는 스스로 어디까지 용감해질 수 있는지를 시험한다.', 'https://image.tmdb.org/t/p/w500/eL3n2EnLoxMR8Ss5fQXLH7myPyh.jpg', '롤러코스터', '1174782', '38094', 'https://image.tmdb.org/t/p/w1280/xq1TkYsSEdzZBF2I90vtl4rBsdD.jpg'),
-	(11, '', '혈귀로 변해버린 여동생 네즈코를 인간으로 되돌리기 위해 혈귀를 사냥하는 조직인 《귀살대》에 입대한 카마도 탄지로. 입대 후 동료인 아가츠마 젠이츠, 하시비라 이노스케와 함께 많은 혈귀와 싸우고, 성장하면서 세 사람의 우정과 유대는 깊어진다. 탄지로는 《귀살대》 최고위 검사인 《주》와도 함께 싸웠다. 「무한열차」에서는 염주・렌고쿠 쿄쥬로, 「유곽」에서는 음주・우즈이 텐겐, 「도공 마을」에서는 하주・토키토 무이치로, 연주・칸로지 미츠리와 함께 혈귀를 상대로 격렬한 전투를 벌였다. 그 후 다가올 혈귀와의 결전에 대비해 귀살대원들과 함께 《주》가 주도하는 합동 강화 훈련에 참가해 훈련을 받던 도중 《귀살대》의 본부인 우부야시키 저택에 나타난 키부츠지 무잔. 어르신의 위기에 달려온 《주》들과 탄지로였지만, 무잔의 술수로 의문의 공간으로 떨어지고 말았는데. 탄지로 일행이 떨어진 곳, 그곳은 혈귀의 본거지 《무한성》─ “귀살대”와 “혈귀”의 최종 결전의 포문이 열린다.', 'https://image.tmdb.org/t/p/w500/m6Dho6hDCcL5KI8mOQNemZAedFI.jpg', '극장판 귀멸의 칼날: 무한성편', '1311031', '62379', 'https://image.tmdb.org/t/p/w1280/1RgPyOhN4DRs225BGTlHJqCudII.jpg'),
-	(12, '/97yvRBw1GzX7fXprcF80er19ot.jpg', '어릴 적부터 경찰이 꿈이었던 토끼 주디 홉스는 주변의 만류에도 불구하고 경찰학교에 들어가 당당히 수석으로 졸업한다. 온갖 동물들이 모여 살며 교양 있고 세련된 라이프 스타일을 주도하는 대도시 주토피아에 자원한 주디는 의욕을 안고 출근하지만, 상사는 작은 토끼라는 이유로 주차관리 같은 소일거리만 시킨다. 따분하게 업무를 보던 주디는 아이스크림 불법 판매를 일삼는 사기꾼 여우 닉 와일드를 알게 되고, 그와 함께  48시간 안에 주토피아에서 벌어지고 있는 연쇄 실종사건을 추적해야만 하는데...', 'https://image.tmdb.org/t/p/w500/uitqZVbhvlQV5iLOdbk3itGoNNd.jpg', '주토피아', '269149', '46018', 'https://image.tmdb.org/t/p/w1280/9tOkjBEiiGcaClgJFtwocStZvIT.jpg'),
-	(13, '/97yvRBw1GzX7fXprcF80er19ot.jpg', '평화를 되찾은 아렌델 왕국에 새로운 위기가 찾아온다. 어느 날부턴가 의문의 목소리가 엘사를 부르고, 평화로운 아렌델 왕국을 위협한다. 트롤은 모든 것은 과거에서 시작되었음을 알려주며 엘사의 힘의 비밀과 진실을 찾아 떠나야한다고 조언한다. 위험에 빠진 아렌델 왕국을 구해야만 하는 엘사와 안나는 숨겨진 과거의 진실을 찾아 크리스토프, 올라프, 그리고 스벤과 함께 위험천만한 놀라운 모험을 떠나게 된다. 자신의 힘을 두려워했던 엘사는 이제 이 모험을 헤쳐나가기에 자신의 힘이 충분하다고 믿어야만 하는데...', 'https://image.tmdb.org/t/p/w500/lVcwSnzhSMWYXUQzyMilCztSE6I.jpg', '겨울왕국 2', '330457', '54366', 'https://image.tmdb.org/t/p/w1280/AoSZyb37ljMAxw0RdeQEBHKtgcc.jpg'),
-	(14, '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/97yvRBw1GzX7fXprcF80er19ot.jpg,/hPcjSaWfMwEqXaCMu7Fkb529Dkc.jpg,/5gmEivxOGPdq4Afpq1f8ktLtEW1.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg,/qHThQdkJuROK0k5QTCrknaNukWe.jpg', '전국 제패를 꿈꾸는 북산고 농구부 5인방의 꿈과 열정, 멈추지 않는 도전을 그린 영화', 'https://image.tmdb.org/t/p/w500/coiJrdXAXuBkSGDvp9bZ7mkuU6E.jpg', '더 퍼스트 슬램덩크', '783675', '59945', 'https://image.tmdb.org/t/p/w1280/rBgzI1a126JWA7YJd7p1NBmC61z.jpg'),
-	(15, '/97yvRBw1GzX7fXprcF80er19ot.jpg', '슈퍼맘 헬렌이 국민 히어로 일라스티걸로 활약하며 세상의 주목을 받자 바쁜 아내의 몫까지 집안일을 하기 위해 육아휴직을 낸 아빠 밥은 질풍노도 시기의 딸 바이올렛, 자기애가 넘치는 아들 대쉬, 어마무시한 능력을 시도때도 없이 방출하는 막내 잭잭까지 전담하며 전쟁같은 하루하루를 보낸다. 그러던 어느 날, 각자의 위치에서 바쁜 일상을 보내던 슈퍼파워 가족 앞에 새로운 악당이 나타났다. 다시 한번 세상을 구하기 위해 나선 가족은 ‘인크레더블’한 능력을 발휘할 수 있을까?', 'https://image.tmdb.org/t/p/w500/qGmgOmeN8AQX5LwrAVaatwWffDs.jpg', '인크레더블 2', '260513', '52292', 'https://image.tmdb.org/t/p/w1280/mabuNsGJgRuCTuGqjFkWe1xdu19.jpg'),
-	(16, '', '계유정난이 조선을 뒤흔들고 어린 왕 이홍위는 왕위에서 쫓겨나 유배길에 오른다. 한편, 강원도 영월 산골 마을 광천골의 촌장 엄흥도는 먹고 살기 힘든 마을 사람들을 위해 청령포를 유배지로 만들기 위해 노력한다. 그러나 촌장이 부푼 꿈으로 맞이한 이는 왕위에서 쫓겨난 이홍위였다. 유배지를 지키는 보수주인으로서 그의 모든 일상을 감시해야만 하는 촌장은 삶의 의지를 잃어버린 이홍위가 점점 신경 쓰이는데…', 'https://image.tmdb.org/t/p/w500/zEH1FQTEnRY05i8gQIYdR10Vp92.jpg', '왕과 사는 남자', '1321179', '62893', 'https://image.tmdb.org/t/p/w1280/1s1r4OOdnU8VX2inALVTA2q94uY.jpg'),
-	(17, '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/5gmEivxOGPdq4Afpq1f8ktLtEW1.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg,/qHThQdkJuROK0k5QTCrknaNukWe.jpg', '전원 백수로 살 길 막막하지만 사이는 좋은 기택 가족. 장남 기우에게 명문대생 친구가 연결시켜 준 고액 과외 자리는 모처럼 싹튼 고정수입의 희망이다. 온 가족의 도움과 기대 속에 박 사장 집으로 향하는 기우. 글로벌 IT기업의 CEO인 박 사장의 저택에 도착하자 젊고 아름다운 사모님 연교와 가정부 문광이 기우를 맞이한다. 큰 문제 없이 박 사장의 딸 다혜의 과외를 시작한 기우. 그러나 이렇게 시작된 두 가족의 만남 뒤로, 걷잡을 수 없는 사건이 기다리고  있는데.....', 'https://image.tmdb.org/t/p/w500/jjHccoFjbqlfr4VGLVLT7yek0Xn.jpg', '기생충', '496243', '52641', 'https://image.tmdb.org/t/p/w1280/hiKmpZMGZsrkA3cdce8a7Dpos1j.jpg'),
-	(18, '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/97yvRBw1GzX7fXprcF80er19ot.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg', '권력의 정점에 서고픈 검사, 무소불위 권력을 쥐고 폼 나게 살고 싶었던 태수는 우여곡절 끝에 권력의 설계자 한강식을 만나 핵심 라인을 타고 승승장구 하게 된다. 정권이 교체되는 중요한 시기, 새로운 판을 짜며 기회를 노리던 이들 앞에 예상치 못한 위기가 닥치는데… 정의 따윈 헌신짝처럼 내다버린 그에게 지금 날아오는 것은 필연의 부메랑인가.', 'https://image.tmdb.org/t/p/w500/mNC4JtrcGxuWoU6yK5d6rCUI1an.jpg', '더 킹', '434724', '47061', 'https://image.tmdb.org/t/p/w1280/auA1OaJKbim8E7ACnMYmvHz5wNB.jpg'),
-	(19, '/hPcjSaWfMwEqXaCMu7Fkb529Dkc.jpg', '싱글맘 사오리는 아들 미나토의 행동에서 이상 기운을 감지한다. 용기를 내 찾아간 학교에서 상담을 진행한 날 이후 선생님과 학생들의 분위기가 심상치 않게 흐르기 시작하고.  한편 사오리는 친구들로부터 따돌림을 당하고 있는 미나토의 친구 요리의 존재를 알게 되고 자신이 아는 아들의 모습과 사람들이 아는 아들의 모습이 다르다는 사실을 어렴풋이 깨닫는데… 태풍이 몰아치던 어느 날, 아무도 몰랐던 진실이 드러난다.', 'https://image.tmdb.org/t/p/w500/cHS3uVwAyViWcVbpRwrfekgn2cr.jpg', '괴물 (2023)', '1050035', '60970', 'https://image.tmdb.org/t/p/w1280/dZJcOyRonN0Kb7kJR3DE3esGn16.jpg'),
-	(20, '', '마법사이자 초콜릿 메이커 윌리 웡카의 꿈은 디저트의 성지, 달콤 백화점에 자신만의 초콜릿 가게를 여는 것. 가진 것이라고는 낡은 모자 가득한 꿈과 단돈 12소베른 뿐이지만 특별한 마법의 초콜릿으로 사람들을 사로잡을 자신이 있다. 하지만 먹을 것도, 잠잘 곳도, 의지할 사람도 없는 상황 속에서 낡은 여인숙에 머물게 된 웡카는 스크러빗 부인과 블리처의 계략에 빠져 눈더미처럼 불어난 숙박비로 인해 순식간에 빚더미에 오른다. 게다가 밤마다 초콜릿을 훔쳐가는 작은 도둑 움파 룸파의 등장과 달콤 백화점을 독점한 초콜릿 카르텔의 강력한 견제까지. 세계 최고의 초콜릿 메이커가 되는 길은 험난하기만 한데…', 'https://image.tmdb.org/t/p/w500/lQ4cwauq2jeTkka9RvdMBTVPLMH.jpg', '웡카', '787699', '61087', 'https://image.tmdb.org/t/p/w1280/uIk2g2bRkNwNywKZIhC5oIU94Kh.jpg'),
-	(21, '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg', '출장안마소를 운영하는 전직 형사 중호. 최근 데리고 있던 여자들이 잇달아 사라지는 일이 발생하던 중 조금 전 나간 미진을 불러낸 손님의 전화 번호와 사라진 여자들이 마지막으로 통화한 번호가 일치함을 알아낸다. 연락이 두절된 미진을 찾아 헤매던 중 우연히 옷에 피가 묻은 영민과 마주치고, 추격 끝에 그를 붙잡는다. 실종된 여자들을 모두 죽였다는 충격적인 고백을 담담히 털어 놓는 영민에 의해 경찰서는 발칵 뒤집어진다. 공세우기에 혈안이 된 경찰은 미진의 생사보다는 증거를 찾기에만 급급해 하고, 미진이 살아 있다고 믿는 단 한 사람인 중호는 미진을 찾아 나서는데...', 'https://image.tmdb.org/t/p/w500/u9FtBUJoGm1jhG9QxAanwg6en5G.jpg', '추격자', '13855', '24235', 'https://image.tmdb.org/t/p/w1280/urBBFQrrVxy7T8uytrn7dOoHqZn.jpg'),
-	(22, '', '홀어머니와 사는 아서 플렉은 코미디언을 꿈꾸지만 그의 삶은 좌절과 절망으로 가득 차 있다. 광대 아르바이트는 그에게 모욕을 가져다주기 일쑤고, 긴장하면 웃음을 통제할 수 없는 신경병 증세는 그를 더욱 고립시킨다. 정부 예산 긴축으로 인해 정신과 약물을 지원하던 공공의료 서비스마저 없어져 버린 어느 날, 아서는 지하철에서 시비를 걸어온 증권사 직원들에게 얻어맞던 와중에 동료가 건네준 권총으로 그들을 쏴 버리고 만다. 군중들은 지배계급에 대한 저항의 아이콘이 된 그를 추종하기 시작하며 광대 마스크로 얼굴을 가리고 거리로 쏟아져 나오기 시작하는데...', 'https://image.tmdb.org/t/p/w500/6OnFzi7nU6t4j1rmX9QI8EYDWb4.jpg', '조커 (2019)', '475557', '55262', 'https://image.tmdb.org/t/p/w1280/hO7KbdvGOtDdeg0W4Y5nKEHeDDh.jpg'),
-	(23, '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/5gmEivxOGPdq4Afpq1f8ktLtEW1.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg,/qHThQdkJuROK0k5QTCrknaNukWe.jpg', '1986년 경기도. 젊은 여인이 무참히 강간, 살해당한 시체로 발견된다. 2개월 후 비슷한 수법의 강간살인사건이 연이어 발생하면서 사건은 세간의 주목을 받기 시작하고, 일대는 연쇄살인이라는 생소한 범죄의 공포에 휩싸인다. 사건 발생 지역에 특별수사본부가 설치되고, 수사본부는 구희봉 반장을 필두로 지역토박이 형사 박두만과 조용구, 그리고 서울 시경에서 자원해 온 서태윤이 배치된다. 육감과 폭력으로 수사를 진행하는 박형사와 증거와 과학수사를 추구하는 서형사는 수사 내내 마찰을 일으키는데...', 'https://image.tmdb.org/t/p/w500/3I1Ng4sxDUyPOdVu3lQ20N14PGE.jpg', '살인의 추억', '11423', '5961', 'https://image.tmdb.org/t/p/w1280/6Kn6qW3an3DkPl3MahWemTzrjCt.jpg'),
-	(24, '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/97yvRBw1GzX7fXprcF80er19ot.jpg,/hPcjSaWfMwEqXaCMu7Fkb529Dkc.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg,/qHThQdkJuROK0k5QTCrknaNukWe.jpg', '유력한 대통령 후보와 재벌 회장, 그들을 돕는 정치깡패 안상구. 뒷거래의 판을 짠 이는 대한민국 여론을 움직이는 유명 논설주간 이강희다. 더 큰 성공을 원한 안상구는 이들의 비자금 파일로 거래를 준비하다 발각되고, 이 일로 폐인이 되어 버려진다. 늘 승진을 눈 앞에 두고 주저 앉는 검사 우장훈는 마침내 대선을 앞둔 대대적인 비자금 조사의 저격수가 되는 기회를 잡는다. 그러나 비자금 파일을 가로챈 안상구 때문에 수사는 종결되고, 우장훈은 책임을 떠안고 좌천되고 마는데...', 'https://image.tmdb.org/t/p/w500/zlFp1a9HXpbyDBaNoS1euprLbLs.jpg', '내부자들', '293413', '42321', 'https://image.tmdb.org/t/p/w1280/4iN7OkAxLoYQcZaKyawaWxEXzUl.jpg'),
-	(25, '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg,/qHThQdkJuROK0k5QTCrknaNukWe.jpg', '오대수는 어느 날 술이 거나하게 취해 집에 돌아가는 길에 누군가에게 납치, 사설 감금방에 갇히게 된다. 중국집 군만두만을 먹으며 8평이라는 제한된 공간에서 그가 할 수 있는 일이라곤 텔레비전 보는 게 전부. 1년이 지났을 무렵, 뉴스를 통해 나오는 아내의 살해소식. 게다가 아내의 살인범으로 자신이 지목되고 있음을 알게 된 오대수는 복수와 탈출을 위해 감금방 한쪽 구석을 쇠젓가락으로 파기 시작한다. 감금 15년을 맞이하는 해, 마침내 사람 몸 하나 빠져나갈 만큼의 탈출구가 생겼을 때, 어이없게도 15년 전 납치됐던 바로 그 장소로 풀려나 있는 자신을 발견하게 된다.', 'https://image.tmdb.org/t/p/w500/xpa9ybm6tYGna5LseqSXvKpSSJn.jpg', '올드보이', '670', '7392', 'https://image.tmdb.org/t/p/w1280/sdwjQEM869JFwMytTmvr6ggvaUl.jpg');
+    (1, '액션'), (2, '코미디'), (3, '범죄'), (4, '스릴러'), (5, '드라마'),
+    (6, '가족'), (7, '애니메이션'), (8, '모험'), (9, '판타지'), (10, '미스터리'),
+    (11, '공포'), (12, 'SF'), (13, '로맨스'), (14, '다큐멘터리'), (15, '역사'),
+    (16, '전쟁'), (17, '음악'), (18, 'TV 영화'), (19, '서부');
 
--- 테이블 데이터 connected_m.content_genre:~71 rows (대략적) 내보내기
+-- 테이블 데이터 connected_m.content:~25 rows (대략적) 내보내기
+INSERT IGNORE INTO `content` (`id`, `age_rating`, `backdrop_path`, `cine21_id`, `ott_logos`, `overview`, `poster_path`, `runtime`, `title`, `tmdb_id`) VALUES
+	(1, '15', 'https://image.tmdb.org/t/p/w1280/mO9oOVXM8tTlC11VFM4FBBNnL3f.jpg', '61332', '/97yvRBw1GzX7fXprcF80er19ot.jpg', '신종 마약 사건 3년 뒤, 괴물형사 마석도와 서울 광수대는 배달앱을 이용한 마약 판매 사건을 수사하던 중 수배 중인 앱 개발자가 필리핀에서 사망한 사건이 대규모 온라인 불법 도박 조직과 연관되어 있음을 알아낸다. 필리핀에 거점을 두고 납치, 감금, 폭행, 살인 등으로 대한민국 온라인 불법 도박 시장을 장악한 특수부대 용병 출신의 빌런 백창기와 한국에서 더 큰 판을 짜고 있는 IT업계 천재 CEO 장동철. 마석도는 더 커진 판을 잡기 위해 장이수에게 뜻밖의 협력을 제안하고 광역수사대는 물론, 사이버수사대까지 합류해 범죄를 소탕하기 시작하는데…', 'https://image.tmdb.org/t/p/w500/jucHQwnRSma1O9V2bM007e4eSd7.jpg', 109, '범죄도시4', '1017163'),
+	(2, '19', 'https://image.tmdb.org/t/p/w1280/7I6VUdPj6tQECNHdviJkUHD2u89.jpg', '60321', '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/5gmEivxOGPdq4Afpq1f8ktLtEW1.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg', '죽을 위기에서 살아난 존 윅은 최고 회의를 쓰러트릴 방법을 찾아낸다. 비로소 완전한 자유의 희망을 보지만, 빌런 그라몽 후작과 전 세계의 최강 연합은 존 윅의 오랜 친구까지 적으로 만들어 버리고, 새로운 위기에 놓인 존 윅은 최후의 반격을 준비하는데...', 'https://image.tmdb.org/t/p/w500/h3LsdSBzhRnBebz4BTpAhh63PD3.jpg', 170, '존 윅 4', '603692'),
+	(3, '12', 'https://image.tmdb.org/t/p/w1280/AaV1YIdWKnjAIAOe8UUKBFm327v.jpg', '55008', '', '최고의 파일럿이자 전설적인 인물 매버릭은 자신이 졸업한 훈련학교 교관으로 발탁된다. 그의 명성을 모르던 팀원들은 매버릭의 지시를 무시하지만 실전을 방불케 하는 상공 훈련에서 눈으로 봐도 믿기 힘든 전설적인 조종 실력에 모두가 압도된다. 매버릭의 지휘 아래 견고한 팀워크를 쌓아가던 팀원들에게 국경을 뛰어넘는 위험한 임무가 주어지자 매버릭은 자신이 가르친 동료들과 함께 마지막이 될지 모를 하늘 위 비행에 나서는데...', 'https://image.tmdb.org/t/p/w500/jeqXUwNilvNqNXqAHsdwm5pEfae.jpg', 131, '탑건: 매버릭', '361743'),
+	(4, '19', 'https://image.tmdb.org/t/p/w1280/nxX9nFLDSytqfd2EaitMPa1nDRE.jpg', '27688', '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg,/qHThQdkJuROK0k5QTCrknaNukWe.jpg', '불행한 사건으로 아내를 잃고 세상을 등진 채 전당포를 꾸려가며 외롭게 살아가는 전직 특수요원 태식. 찾아오는 사람이라곤 전당포에 물건을 맡기러 오는 사람들과 옆집소녀 소미뿐이다. 세상으로부터 버림받은 소미와 함께 보내는 시간이 많아지면서 태식과 소미는 서로 마음을 열며 친구가 되어간다.  그러던 어느 날 소미의 엄마가 범죄단체 연루되고 태식의 눈앞에서 소미가 납치되는데...', 'https://image.tmdb.org/t/p/w500/xmD04pnMIO0FUe0FJc8rHjfi6vY.jpg', 119, '아저씨', '51608'),
+	(5, '15', 'https://image.tmdb.org/t/p/w1280/5jnoAA74Qwb5w6B9FMvnc20n6Ie.jpg', '52286', '/97yvRBw1GzX7fXprcF80er19ot.jpg', '에단 헌트는 세계를 위협하는 테러 조직 신디케이트의 수장 솔로몬 레인을 우여곡절 끝에 체포했지만, 그의 잔당들은 여전히 세계 각지에서 테러를 일삼는다. 에단 헌트와 그의 팀은 테러조직의 핵무기 소지를 막기 위해 미션에 착수한다. 에단 헌트는 작전 수행 중 예상치 못한 결단을 내리게 되고, 중앙정보국 CIA는 그를 견제하기 위해 상급 요원 어거스트 워커를 파견한다. 최악의 테러 위기와 라이벌의 출현 속, 팀이 행한 모든 선의의 선택들이 최악의 결과로 돌아오면서 미션은 점점 더 예측할 수 없는 상황으로 치닫게 되는데...', 'https://image.tmdb.org/t/p/w500/tKAlw88sEjU5bntbAfdfWcmRx6S.jpg', 147, '미션 임파서블: 폴 아웃', '353081'),
+	(6, '12', 'https://image.tmdb.org/t/p/w1280/gT7MXlPs7ohpdefR5cdgdPx1zsf.jpg', '62252', '/97yvRBw1GzX7fXprcF80er19ot.jpg', '댄스 열정을 불태우는 사춘기 딸 수아와 함께 티격태격 일상을 보내는 맹수 전문 사육사 정환. 어느 날 전 세계를 강타한 좀비 바이러스에 감염된 딸 수아를 지키기 위해 정환은 어머니 밤순이 사는 바닷가 마을 은봉리로 수아와 함께 향한다. 감염자를 색출해 내려는 사회 분위기 속에서 수아가 어렴풋이 사람 말을 알아듣고, 평소 좋아하던 춤과 할머니 밤순의 따끔한 효자손 맛에 반응하는 모습을 발견한다. 절대 수아를 포기할 수 없는 정환은 호랑이 사육사의 오랜 경험을 살려 좀비딸 트레이닝에 돌입하는데...', 'https://image.tmdb.org/t/p/w500/aASLRiO8p9xLIvG9EHXSyZ71sPl.jpg', 114, '좀비딸', '1306816'),
+	(7, '15', 'https://image.tmdb.org/t/p/w1280/3MUwpoEnsSNinnzVQ6mynvXBw7T.jpg', '52541', '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/5gmEivxOGPdq4Afpq1f8ktLtEW1.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg,/qHThQdkJuROK0k5QTCrknaNukWe.jpg', '불철주야 달리고 구르지만 실적은 바닥, 급기야 해체 위기를 맞는 마약반!  더 이상 물러설 곳이 없는 팀의 맏형 고반장은 국제 범죄조직의 국내 마약 밀반입 정황을 포착하고 장형사, 마형사, 영호, 재훈까지 4명의 팀원들과 함께 잠복 수사에 나선다.  마약반은 24시간 감시를 위해 범죄조직의 아지트 앞 치킨집을 인수해 위장 창업을 하게 되고, 뜻밖의 절대미각을 지닌 마형사의 숨은 재능으로 치킨집은 일약 맛집으로 입소문이 나기 시작한다.  수사는 뒷전, 치킨장사로 눈코 뜰 새 없이 바빠진 마약반에게 어느 날 절호의 기회가 찾아오는데…', 'https://image.tmdb.org/t/p/w500/jbHNkNydiZstlqhhBSvG19lm4NL.jpg', 111, '극한직업', '567646'),
+	(8, '15', 'https://image.tmdb.org/t/p/w1280/w121PdRrpzxhKZuBIvTpvq5WDq4.jpg', '61975', '', '욱해서 그린 웹툰 암살요원 준의 성공으로 잠깐 흥행 작가가 된 준은 시즌2 연재 시작과 동시에 순식간에 뇌절작가로 전락하고, 오히려 망작이 된 시즌2는 준을 노리는 글로벌한 악당들의 내한 열풍을 일으킨다. 아무것도 모른 채, 다시 한번 대히트를 꿈꾸며 새 웹툰 연재에 돌입한 준. 그러나 그의 웹툰을 모방한 테러가 발생하고, 국정원은 다름 아닌 준을 범인으로 지목하는데…', 'https://image.tmdb.org/t/p/w500/cAUoVuOZONkL2GLcMc6xjjPC1mQ.jpg', 114, '히트맨2', '1129923'),
+	(9, '15', 'https://image.tmdb.org/t/p/w1280/9AKN9jgCXqziM2fEFyLDOTUMCrS.jpg', '41502', '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/97yvRBw1GzX7fXprcF80er19ot.jpg,/5gmEivxOGPdq4Afpq1f8ktLtEW1.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg', '아무것도 하지 않는 잉여의 삶을 지향하는 인기절정의 백수, 만화가가 되겠다는 꿈을 위해 쉴 틈 없이 준비하는 생활력 강한 재수생, 대기업 입사가 목표인 최강 스펙의 엄친아이지만 술만 마시면 돌변하는 새내기 대학생까지. 인생의 가장 부끄러운 순간을 함께 한 스무살 동갑내기 세 친구의 자체발광 코미디!', 'https://image.tmdb.org/t/p/w500/hzKynyDi7NwG5Yxn3JC9eNWM9Io.jpg', 115, '스물', '331251'),
+	(10, '정보없음', 'https://image.tmdb.org/t/p/w1280/xq1TkYsSEdzZBF2I90vtl4rBsdD.jpg', '38094', '', '중년 남자 량페이는 펜데믹으로 인해 도시가 봉쇄되기 직전 인생 처음으로 롤러코스터를 타본다. 동물원에서 탈출한 표범에 대한 소식을 들은 그는 스스로 어디까지 용감해질 수 있는지를 시험한다.', 'https://image.tmdb.org/t/p/w500/eL3n2EnLoxMR8Ss5fQXLH7myPyh.jpg', 21, '롤러코스터', '1174782'),
+	(11, '15', 'https://image.tmdb.org/t/p/w1280/1RgPyOhN4DRs225BGTlHJqCudII.jpg', '62379', '', '혈귀로 변해버린 여동생 네즈코를 인간으로 되돌리기 위해 혈귀를 사냥하는 조직인 《귀살대》에 입대한 카마도 탄지로. 입대 후 동료인 아가츠마 젠이츠, 하시비라 이노스케와 함께 많은 혈귀와 싸우고, 성장하면서 세 사람의 우정과 유대는 깊어진다. 탄지로는 《귀살대》 최고위 검사인 《주》와도 함께 싸웠다. 「무한열차」에서는 염주・렌고쿠 쿄쥬로, 「유곽」에서는 음주・우즈이 텐겐, 「도공 마을」에서는 하주・토키토 무이치로, 연주・칸로지 미츠리와 함께 혈귀를 상대로 격렬한 전투를 벌였다. 그 후 다가올 혈귀와의 결전에 대비해 귀살대원들과 함께 《주》가 주도하는 합동 강화 훈련에 참가해 훈련을 받던 도중 《귀살대》의 본부인 우부야시키 저택에 나타난 키부츠지 무잔. 어르신의 위기에 달려온 《주》들과 탄지로였지만, 무잔의 술수로 의문의 공간으로 떨어지고 말았는데. 탄지로 일행이 떨어진 곳, 그곳은 혈귀의 본거지 《무한성》─ “귀살대”와 “혈귀”의 최종 결전의 포문이 열린다.', 'https://image.tmdb.org/t/p/w500/m6Dho6hDCcL5KI8mOQNemZAedFI.jpg', 155, '극장판 귀멸의 칼날: 무한성편', '1311031'),
+	(12, 'ALL', 'https://image.tmdb.org/t/p/w1280/9tOkjBEiiGcaClgJFtwocStZvIT.jpg', '46018', '/97yvRBw1GzX7fXprcF80er19ot.jpg', '어릴 적부터 경찰이 꿈이었던 토끼 주디 홉스는 주변의 만류에도 불구하고 경찰학교에 들어가 당당히 수석으로 졸업한다. 온갖 동물들이 모여 살며 교양 있고 세련된 라이프 스타일을 주도하는 대도시 주토피아에 자원한 주디는 의욕을 안고 출근하지만, 상사는 작은 토끼라는 이유로 주차관리 같은 소일거리만 시킨다. 따분하게 업무를 보던 주디는 아이스크림 불법 판매를 일삼는 사기꾼 여우 닉 와일드를 알게 되고, 그와 함께  48시간 안에 주토피아에서 벌어지고 있는 연쇄 실종사건을 추적해야만 하는데...', 'https://image.tmdb.org/t/p/w500/uitqZVbhvlQV5iLOdbk3itGoNNd.jpg', 108, '주토피아', '269149'),
+	(13, 'ALL', 'https://image.tmdb.org/t/p/w1280/AoSZyb37ljMAxw0RdeQEBHKtgcc.jpg', '54366', '/97yvRBw1GzX7fXprcF80er19ot.jpg', '평화를 되찾은 아렌델 왕국에 새로운 위기가 찾아온다. 어느 날부턴가 의문의 목소리가 엘사를 부르고, 평화로운 아렌델 왕국을 위협한다. 트롤은 모든 것은 과거에서 시작되었음을 알려주며 엘사의 힘의 비밀과 진실을 찾아 떠나야한다고 조언한다. 위험에 빠진 아렌델 왕국을 구해야만 하는 엘사와 안나는 숨겨진 과거의 진실을 찾아 크리스토프, 올라프, 그리고 스벤과 함께 위험천만한 놀라운 모험을 떠나게 된다. 자신의 힘을 두려워했던 엘사는 이제 이 모험을 헤쳐나가기에 자신의 힘이 충분하다고 믿어야만 하는데...', 'https://image.tmdb.org/t/p/w500/lVcwSnzhSMWYXUQzyMilCztSE6I.jpg', 103, '겨울왕국 2', '330457'),
+	(14, '12', 'https://image.tmdb.org/t/p/w1280/rBgzI1a126JWA7YJd7p1NBmC61z.jpg', '59945', '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/97yvRBw1GzX7fXprcF80er19ot.jpg,/hPcjSaWfMwEqXaCMu7Fkb529Dkc.jpg,/5gmEivxOGPdq4Afpq1f8ktLtEW1.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg,/qHThQdkJuROK0k5QTCrknaNukWe.jpg', '전국 제패를 꿈꾸는 북산고 농구부 5인방의 꿈과 열정, 멈추지 않는 도전을 그린 영화', 'https://image.tmdb.org/t/p/w500/coiJrdXAXuBkSGDvp9bZ7mkuU6E.jpg', 125, '더 퍼스트 슬램덩크', '783675'),
+	(15, 'ALL', 'https://image.tmdb.org/t/p/w1280/mabuNsGJgRuCTuGqjFkWe1xdu19.jpg', '52292', '/97yvRBw1GzX7fXprcF80er19ot.jpg', '슈퍼맘 헬렌이 국민 히어로 일라스티걸로 활약하며 세상의 주목을 받자 바쁜 아내의 몫까지 집안일을 하기 위해 육아휴직을 낸 아빠 밥은 질풍노도 시기의 딸 바이올렛, 자기애가 넘치는 아들 대쉬, 어마무시한 능력을 시도때도 없이 방출하는 막내 잭잭까지 전담하며 전쟁같은 하루하루를 보낸다. 그러던 어느 날, 각자의 위치에서 바쁜 일상을 보내던 슈퍼파워 가족 앞에 새로운 악당이 나타났다. 다시 한번 세상을 구하기 위해 나선 가족은 ‘인크레더블’한 능력을 발휘할 수 있을까?', 'https://image.tmdb.org/t/p/w500/qGmgOmeN8AQX5LwrAVaatwWffDs.jpg', 125, '인크레더블 2', '260513'),
+	(16, '12', 'https://image.tmdb.org/t/p/w1280/1s1r4OOdnU8VX2inALVTA2q94uY.jpg', '62893', '', '계유정난이 조선을 뒤흔들고 어린 왕 이홍위는 왕위에서 쫓겨나 유배길에 오른다. 한편, 강원도 영월 산골 마을 광천골의 촌장 엄흥도는 먹고 살기 힘든 마을 사람들을 위해 청령포를 유배지로 만들기 위해 노력한다. 그러나 촌장이 부푼 꿈으로 맞이한 이는 왕위에서 쫓겨난 이홍위였다. 유배지를 지키는 보수주인으로서 그의 모든 일상을 감시해야만 하는 촌장은 삶의 의지를 잃어버린 이홍위가 점점 신경 쓰이는데…', 'https://image.tmdb.org/t/p/w500/zEH1FQTEnRY05i8gQIYdR10Vp92.jpg', 117, '왕과 사는 남자', '1321179'),
+	(17, '15', 'https://image.tmdb.org/t/p/w1280/hiKmpZMGZsrkA3cdce8a7Dpos1j.jpg', '52641', '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/5gmEivxOGPdq4Afpq1f8ktLtEW1.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg,/qHThQdkJuROK0k5QTCrknaNukWe.jpg', '전원 백수로 살 길 막막하지만 사이는 좋은 기택 가족. 장남 기우에게 명문대생 친구가 연결시켜 준 고액 과외 자리는 모처럼 싹튼 고정수입의 희망이다. 온 가족의 도움과 기대 속에 박 사장 집으로 향하는 기우. 글로벌 IT기업의 CEO인 박 사장의 저택에 도착하자 젊고 아름다운 사모님 연교와 가정부 문광이 기우를 맞이한다. 큰 문제 없이 박 사장의 딸 다혜의 과외를 시작한 기우. 그러나 이렇게 시작된 두 가족의 만남 뒤로, 걷잡을 수 없는 사건이 기다리고  있는데.....', 'https://image.tmdb.org/t/p/w500/jjHccoFjbqlfr4VGLVLT7yek0Xn.jpg', 131, '기생충', '496243'),
+	(18, '15', 'https://image.tmdb.org/t/p/w1280/auA1OaJKbim8E7ACnMYmvHz5wNB.jpg', '47061', '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/97yvRBw1GzX7fXprcF80er19ot.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg', '권력의 정점에 서고픈 검사, 무소불위 권력을 쥐고 폼 나게 살고 싶었던 태수는 우여곡절 끝에 권력의 설계자 한강식을 만나 핵심 라인을 타고 승승장구 하게 된다. 정권이 교체되는 중요한 시기, 새로운 판을 짜며 기회를 노리던 이들 앞에 예상치 못한 위기가 닥치는데… 정의 따윈 헌신짝처럼 내다버린 그에게 지금 날아오는 것은 필연의 부메랑인가.', 'https://image.tmdb.org/t/p/w500/mNC4JtrcGxuWoU6yK5d6rCUI1an.jpg', 134, '더 킹', '434724'),
+	(19, '12', 'https://image.tmdb.org/t/p/w1280/dZJcOyRonN0Kb7kJR3DE3esGn16.jpg', '60970', '/hPcjSaWfMwEqXaCMu7Fkb529Dkc.jpg', '싱글맘 사오리는 아들 미나토의 행동에서 이상 기운을 감지한다. 용기를 내 찾아간 학교에서 상담을 진행한 날 이후 선생님과 학생들의 분위기가 심상치 않게 흐르기 시작하고.  한편 사오리는 친구들로부터 따돌림을 당하고 있는 미나토의 친구 요리의 존재를 알게 되고 자신이 아는 아들의 모습과 사람들이 아는 아들의 모습이 다르다는 사실을 어렴풋이 깨닫는데… 태풍이 몰아치던 어느 날, 아무도 몰랐던 진실이 드러난다.', 'https://image.tmdb.org/t/p/w500/cHS3uVwAyViWcVbpRwrfekgn2cr.jpg', 126, '괴물 (2023)', '1050035'),
+	(20, 'All', 'https://image.tmdb.org/t/p/w1280/uIk2g2bRkNwNywKZIhC5oIU94Kh.jpg', '61087', '', '마법사이자 초콜릿 메이커 윌리 웡카의 꿈은 디저트의 성지, 달콤 백화점에 자신만의 초콜릿 가게를 여는 것. 가진 것이라고는 낡은 모자 가득한 꿈과 단돈 12소베른 뿐이지만 특별한 마법의 초콜릿으로 사람들을 사로잡을 자신이 있다. 하지만 먹을 것도, 잠잘 곳도, 의지할 사람도 없는 상황 속에서 낡은 여인숙에 머물게 된 웡카는 스크러빗 부인과 블리처의 계략에 빠져 눈더미처럼 불어난 숙박비로 인해 순식간에 빚더미에 오른다. 게다가 밤마다 초콜릿을 훔쳐가는 작은 도둑 움파 룸파의 등장과 달콤 백화점을 독점한 초콜릿 카르텔의 강력한 견제까지. 세계 최고의 초콜릿 메이커가 되는 길은 험난하기만 한데…', 'https://image.tmdb.org/t/p/w500/lQ4cwauq2jeTkka9RvdMBTVPLMH.jpg', 117, '웡카', '787699'),
+	(21, '19', 'https://image.tmdb.org/t/p/w1280/urBBFQrrVxy7T8uytrn7dOoHqZn.jpg', '24235', '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg', '출장안마소를 운영하는 전직 형사 중호. 최근 데리고 있던 여자들이 잇달아 사라지는 일이 발생하던 중 조금 전 나간 미진을 불러낸 손님의 전화 번호와 사라진 여자들이 마지막으로 통화한 번호가 일치함을 알아낸다. 연락이 두절된 미진을 찾아 헤매던 중 우연히 옷에 피가 묻은 영민과 마주치고, 추격 끝에 그를 붙잡는다. 실종된 여자들을 모두 죽였다는 충격적인 고백을 담담히 털어 놓는 영민에 의해 경찰서는 발칵 뒤집어진다. 공세우기에 혈안이 된 경찰은 미진의 생사보다는 증거를 찾기에만 급급해 하고, 미진이 살아 있다고 믿는 단 한 사람인 중호는 미진을 찾아 나서는데...', 'https://image.tmdb.org/t/p/w500/u9FtBUJoGm1jhG9QxAanwg6en5G.jpg', 123, '추격자', '13855'),
+	(22, '15', 'https://image.tmdb.org/t/p/w1280/hO7KbdvGOtDdeg0W4Y5nKEHeDDh.jpg', '55262', '', '홀어머니와 사는 아서 플렉은 코미디언을 꿈꾸지만 그의 삶은 좌절과 절망으로 가득 차 있다. 광대 아르바이트는 그에게 모욕을 가져다주기 일쑤고, 긴장하면 웃음을 통제할 수 없는 신경병 증세는 그를 더욱 고립시킨다. 정부 예산 긴축으로 인해 정신과 약물을 지원하던 공공의료 서비스마저 없어져 버린 어느 날, 아서는 지하철에서 시비를 걸어온 증권사 직원들에게 얻어맞던 와중에 동료가 건네준 권총으로 그들을 쏴 버리고 만다. 군중들은 지배계급에 대한 저항의 아이콘이 된 그를 추종하기 시작하며 광대 마스크로 얼굴을 가리고 거리로 쏟아져 나오기 시작하는데...', 'https://image.tmdb.org/t/p/w500/6OnFzi7nU6t4j1rmX9QI8EYDWb4.jpg', 122, '조커 (2019)', '475557'),
+	(23, '15', 'https://image.tmdb.org/t/p/w1280/6Kn6qW3an3DkPl3MahWemTzrjCt.jpg', '5961', '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/5gmEivxOGPdq4Afpq1f8ktLtEW1.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg,/qHThQdkJuROK0k5QTCrknaNukWe.jpg', '1986년 경기도. 젊은 여인이 무참히 강간, 살해당한 시체로 발견된다. 2개월 후 비슷한 수법의 강간살인사건이 연이어 발생하면서 사건은 세간의 주목을 받기 시작하고, 일대는 연쇄살인이라는 생소한 범죄의 공포에 휩싸인다. 사건 발생 지역에 특별수사본부가 설치되고, 수사본부는 구희봉 반장을 필두로 지역토박이 형사 박두만과 조용구, 그리고 서울 시경에서 자원해 온 서태윤이 배치된다. 육감과 폭력으로 수사를 진행하는 박형사와 증거와 과학수사를 추구하는 서형사는 수사 내내 마찰을 일으키는데...', 'https://image.tmdb.org/t/p/w500/3I1Ng4sxDUyPOdVu3lQ20N14PGE.jpg', 127, '살인의 추억', '11423'),
+	(24, '19', 'https://image.tmdb.org/t/p/w1280/4iN7OkAxLoYQcZaKyawaWxEXzUl.jpg', '42321', '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/97yvRBw1GzX7fXprcF80er19ot.jpg,/hPcjSaWfMwEqXaCMu7Fkb529Dkc.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg,/qHThQdkJuROK0k5QTCrknaNukWe.jpg', '유력한 대통령 후보와 재벌 회장, 그들을 돕는 정치깡패 안상구. 뒷거래의 판을 짠 이는 대한민국 여론을 움직이는 유명 논설주간 이강희다. 더 큰 성공을 원한 안상구는 이들의 비자금 파일로 거래를 준비하다 발각되고, 이 일로 폐인이 되어 버려진다. 늘 승진을 눈 앞에 두고 주저 앉는 검사 우장훈는 마침내 대선을 앞둔 대대적인 비자금 조사의 저격수가 되는 기회를 잡는다. 그러나 비자금 파일을 가로챈 안상구 때문에 수사는 종결되고, 우장훈은 책임을 떠안고 좌천되고 마는데...', 'https://image.tmdb.org/t/p/w500/zlFp1a9HXpbyDBaNoS1euprLbLs.jpg', 130, '내부자들', '293413'),
+	(25, '19', 'https://image.tmdb.org/t/p/w1280/sdwjQEM869JFwMytTmvr6ggvaUl.jpg', '7392', '/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg,/dpR8r13zWDeUR0QkzWidrdMxa56.jpg,/qHThQdkJuROK0k5QTCrknaNukWe.jpg', '오대수는 어느 날 술이 거나하게 취해 집에 돌아가는 길에 누군가에게 납치, 사설 감금방에 갇히게 된다. 중국집 군만두만을 먹으며 8평이라는 제한된 공간에서 그가 할 수 있는 일이라곤 텔레비전 보는 게 전부. 1년이 지났을 무렵, 뉴스를 통해 나오는 아내의 살해소식. 게다가 아내의 살인범으로 자신이 지목되고 있음을 알게 된 오대수는 복수와 탈출을 위해 감금방 한쪽 구석을 쇠젓가락으로 파기 시작한다. 감금 15년을 맞이하는 해, 마침내 사람 몸 하나 빠져나갈 만큼의 탈출구가 생겼을 때, 어이없게도 15년 전 납치됐던 바로 그 장소로 풀려나 있는 자신을 발견하게 된다.', 'https://image.tmdb.org/t/p/w500/xpa9ybm6tYGna5LseqSXvKpSSJn.jpg', 120, '올드보이', '670');
+
+       -- 테이블 데이터 connected_m.content_genre:~71 rows (대략적) 내보내기
 INSERT IGNORE INTO `content_genre` (`id`, `content_id`, `genre_id`) VALUES
-	(1, 7, 1),
-	(2, 7, 2),
-	(3, 7, 3),
-	(4, 1, 1),
-	(5, 1, 3),
-	(6, 1, 4),
-	(7, 1, 2),
-	(8, 2, 1),
-	(9, 2, 4),
-	(10, 2, 3),
-	(11, 4, 1),
-	(12, 4, 4),
-	(13, 4, 3),
-	(14, 3, 1),
-	(15, 3, 5),
-	(16, 8, 1),
-	(17, 8, 2),
-	(18, 9, 2),
-	(19, 9, 5),
-	(20, 10, 5),
-	(21, 13, 6),
-	(22, 13, 7),
-	(23, 13, 8),
-	(24, 13, 2),
-	(25, 13, 9),
-	(26, 25, 5),
-	(27, 25, 4),
-	(28, 25, 10),
-	(29, 25, 1),
-	(30, 20, 2),
-	(31, 20, 6),
-	(32, 20, 9),
-	(33, 5, 1),
-	(34, 5, 8),
-	(35, 6, 2),
-	(36, 6, 5),
-	(37, 14, 7),
-	(38, 14, 2),
-	(39, 14, 5),
-	(40, 16, 6),
-	(41, 16, 7),
-	(42, 17, 2),
-	(43, 17, 4),
-	(44, 17, 5),
-	(45, 18, 3),
-	(46, 18, 1),
-	(47, 11, 7),
-	(48, 11, 1),
-	(49, 11, 9),
-	(50, 19, 10),
-	(51, 19, 4),
-	(52, 19, 5),
-	(53, 21, 3),
-	(54, 21, 4),
-	(55, 21, 1),
-	(56, 22, 3),
-	(57, 22, 4),
-	(58, 22, 5),
-	(59, 23, 3),
-	(60, 23, 5),
-	(61, 23, 4),
-	(62, 24, 3),
-	(63, 24, 5),
-	(64, 15, 1),
-	(65, 15, 8),
-	(66, 15, 7),
-	(67, 15, 6),
-	(68, 12, 7),
-	(69, 12, 8),
-	(70, 12, 6),
-	(71, 12, 2);
+    (1, 7, 1), (2, 7, 2), (3, 7, 3), (4, 1, 1), (5, 1, 3), (6, 1, 4), (7, 1, 2), (8, 2, 1), (9, 2, 4), (10, 2, 3),
+    (11, 4, 1), (12, 4, 4), (13, 4, 3), (14, 3, 1), (15, 3, 5), (16, 8, 1), (17, 8, 2), (18, 9, 2), (19, 9, 5), (20, 10, 5),
+    (21, 13, 6), (22, 13, 7), (23, 13, 8), (24, 13, 2), (25, 13, 9), (26, 25, 5), (27, 25, 4), (28, 25, 10), (29, 25, 1), (30, 20, 2),
+    (31, 20, 6), (32, 20, 9), (33, 5, 1), (34, 5, 8), (35, 6, 2), (36, 6, 5), (37, 14, 7), (38, 14, 2), (39, 14, 5), (40, 16, 6),
+    (41, 16, 7), (42, 17, 2), (43, 17, 4), (44, 17, 5), (45, 18, 3), (46, 18, 1), (47, 11, 7), (48, 11, 1), (49, 11, 9), (50, 19, 10),
+    (51, 19, 4), (52, 19, 5), (53, 21, 3), (54, 21, 4), (55, 21, 1), (56, 22, 3), (57, 22, 4), (58, 22, 5), (59, 23, 3), (60, 23, 5),
+    (61, 23, 4), (62, 24, 3), (63, 24, 5), (64, 15, 1), (65, 15, 8), (66, 15, 7), (67, 15, 6), (68, 12, 7), (69, 12, 8), (70, 12, 6), (71, 12, 2);
 
 -- 테이블 데이터 connected_m.expert_review:~140 rows (대략적) 내보내기
 INSERT IGNORE INTO `expert_review` (`id`, `content_id`, `analysis_id`, `movie_title`, `critic_name`, `rating`, `comment`, `source`, `created_at`, `source_id`) VALUES
@@ -271,6 +206,8 @@ INSERT IGNORE INTO `expert_review` (`id`, `content_id`, `analysis_id`, `movie_ti
 	(139, 25, 1, '올드보이', '유지나', '7', '박찬욱버전 <남자의 탄생>, 부제는 ‘늙은 꼬마-남성’의 욕망/트라우마 속으로...', 'Cine21', '2026-04-07 05:00:34', NULL),
 	(140, 25, 1, '올드보이', '이동진', '9', '치밀한 덫과 강력한 도끼를 함께 갖춘 괴력의 영화', 'Cine21', '2026-04-07 05:00:34', NULL);
 
+
+SET FOREIGN_KEY_CHECKS = 1;
 -- 테이블 데이터 connected_m.genre:~10 rows (대략적) 내보내기
 
 

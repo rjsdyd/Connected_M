@@ -1,27 +1,21 @@
 package com.Connectedm.backend.domain.content.service;
 
-import java.util.List;
-import java.util.Map;
-
+import com.Connectedm.backend.domain.content.dto.TmdbMovieResponseDto;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.Connectedm.backend.domain.content.dto.TmdbMovieResponseDto;
-
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class TmdbService {
 
-    // 1. properties 파일에서 설정값 읽어오기
     @Value("${tmdb.api.key}")
     private String apiKey;
-
-    @Value("${tmdb.api.token}")
-    private String apiToken;
 
     @Value("${tmdb.api.base-url}")
     private String baseUrl;
@@ -29,7 +23,7 @@ public class TmdbService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     /**
-     * 영화 제목으로 진짜 TMDB ID 찾아오기
+     * 영화 제목으로 TMDB ID 검색
      */
     public Long searchMovieIdByTitle(String title) {
         String url = UriComponentsBuilder.fromHttpUrl(baseUrl)
@@ -39,32 +33,46 @@ public class TmdbService {
                 .queryParam("language", "ko-KR")
                 .toUriString();
 
-        // 1. 검색 API 호출
         Map<String, Object> response = restTemplate.getForObject(url, Map.class);
 
-        // 2. 검색 결과에서 첫 번째 영화의 ID 추출
         if (response != null && response.get("results") != null) {
             List<Map<String, Object>> results = (List<Map<String, Object>>) response.get("results");
-            
-            if (results != null && !results.isEmpty()) {
-                // 가장 연관도 높은 첫 번째 결과의 ID 반환
+            if (!results.isEmpty()) {
                 return Long.valueOf(results.get(0).get("id").toString());
             }
         }
-
-        return null; // 검색 결과가 없을 경우
+        return null;
     }
 
     /**
-     * 영화 상세 정보 가져오기
+     * 영화 상세 정보 및 한국 심의 등급 가져오기
      */
     public TmdbMovieResponseDto getMovieDetail(String tmdbId) {
-        String url = "https://api.themoviedb.org/3/movie/" + tmdbId +
-                    "?api_key=" + apiKey +
-                    "&language=ko-KR" +
-                    "&append_to_response=credits,watch/providers";
-//https://api.themoviedb.org/3/movie/{tmdbId}?api_key={apiKey}&language=ko-KR&append_to_response=credits,watch/providers
+        String url = UriComponentsBuilder.fromHttpUrl("https://api.themoviedb.org/3/movie/" + tmdbId)
+                .queryParam("api_key", apiKey)
+                .queryParam("language", "ko-KR")
+                .queryParam("append_to_response", "credits,watch/providers,release_dates")
+                .toUriString();
 
-        return restTemplate.getForObject(url, TmdbMovieResponseDto.class);
+        TmdbMovieResponseDto response = restTemplate.getForObject(url, TmdbMovieResponseDto.class);
+
+        // KR 등급 추출 로직
+        if (response != null && response.getReleaseDates() != null && response.getReleaseDates().getResults() != null) {
+            String krRating = response.getReleaseDates().getResults().stream()
+                    // 1. 한국(KR) 데이터 필터링 + 내부 리스트가 null이 아닌지 확인
+                    .filter(r -> "KR".equals(r.getIso31661()) && r.getReleaseDates() != null)
+                    // 2. 내부의 release_dates 리스트를 평탄화 (Stream<ReleaseDateDetail>)
+                    .flatMap(r -> r.getReleaseDates().stream())
+                    // 3. certification(ageRating) 값 추출
+                    .map(TmdbMovieResponseDto.ReleaseDateDetail::getAgeRating)
+                    // 4. 비어있지 않은 값만 필터링
+                    .filter(c -> c != null && !c.isEmpty())
+                    .findFirst()
+                    .orElse("정보없음");
+
+            response.setAgeRating(krRating);
+        }
+
+        return response;
     }
 }
