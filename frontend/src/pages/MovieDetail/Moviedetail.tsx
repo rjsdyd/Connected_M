@@ -13,15 +13,16 @@ interface CastMember {
 
 interface ReviewData {
   id: number;
-  criticName: string;
+  nickname?: string;   // 유저 리뷰는 nickname으로 옴
+  criticName?: string; // 전문가 리뷰는 criticName으로 옴
   rating: string;
   comment: string;
-  sourceName: string;
-  nickname?: string; // 백엔드 필드명 대응을 위해 추가
+  sourceName?: string; // 전문가 리뷰에만 있음
+  createdAt?: string; // 백엔드 필드명 대응을 위해 추가
 }
 
 interface MovieDetailData {
-  id: number;
+id: number;
   title: string;
   overview: string;
   posterPath: string;    
@@ -34,15 +35,15 @@ interface MovieDetailData {
   expertReviews: ReviewData[];
   userReviews: ReviewData[];
   backdropPath: string;
-  runtime?: number;
+  runtime: number;
+  ageRating: string;
 }
 
 const MovieDetail: React.FC = () => {
-  // 🚀 페이지 이동 시 스크롤을 최상단으로 올리는 코드 추가
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [])
-  const { id } = useParams<{ id: string }>(); // URL에서 영화 ID 추출
+  const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<MovieDetailData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   
@@ -51,23 +52,16 @@ const MovieDetail: React.FC = () => {
 
   // 이 부분의 비교 로직을 강화하여 새로고침 시에도 정확히 체크되도록 수정했습니다.
   useEffect(() => {
-  if (movie && isLoggedIn && userNickname) {
-    // 🔍 디버깅용 로그: 실제로 비교되는 값들을 확인해보세요
-    console.log("내 닉네임:", userNickname);
-    console.log("리뷰 목록:", movie.userReviews);
-
-    const alreadyHasReview = movie.userReviews.some(
-      (review) => {
-        // 백엔드에서 주는 이름 필드가 criticName 일수도, nickname 일수도 있으므로 둘 다 체크합니다.
-        const reviewerName = (review.criticName || review.nickname || "").trim();
-        return reviewerName === userNickname.trim();
-      }
-    );
-    
-    console.log("작성 여부 확인 결과:", alreadyHasReview);
-    setHasReviewed(alreadyHasReview);
-  }
-}, [movie, isLoggedIn, userNickname]);
+    if (movie && isLoggedIn && userNickname) {
+      const alreadyHasReview = movie.userReviews.some(
+        (review) => {
+          // JSON 데이터의 nickname과 내 userNickname을 비교
+          return review.nickname?.trim() === userNickname.trim();
+        }
+      );
+      setHasReviewed(alreadyHasReview);
+    }
+  }, [movie, isLoggedIn, userNickname]);
 
   const [isWishlisted, setIsWishlisted] = useState<boolean>(false); 
   const [expertPage, setExpertPage] = useState(0);
@@ -129,37 +123,34 @@ const MovieDetail: React.FC = () => {
     );
   };
 
-const handleReviewSubmit = async () => {
+  // 3. 리뷰 등록 API 연동 부분
+  const handleReviewSubmit = async () => {
     if (!isLoggedIn) { alert("로그인이 필요합니다."); return; }
     if (hasReviewed) { alert("리뷰는 한 번만 작성 가능합니다."); return; }
     if (!newComment.trim()) { alert("내용을 입력해주세요."); return; }
     if (newRating === 0) { alert("별점을 선택해주세요."); return; }
 
-    try {
-      // 백엔드 UserReviewRequestDto 구조에 맞춰 rating과 comment만 보냅니다.
+        try {
       const reviewBody = {
         rating: newRating.toString(),
         comment: newComment
       };
 
-      // 1. 서버에 데이터 전송 (주소와 쿼리 파라미터 방식으로 수정)
+      // ⚠️ 주소 뒤에 ?contentId=${id} 가 반드시 붙어야 백엔드 500 에러가 안 납니다.
       const response = await axios.post(
         `http://localhost:8080/api/contents/user-reviews?contentId=${id}`, 
         reviewBody
       );
 
-      // 2. 서버 응답이 성공(200~201)인 경우에만 로직 수행
       if (response.status === 200 || response.status === 201) {
         alert("리뷰가 성공적으로 등록되었습니다!");
-
-        // 3. UI 즉시 업데이트 (중복 작성 방지)
         setHasReviewed(true);
 
-        // 4. 관람평 목록에 내가 쓴 리뷰 즉시 끼워넣기 (화면 갱신)
         if (movie) {
+          // UI 즉시 반영용 데이터 (필드명 nickname 주의!)
           const myNewReview: ReviewData = {
-            id: Date.now(), // 임시 ID (서버에서 받은 ID가 있다면 response.data.id 사용 권장)
-            criticName: userNickname || "나",
+            id: Date.now(), 
+            nickname: userNickname || "나",
             rating: newRating.toString(),
             comment: newComment,
             sourceName: "내 리뷰"
@@ -167,23 +158,15 @@ const handleReviewSubmit = async () => {
 
           setMovie({
             ...movie,
-            userReviews: [myNewReview, ...movie.userReviews] // 새 리뷰를 목록 맨 앞으로
+            userReviews: [myNewReview, ...movie.userReviews]
           });
         }
-
-        // 5. 입력창 비우기
         setNewComment("");
         setNewRating(0);
       }
     } catch (error) {
       console.error("리뷰 등록 실패 상세:", error);
-      // 만약 서버에서 "이미 작성한 유저입니다"라는 에러를 보낸다면 여기서 처리
-      if (axios.isAxiosError(error) && error.response?.status === 400) {
-        alert("이미 리뷰를 작성하셨습니다.");
-        setHasReviewed(true);
-      } else {
-        alert("리뷰 등록 중 오류가 발생했습니다. 서버 연결을 확인해 주세요.");
-      }
+      alert("리뷰 등록 중 오류가 발생했습니다.");
     }
   };
 
@@ -206,48 +189,47 @@ const handleReviewSubmit = async () => {
   const getOttLink = (logoPath: string, movieTitle: string) => {
     const path = logoPath.trim();
     if (path.includes("pbpMk2JmcoNnQwx5JGpXngfoWtp")) return "https://www.netflix.com";
-    if (path.includes("dpR8r13zWDeUR0QkzWidrdMxa56")) return "https://www.netflix.com";
-    if (path.includes("97yvRBw1GzX7fXprcF80er19ot")) return "https://www.disneyplus.com";
-    if (path.includes("5gmEivxOGPdqQ0A09uXp9Gf1vSj")) return "https://www.coupangplay.com";
-    if (path.includes("hPcjSaWfMwEqXaCMu7Fkb529Dkc")) return "https://www.wavve.com";
-    if (path.includes("5gmEivxOGPdq4Afpq1f8ktLtEW1")) return "https://watcha.com";
-    if (path.includes("qHThQdkJuROK0k5QTCrknaNukWe")) return "https://www.tving.com";
     return `https://www.google.com/search?q=${encodeURIComponent(movieTitle)}+시청하기`;
+  };
+
+  // 연령 등급 배지 렌더링 함수
+  const renderAgeBadge = (age: string | undefined) => {
+    const text = age || "전체";
+    let className = "age-all";
+    if (text.includes("18")) className = "age-18";
+    else if (text.includes("15")) className = "age-15";
+    else if (text.includes("12")) className = "age-12";
+    return <span className={`age-badge ${className}`}>{text === "ALL" ? "전체" : text}</span>;
   };
 
   if (loading || !movie) return <div className="loading-container">데이터를 불러오는 중...</div>;
 
-  const ottLogos = movie.ottLogos 
-    ? movie.ottLogos.split(',')
-        .map(s => s.trim())
-        .filter(s => s && s.length > 10) 
-    : [];
+  const ottLogos = movie.ottLogos ? movie.ottLogos.split(',').map(s => s.trim()).filter(s => s && s.length > 10) : [];
 
   return (
     <div className="detail-container">
       <main className="main-content">
         <section className="banner-section">
           <div className="banner-background-wrapper">
-            <div 
-              className="banner-bg-image" 
-              style={{ backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdropPath})` }}
-            ></div>
+            <div className="banner-bg-image" style={{ backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdropPath})` }}></div>
             <div className="banner-overlay"></div>
           </div>
 
           <div className="banner-content">
             <div className="poster-area">
-              <img 
-                src={`https://image.tmdb.org/t/p/w500${movie.posterPath}`} 
-                alt={movie.title} 
-                className="main-poster" 
-              />
+              <img src={`https://image.tmdb.org/t/p/w500${movie.posterPath}`} alt={movie.title} className="main-poster" />
             </div>
             
             <div className="info-area">
+              {/* 연령과 런타임을 제목 위로 배치 */}
+              <div className="meta-info-row">
+                {renderAgeBadge(movie.ageRating)}
+                <span className="runtime-label">{movie.runtime || '120'} min</span>
+              </div>
               <div className="title-row">
                 <h1 className="movie-title">{movie.title}</h1>
-                <span className="runtime-label">{movie.runtime || '120'} min</span>
+                  {renderAgeBadge(movie.ageRating)} 
+                  <span className="runtime-label">{movie.runtime || '120'} min</span>
               </div>
               
               <div className="genre-row">
@@ -372,7 +354,6 @@ const handleReviewSubmit = async () => {
                       let StarIcon = FaRegStar;
                       if (displayRating >= i * 2 + 2) StarIcon = FaStar;
                       else if (displayRating >= i * 2 + 1) StarIcon = FaStarHalfAlt;
-
                       return (
                         <div key={i} className="interactive-star-area">
                           <StarIcon className="interactive-star-icon visible-star" />
@@ -386,13 +367,7 @@ const handleReviewSubmit = async () => {
                     <span className="rating-num-display">{hoverRating !== null ? hoverRating : newRating}점</span>
                   </div>
                   <div className="textarea-wrapper">
-                    <textarea 
-                      className="write-textarea" 
-                      placeholder={`${userNickname}님, 솔직한 감상을 남겨주세요.`}
-                      value={newComment} 
-                      maxLength={200}
-                      onChange={(e) => setNewComment(e.target.value)} 
-                    />
+                    <textarea className="write-textarea" placeholder={`${userNickname}님, 솔직한 감상을 남겨주세요.`} value={newComment} maxLength={200} onChange={(e) => setNewComment(e.target.value)} />
                     <span className="char-count">{newComment.length} / 200</span>
                   </div>
                   <button className="btn-submit-review" onClick={handleReviewSubmit}>리뷰 등록</button>
