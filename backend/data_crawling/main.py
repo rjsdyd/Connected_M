@@ -16,6 +16,7 @@ from movie_data import MOVIE_CATEGORIES
 from scraper import MovieScraper
 from expert_saver import ExpertSaver, db_host, db_port, db_user, db_pw, db_name
 from dotenv import load_dotenv
+from embedding_engine import MeaningVectorEngine
 
 DEFAULT_ANALYSIS_ID = 1  # analysis_cache 테이블의 1번 데이터 ID (자가 치유용)
 
@@ -24,6 +25,7 @@ load_dotenv()
 
 def save_data_and_crawling_plzplzplz():
     scraper = MovieScraper(headless=True)
+    engine = MeaningVectorEngine()
 
     db = ExpertSaver(
         host=db_host,
@@ -45,11 +47,20 @@ def save_data_and_crawling_plzplzplz():
                 result = scraper.get_expert_reviews(cine21_id, limit=10)
 
                 if result:
+
+                    # 1. 텍스트 합치기: 수집된 리뷰 10개를 하나의 덩어리로
+                    all_reviews_text = " ".join([r['content'] for r in result])
+
+                    # 2. 의미 좌표 생성 : AI가 이 영화의 '느낌'을 숫자로 변환
+                    print(f"🧠 '{movie_name}'의 의미 좌표를 추출하는 중... (잠시만 기다려주세요!)")
+                    meaning_vector = engine.generate_vector(all_reviews_text)
+
                     db.save_review(
                         cine21_id=cine21_id,
                         analysis_id=DEFAULT_ANALYSIS_ID,
                         movie_title=movie_name,
-                        reviews=result
+                        reviews=result,
+                        vector=meaning_vector # 파라미터 추가
                     )
                     print(f"저장 완료 (cine21_id : {cine21_id}, 제목 : {movie_name})")
                 else:
@@ -62,6 +73,8 @@ def save_data_and_crawling_plzplzplz():
 
 if __name__ == "__main__":
     save_data_and_crawling_plzplzplz()
+
+
 
 
 

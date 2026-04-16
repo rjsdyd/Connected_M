@@ -32,6 +32,12 @@ public class AnalysisCache {
     @JoinColumn(name = "content_id")
     private Content content;
 
+    @Column(columnDefinition = "TEXT")
+    private String embeddingVector;
+
+    @Column(length = 500)
+    private String searchKeywords;
+
     // 분석의 근거가 된 수집된(전문가) 리뷰들 (1:N)
     @Builder.Default
     @OneToMany(mappedBy = "analysisCache", cascade = CascadeType.ALL)
