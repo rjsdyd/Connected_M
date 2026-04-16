@@ -29,7 +29,7 @@ public class UserReviewController {
             @RequestParam Long contentId,
             @RequestBody UserReviewRequestDto dto) {
 
-        // TODO: 보안 필터 적용 전이니 임시로 1번 유저 사용 ㅋ
+        // TODO: 보안 필터 적용 전이니 임시로 1번 유저 사용
         Long userId = 1L;
 
         reviewService.saveUserReview(userId, contentId, dto);
@@ -48,7 +48,7 @@ public class UserReviewController {
 
         Long userId = 1L; // 임시 유저 ㅋ
 
-        // reviewService.updateUserReview(userId, reviewId, dto); // 곧 만들 예정 ㅋ
+        // reviewService.updateUserReview(userId, reviewId, dto); // 곧 만들 예정
         return ApiResponse.success("리뷰가 수정되었습니다!");
     }
 

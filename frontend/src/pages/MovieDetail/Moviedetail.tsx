@@ -13,14 +13,16 @@ interface CastMember {
 
 interface ReviewData {
   id: number;
-  criticName: string;
+  nickname?: string;   // 유저 리뷰는 nickname으로 옴
+  criticName?: string; // 전문가 리뷰는 criticName으로 옴
   rating: string;
   comment: string;
-  sourceName: string;
+  sourceName?: string; // 전문가 리뷰에만 있음
+  createdAt?: string; // 백엔드 필드명 대응을 위해 추가
 }
 
 interface MovieDetailData {
-  id: number;
+id: number;
   title: string;
   overview: string;
   posterPath: string;    
@@ -33,8 +35,8 @@ interface MovieDetailData {
   expertReviews: ReviewData[];
   userReviews: ReviewData[];
   backdropPath: string;
-  runtime?: number;
-  certification?: string; // 연령 정보 추가
+  runtime: number;
+  ageRating: string;
 }
 
 const MovieDetail: React.FC = () => {
@@ -47,6 +49,20 @@ const MovieDetail: React.FC = () => {
   
   const { isLoggedIn, userNickname } = useAuth();
   const [hasReviewed, setHasReviewed] = useState<boolean>(false);
+
+  // 이 부분의 비교 로직을 강화하여 새로고침 시에도 정확히 체크되도록 수정했습니다.
+  useEffect(() => {
+    if (movie && isLoggedIn && userNickname) {
+      const alreadyHasReview = movie.userReviews.some(
+        (review) => {
+          // JSON 데이터의 nickname과 내 userNickname을 비교
+          return review.nickname?.trim() === userNickname.trim();
+        }
+      );
+      setHasReviewed(alreadyHasReview);
+    }
+  }, [movie, isLoggedIn, userNickname]);
+
   const [isWishlisted, setIsWishlisted] = useState<boolean>(false); 
   const [expertPage, setExpertPage] = useState(0);
   const [userPage, setUserPage] = useState(0);
@@ -64,7 +80,10 @@ const MovieDetail: React.FC = () => {
         const data: MovieDetailData = response.data.data || response.data;
 
         if (isLoggedIn && userNickname) {
-          const alreadyHasReview = data.userReviews.some(review => review.criticName === userNickname);
+          const alreadyHasReview = data.userReviews.some(review => {
+            const reviewerName = (review.criticName || review.nickname || "").trim();
+            return reviewerName === userNickname.trim();
+          });
           setHasReviewed(alreadyHasReview);
         }
         
@@ -104,33 +123,39 @@ const MovieDetail: React.FC = () => {
     );
   };
 
+  // 3. 리뷰 등록 API 연동 부분
   const handleReviewSubmit = async () => {
     if (!isLoggedIn) { alert("로그인이 필요합니다."); return; }
     if (hasReviewed) { alert("리뷰는 한 번만 작성 가능합니다."); return; }
     if (!newComment.trim()) { alert("내용을 입력해주세요."); return; }
     if (newRating === 0) { alert("별점을 선택해주세요."); return; }
 
-    try {
-      const reviewRequest = {
-        contentId: movie?.id,
-        criticName: userNickname,
+        try {
+      const reviewBody = {
         rating: newRating.toString(),
         comment: newComment
       };
 
-      const response = await axios.post(`http://localhost:8080/api/reviews`, reviewRequest);
+      // ⚠️ 주소 뒤에 ?contentId=${id} 가 반드시 붙어야 백엔드 500 에러가 안 납니다.
+      const response = await axios.post(
+        `http://localhost:8080/api/contents/user-reviews?contentId=${id}`, 
+        reviewBody
+      );
 
       if (response.status === 200 || response.status === 201) {
         alert("리뷰가 성공적으로 등록되었습니다!");
         setHasReviewed(true);
+
         if (movie) {
+          // UI 즉시 반영용 데이터 (필드명 nickname 주의!)
           const myNewReview: ReviewData = {
-            id: Date.now(),
-            criticName: userNickname || "나",
+            id: Date.now(), 
+            nickname: userNickname || "나",
             rating: newRating.toString(),
             comment: newComment,
             sourceName: "내 리뷰"
           };
+
           setMovie({
             ...movie,
             userReviews: [myNewReview, ...movie.userReviews]
@@ -140,12 +165,8 @@ const MovieDetail: React.FC = () => {
         setNewRating(0);
       }
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 400) {
-        alert("이미 리뷰를 작성하셨습니다.");
-        setHasReviewed(true);
-      } else {
-        alert("리뷰 등록 중 오류가 발생했습니다.");
-      }
+      console.error("리뷰 등록 실패 상세:", error);
+      alert("리뷰 등록 중 오류가 발생했습니다.");
     }
   };
 
@@ -175,7 +196,7 @@ const MovieDetail: React.FC = () => {
   const renderAgeBadge = (age: string | undefined) => {
     const text = age || "전체";
     let className = "age-all";
-    if (text.includes("19")) className = "age-19";
+    if (text.includes("18")) className = "age-18";
     else if (text.includes("15")) className = "age-15";
     else if (text.includes("12")) className = "age-12";
     return <span className={`age-badge ${className}`}>{text === "ALL" ? "전체" : text}</span>;
@@ -202,11 +223,13 @@ const MovieDetail: React.FC = () => {
             <div className="info-area">
               {/* 연령과 런타임을 제목 위로 배치 */}
               <div className="meta-info-row">
-                {renderAgeBadge(movie.certification)}
+                {renderAgeBadge(movie.ageRating)}
                 <span className="runtime-label">{movie.runtime || '120'} min</span>
               </div>
               <div className="title-row">
                 <h1 className="movie-title">{movie.title}</h1>
+                  {renderAgeBadge(movie.ageRating)} 
+                  <span className="runtime-label">{movie.runtime || '120'} min</span>
               </div>
               
               <div className="genre-row">
@@ -236,8 +259,16 @@ const MovieDetail: React.FC = () => {
 
             <div className="ai-keyword-side-card">
               <div className="card-header">AI 분석 키워드</div>
-              <div className="card-body placeholder-body">
-                <p className="placeholder-text">추후 구현 예정</p>
+              <div className="card-body">
+                <p className="ai-keyword-tags">
+                  {movie.topKeywords && movie.topKeywords.length > 0 ? (
+                    movie.topKeywords.map((k, i) => (
+                      <span key={i} className="ai-tag"># {k}</span>
+                    ))
+                  ) : (
+                    <span className="placeholder-text">분석된 키워드가 없습니다.</span>
+                  )}
+                </p>
               </div>
             </div>
           </div>
