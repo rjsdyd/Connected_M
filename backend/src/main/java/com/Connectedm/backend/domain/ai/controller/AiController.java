@@ -31,17 +31,24 @@ public class AiController {
     }
 
     // 3. 대화형 맞춤 영화 추천 (챗봇)
-    @PostMapping("/recommend") // 명세에 따라 /recommend 엔드포인트 사용
-    public ChatResponse recommendMovie(@RequestBody ChatRequest request, @AuthenticationPrincipal UserDetails userDetails) { 
+    @PostMapping("/recommend")
+    public ChatResponse recommendMovie(@RequestBody ChatRequest request, @AuthenticationPrincipal UserDetails userDetails) {
         Long userId = null;
-        
-        // 로그인한 사용자(토큰 있음)라면 UserDetails가 주입됨
+
         if (userDetails != null) {
-            userId = userRepository.findByEmail(userDetails.getUsername())
+            String loginInfo = userDetails.getUsername(); // "4834407334" 또는 이메일이 들어옴
+
+            // 1. 먼저 이메일로 찾아봅니다 (로컬 유저용)
+            userId = userRepository.findByEmail(loginInfo)
                     .map(User::getId)
-                    .orElse(null);
+                    .orElseGet(() ->
+                            // 2. 없으면 번호(providerId)로 다시 찾습니다 (카카오 유저용)
+                            userRepository.findByProviderId(loginInfo)
+                                    .map(User::getId)
+                                    .orElse(null)
+                    );
         }
-        
+
         return aiService.processChat(request, userId);
     }
 }
