@@ -1,9 +1,22 @@
-import movie_data
+'''
+[ 프로젝트 핵심 모듈 및 환경 설정 불러오기 ]
+
+1. movie_data:
+   - 크롤링할 영화 목록 및 타겟 URL 정보가 담긴 데이터 저장소입니다.
+2. scraper (MovieScraper):
+   - 셀레니움(Selenium)을 이용해 실제로 웹사이트에 접속하고 데이터를 긁어오는 '수집기'입니다.
+3. expert_saver (ExpertSaver):
+   - 수집된 데이터를 MariaDB에 안전하게 저장하는 '저장소 매니저'입니다.
+4. dotenv (load_dotenv):
+   - .env 파일에 숨겨둔 DB 비밀번호 등 보안 정보를 읽어오는 '보안 관리자'입니다.
+'''
+
 from movie_data import MOVIE_CATEGORIES
 from scraper import MovieScraper
 from expert_saver import ExpertSaver, db_host, db_port, db_user, db_pw, db_name
 from dotenv import load_dotenv
 from gemini_analysis import perform_analysis
+from embedding_engine import MeaningVectorEngine
 
 # 환경 변수 로드
 load_dotenv()
@@ -13,6 +26,8 @@ DEFAULT_ANALYSIS_ID = 1  # 외래키 제약조건 방지용 기본 ID
 def save_data_and_crawling():
     """1단계: 셀레니움으로 전문가 리뷰 수집 및 DB 저장"""
     scraper = MovieScraper(headless=True)
+    engine = MeaningVectorEngine()
+
     db = ExpertSaver(
         host=db_host,
         port=db_port,
@@ -33,11 +48,20 @@ def save_data_and_crawling():
                 result = scraper.get_expert_reviews(cine21_id, limit=10)
 
                 if result:
+
+                    # 1. 텍스트 합치기: 수집된 리뷰 10개를 하나의 덩어리로
+                    all_reviews_text = " ".join([r['content'] for r in result])
+
+                    # 2. 의미 좌표 생성 : AI가 이 영화의 '느낌'을 숫자로 변환
+                    print(f"🧠 '{movie_name}'의 의미 좌표를 추출하는 중... (잠시만 기다려주세요!)")
+                    meaning_vector = engine.generate_vector(all_reviews_text)
+
                     db.save_review(
                         cine21_id=cine21_id,
                         analysis_id=DEFAULT_ANALYSIS_ID,
                         movie_title=movie_name,
-                        reviews=result
+                        reviews=result,
+                        vector=meaning_vector # 파라미터 추가
                     )
                     print(f"✅ 저장 완료: {movie_name}")
                 else:

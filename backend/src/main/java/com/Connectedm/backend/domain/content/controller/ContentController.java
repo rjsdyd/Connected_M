@@ -3,10 +3,15 @@ package com.Connectedm.backend.domain.content.controller;
 import com.Connectedm.backend.domain.content.dto.*;
 import com.Connectedm.backend.domain.content.service.ContentService;
 import com.Connectedm.backend.domain.content.service.ReviewService;
+import com.Connectedm.backend.domain.content.service.SemanticSearchService;
 import com.Connectedm.backend.global.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/contents")
@@ -15,6 +20,8 @@ public class ContentController {
 
     private final ContentService contentService;
     private final ReviewService reviewService;
+    private final SemanticSearchService semanticSearchService;
+    private final RestTemplate restTemplate;
 
     /**
      * 메인페이지 데이터 조회
@@ -60,6 +67,33 @@ public class ContentController {
     public ApiResponse<String> saveExpertReview(@RequestBody ExpertReviewCreateRequestDto dto) {
         reviewService.saveExpertReview(dto);
         return ApiResponse.success("전문가 리뷰 저장 완료!");
+    }
+
+    @PostMapping("/search/semantic")
+    public ResponseEntity<List<ContentSearchResponse>> searchSemantic(@RequestBody Map<String, String> requestBody) {
+        // 1. 프론트엔드에서 보낸 자연어 쿼리 추출 ㅋㅋㅋㅋ
+        String userQuery = requestBody.get("query");
+
+        if (userQuery == null || userQuery.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        // 2. 파이썬 사령부(5000번 포트)로 "이 문장 좌표로 바꿔와!"
+        String pythonUrl = "http://localhost:5000/vectorize";
+
+        // RestTemplate이 파이썬의 JSON 응답을 double[]로 변환해줍니다!
+        double[] vector = restTemplate.postForObject(pythonUrl, Map.of("text", userQuery), double[].class);
+
+        // 3. 받아온 좌표를 DTO에 담아서 서비스 엔진으로 전달
+        ContentSearchRequest searchRequest = new ContentSearchRequest();
+        searchRequest.setQuery(userQuery);
+        searchRequest.setQueryVector(vector);
+
+        // 4. 자바 서비스에서 DB 전수조사 및 유사도 랭킹 산출
+        List<ContentSearchResponse> results = semanticSearchService.searchBySemantic(searchRequest);
+
+        // 5. 성공의 리스트 반환
+        return ResponseEntity.ok(results);
     }
 
 }

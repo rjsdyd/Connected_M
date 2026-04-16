@@ -1,24 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom'; // ID를 가져오기 위해 추가
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { FaStar, FaRegStar, FaStarHalfAlt } from 'react-icons/fa';
+import { FaStar, FaRegStar, FaStarHalfAlt, FaBookmark, FaRegBookmark } from 'react-icons/fa';
 import './MovieDetail.css';
-import { useAuth } from '../../hooks/useAuth'; 
+import { useAuth } from '../../hooks/useAuth';
 
-
-// 1. 백엔드 DTO와 1:1 대응하도록 인터페이스 수정
 interface CastMember {
   name: string;
   character: string;
-  profile_path: string; // Snake case 주의
+  profile_path: string;
 }
 
 interface ReviewData {
   id: number;
   criticName: string;
-  rating: string; // 백엔드 String 합의 반영
+  rating: string;
   comment: string;
   sourceName: string;
+  nickname?: string; // 백엔드 필드명 대응을 위해 추가
 }
 
 interface MovieDetailData {
@@ -35,15 +34,42 @@ interface MovieDetailData {
   expertReviews: ReviewData[];
   userReviews: ReviewData[];
   backdropPath: string;
+  runtime?: number;
 }
 
 const MovieDetail: React.FC = () => {
+  // 🚀 페이지 이동 시 스크롤을 최상단으로 올리는 코드 추가
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [])
   const { id } = useParams<{ id: string }>(); // URL에서 영화 ID 추출
   const [movie, setMovie] = useState<MovieDetailData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   
   const { isLoggedIn, userNickname } = useAuth();
   const [hasReviewed, setHasReviewed] = useState<boolean>(false);
+
+  // 이 부분의 비교 로직을 강화하여 새로고침 시에도 정확히 체크되도록 수정했습니다.
+  useEffect(() => {
+  if (movie && isLoggedIn && userNickname) {
+    // 🔍 디버깅용 로그: 실제로 비교되는 값들을 확인해보세요
+    console.log("내 닉네임:", userNickname);
+    console.log("리뷰 목록:", movie.userReviews);
+
+    const alreadyHasReview = movie.userReviews.some(
+      (review) => {
+        // 백엔드에서 주는 이름 필드가 criticName 일수도, nickname 일수도 있으므로 둘 다 체크합니다.
+        const reviewerName = (review.criticName || review.nickname || "").trim();
+        return reviewerName === userNickname.trim();
+      }
+    );
+    
+    console.log("작성 여부 확인 결과:", alreadyHasReview);
+    setHasReviewed(alreadyHasReview);
+  }
+}, [movie, isLoggedIn, userNickname]);
+
+  const [isWishlisted, setIsWishlisted] = useState<boolean>(false); 
   const [expertPage, setExpertPage] = useState(0);
   const [userPage, setUserPage] = useState(0);
   const itemsPerPage = 3;
@@ -52,18 +78,18 @@ const MovieDetail: React.FC = () => {
   const [newRating, setNewRating] = useState(0); 
   const [hoverRating, setHoverRating] = useState<number | null>(null);
 
-  // 2. 실시간 API 호출 로직
   useEffect(() => {
     const fetchMovieData = async () => {
       try {
         setLoading(true);
-        // 백엔드 API 주소 (환경에 맞춰 수정)
         const response = await axios.get(`http://localhost:8080/api/contents/${id}`);
         const data: MovieDetailData = response.data.data || response.data;
 
-        // 내가 쓴 리뷰가 있는지 체크
         if (isLoggedIn && userNickname) {
-          const alreadyHasReview = data.userReviews.some(review => review.criticName === userNickname);
+          const alreadyHasReview = data.userReviews.some(review => {
+            const reviewerName = (review.criticName || review.nickname || "").trim();
+            return reviewerName === userNickname.trim();
+          });
           setHasReviewed(alreadyHasReview);
         }
         
@@ -77,10 +103,16 @@ const MovieDetail: React.FC = () => {
     if (id) fetchMovieData();
   }, [id, isLoggedIn, userNickname]);
 
-  // 별점 렌더링 (String rating을 Number로 변환하여 처리)
+  const handleWishlistToggle = () => {
+    if (!isLoggedIn) {
+      alert("로그인이 필요한 기능입니다.");
+      return;
+    }
+    setIsWishlisted(!isWishlisted);
+  };
+
   const renderYellowStars = (rating: string | number) => {
     const numRating = typeof rating === 'string' ? parseFloat(rating) : rating;
-    const stars = [];
     const ratingOutOfFive = numRating / 2;
     const fullStars = Math.floor(ratingOutOfFive);
     const hasHalfStar = ratingOutOfFive % 1 >= 0.5;
@@ -92,34 +124,66 @@ const MovieDetail: React.FC = () => {
           if (i === fullStars && hasHalfStar) return <FaStarHalfAlt key={i} className="star-icon compact half" />;
           return <FaRegStar key={i} className="star-icon compact empty" />;
         })}
-        <span className="rating-num compact">{numRating}점</span>
+        <span className="rating-num compact"> {numRating} 점</span>
       </div>
     );
   };
 
-  // 3. 리뷰 등록 API 연동
-  const handleReviewSubmit = async () => {
+const handleReviewSubmit = async () => {
     if (!isLoggedIn) { alert("로그인이 필요합니다."); return; }
     if (hasReviewed) { alert("리뷰는 한 번만 작성 가능합니다."); return; }
     if (!newComment.trim()) { alert("내용을 입력해주세요."); return; }
     if (newRating === 0) { alert("별점을 선택해주세요."); return; }
 
     try {
-      const reviewRequest = {
-        contentId: movie?.id,
-        criticName: userNickname,
+      // 백엔드 UserReviewRequestDto 구조에 맞춰 rating과 comment만 보냅니다.
+      const reviewBody = {
         rating: newRating.toString(),
         comment: newComment
       };
 
-      // 실제 백엔드 POST 요청
-      await axios.post(`http://localhost:8080/api/reviews`, reviewRequest);
-      
-      alert("리뷰가 성공적으로 등록되었습니다!");
-      window.location.reload(); // 데이터 갱신을 위해 새로고침 혹은 상태 업데이트
+      // 1. 서버에 데이터 전송 (주소와 쿼리 파라미터 방식으로 수정)
+      const response = await axios.post(
+        `http://localhost:8080/api/contents/user-reviews?contentId=${id}`, 
+        reviewBody
+      );
+
+      // 2. 서버 응답이 성공(200~201)인 경우에만 로직 수행
+      if (response.status === 200 || response.status === 201) {
+        alert("리뷰가 성공적으로 등록되었습니다!");
+
+        // 3. UI 즉시 업데이트 (중복 작성 방지)
+        setHasReviewed(true);
+
+        // 4. 관람평 목록에 내가 쓴 리뷰 즉시 끼워넣기 (화면 갱신)
+        if (movie) {
+          const myNewReview: ReviewData = {
+            id: Date.now(), // 임시 ID (서버에서 받은 ID가 있다면 response.data.id 사용 권장)
+            criticName: userNickname || "나",
+            rating: newRating.toString(),
+            comment: newComment,
+            sourceName: "내 리뷰"
+          };
+
+          setMovie({
+            ...movie,
+            userReviews: [myNewReview, ...movie.userReviews] // 새 리뷰를 목록 맨 앞으로
+          });
+        }
+
+        // 5. 입력창 비우기
+        setNewComment("");
+        setNewRating(0);
+      }
     } catch (error) {
-      console.error("리뷰 등록 실패:", error);
-      alert("리뷰 등록 중 오류가 발생했습니다.");
+      console.error("리뷰 등록 실패 상세:", error);
+      // 만약 서버에서 "이미 작성한 유저입니다"라는 에러를 보낸다면 여기서 처리
+      if (axios.isAxiosError(error) && error.response?.status === 400) {
+        alert("이미 리뷰를 작성하셨습니다.");
+        setHasReviewed(true);
+      } else {
+        alert("리뷰 등록 중 오류가 발생했습니다. 서버 연결을 확인해 주세요.");
+      }
     }
   };
 
@@ -128,9 +192,9 @@ const MovieDetail: React.FC = () => {
 
   const renderNav = (cur: number, total: number, set: any) => (
     <div className="compact-controller">
-      <button className="nav-btn" onClick={() => set(prev => Math.max(0, prev - 1))} disabled={cur === 0}>‹</button>
-      <span className="page-indicator">{cur + 1}/{total}</span>
-      <button className="nav-btn" onClick={() => set(prev => Math.min(total - 1, prev + 1))} disabled={cur === total - 1}>›</button>
+      <button className="nav-btn" onClick={() => set((prev: number) => Math.max(0, prev - 1))} disabled={cur === 0}>‹</button>
+      <span className="page-indicator">{cur + 1}/{total > 0 ? total : 1}</span>
+      <button className="nav-btn" onClick={() => set((prev: number) => Math.min(total - 1, prev + 1))} disabled={cur >= total - 1}>›</button>
     </div>
   );
 
@@ -139,32 +203,92 @@ const MovieDetail: React.FC = () => {
     setNewRating((starIndex * 2) + (isHalf ? 1 : 2));
   };
 
+  const getOttLink = (logoPath: string, movieTitle: string) => {
+    const path = logoPath.trim();
+    if (path.includes("pbpMk2JmcoNnQwx5JGpXngfoWtp")) return "https://www.netflix.com";
+    if (path.includes("dpR8r13zWDeUR0QkzWidrdMxa56")) return "https://www.netflix.com";
+    if (path.includes("97yvRBw1GzX7fXprcF80er19ot")) return "https://www.disneyplus.com";
+    if (path.includes("5gmEivxOGPdqQ0A09uXp9Gf1vSj")) return "https://www.coupangplay.com";
+    if (path.includes("hPcjSaWfMwEqXaCMu7Fkb529Dkc")) return "https://www.wavve.com";
+    if (path.includes("5gmEivxOGPdq4Afpq1f8ktLtEW1")) return "https://watcha.com";
+    if (path.includes("qHThQdkJuROK0k5QTCrknaNukWe")) return "https://www.tving.com";
+    return `https://www.google.com/search?q=${encodeURIComponent(movieTitle)}+시청하기`;
+  };
+
   if (loading || !movie) return <div className="loading-container">데이터를 불러오는 중...</div>;
 
-  // OTT 로고 처리 (쉼표 구분)
-  const ottLogos = movie.ottLogos ? movie.ottLogos.split(',') : [];
+  const ottLogos = movie.ottLogos 
+    ? movie.ottLogos.split(',')
+        .map(s => s.trim())
+        .filter(s => s && s.length > 10) 
+    : [];
 
   return (
     <div className="detail-container">
       <main className="main-content">
-        <section 
-                  className="banner-section" 
-                  style={{ 
-                    backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url(https://image.tmdb.org/t/p/original${movie.backdropPath})` 
-                  }}
-                >
-          <div className="info-overlay">
-            <div className="platform-row">
-              {ottLogos.map((logo, i) => (
-                <div key={i} className="platform-link">
-                  <img src={`https://image.tmdb.org/t/p/original${logo}`} alt="OTT" className="platform-icon" />
-                </div>
-              ))}
-            </div>  
-            <div className="genre-list">
-               {movie.genres.map((g, i) => <span key={i} className="genre-label">{g}</span>)}
+        <section className="banner-section">
+          <div className="banner-background-wrapper">
+            <div 
+              className="banner-bg-image" 
+              style={{ backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdropPath})` }}
+            ></div>
+            <div className="banner-overlay"></div>
+          </div>
+
+          <div className="banner-content">
+            <div className="poster-area">
+              <img 
+                src={`https://image.tmdb.org/t/p/w500${movie.posterPath}`} 
+                alt={movie.title} 
+                className="main-poster" 
+              />
             </div>
-            <h1 className="movie-title">{movie.title}</h1>
+            
+            <div className="info-area">
+              <div className="title-row">
+                <h1 className="movie-title">{movie.title}</h1>
+                <span className="runtime-label">{movie.runtime || '120'} min</span>
+              </div>
+              
+              <div className="genre-row">
+                {movie.genres.map((g, i) => <span key={i} className="genre-tag">{g}</span>)}
+              </div>
+
+              <div className="platform-buttons-container">
+                <span className="platform-label">현재 상영중인 플랫폼</span>
+                <div className="platform-logos-row">
+                  {ottLogos.map((logo, i) => {
+                    const targetUrl = getOttLink(logo, movie.title);
+                    const fullLogoUrl = `https://image.tmdb.org/t/p/original${logo.startsWith('/') ? logo : '/' + logo}`;
+                    return (
+                      <a key={i} href={targetUrl} target="_blank" rel="noopener noreferrer" className="ott-logo-link">
+                        <img src={fullLogoUrl} alt="OTT 로고" className="ott-logo-simple" />
+                      </a>
+                    );
+                  })}
+                </div>
+                
+                <button className={`wishlist-btn ${isWishlisted ? 'active' : ''}`} onClick={handleWishlistToggle}>
+                  {isWishlisted ? <FaBookmark className="wish-icon" /> : <FaRegBookmark className="wish-icon" />}
+                  <span>{isWishlisted ? '찜한 영화' : '찜하기'}</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="ai-keyword-side-card">
+              <div className="card-header">AI 분석 키워드</div>
+              <div className="card-body">
+                <p className="ai-keyword-tags">
+                  {movie.topKeywords && movie.topKeywords.length > 0 ? (
+                    movie.topKeywords.map((k, i) => (
+                      <span key={i} className="ai-tag"># {k}</span>
+                    ))
+                  ) : (
+                    <span className="placeholder-text">분석된 키워드가 없습니다.</span>
+                  )}
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -191,66 +315,58 @@ const MovieDetail: React.FC = () => {
               <h2 className="section-title">줄거리</h2>
               <p className="synopsis-text">{movie.overview}</p>
             </section>
-
-            <section className="detail-section">
-              <h2 className="section-title">AI 분석 요약</h2>
-              <div className="ai-summary-box">
-                <p>{movie.aiSummary}</p>
-              </div>
-              <h3 className="sub-title">핵심 키워드</h3>
-              <ul className="ai-pick-list">
-                {movie.topKeywords.map((k, i) => <li key={i}># {k}</li>)}
-              </ul>
-            </section>
           </div>
 
           <div className="right-column">
-            <section className="detail-section compact-reviews-section">
+            <section className="detail-section">
               <h2 className="section-title">전문가 평점</h2>
               <div className="compact-card-container">
                 <div className="compact-card-content">
-                  {getPagedData(movie.expertReviews, expertPage).map((r, i) => (
-                    <div key={i} className="compact-review-row">
-                      <div className="compact-reviewer-meta">
-                        <span className="compact-reviewer-name">{r.criticName} ({r.sourceName})</span>
-                        {renderYellowStars(r.rating)}
+                  {movie.expertReviews.length > 0 ? (
+                    getPagedData(movie.expertReviews, expertPage).map((r, i) => (
+                      <div key={i} className="compact-review-row">
+                        <div className="compact-reviewer-meta">
+                          <span className="compact-reviewer-name">{r.criticName}</span>
+                          {renderYellowStars(r.rating)}
+                        </div>
+                        <p className="compact-comment-text">{r.comment}</p>
                       </div>
-                      <p className="compact-comment-text">{r.comment}</p>
-                    </div>
-                  ))}
+                    ))
+                  ) : <p className="empty-msg">등록된 평점이 없습니다.</p>}
                 </div>
                 {renderNav(expertPage, totalPagesCount(movie.expertReviews.length), setExpertPage)}
               </div>
             </section>
 
-            <section className="detail-section compact-reviews-section">
+            <section className="detail-section">
               <h2 className="section-title">관람평 리뷰 ({movie.userReviews.length}건)</h2>
               <div className="compact-card-container">
                 <div className="compact-card-content">
-                  {getPagedData(movie.userReviews, userPage).map((r, i) => (
-                    <div key={i} className="compact-review-row">
-                      <div className="compact-reviewer-meta">
-                        <span className="compact-reviewer-name">{r.criticName}</span>
-                        {renderYellowStars(r.rating)}
+                  {movie.userReviews.length > 0 ? (
+                    getPagedData(movie.userReviews, userPage).map((r, i) => (
+                      <div key={i} className="compact-review-row">
+                        <div className="compact-reviewer-meta">
+                          <span className="compact-reviewer-name">{r.criticName}</span>
+                          {renderYellowStars(r.rating)}
+                        </div>
+                        <p className="compact-comment-text">{r.comment}</p>
                       </div>
-                      <p className="compact-comment-text">{r.comment}</p>
-                    </div>
-                  ))}
+                    ))
+                  ) : <p className="empty-msg">첫 리뷰를 작성해보세요!</p>}
                 </div>
                 {renderNav(userPage, totalPagesCount(movie.userReviews.length), setUserPage)}
               </div>
             </section>
 
-            {/* 리뷰 작성 섹션 */}
             <section className="review-write-section">
-               <h2 className="write-title">리뷰 작성</h2>
+              <h2 className="write-title">리뷰 작성</h2>
               {!isLoggedIn ? (
                 <div className="already-reviewed-msg">로그인이 필요한 서비스입니다.</div>
               ) : hasReviewed ? (
                 <div className="already-reviewed-msg">이미 리뷰를 작성하셨습니다.</div>
               ) : (
                 <div className="write-form-container">
-                  <div className="interactive-rating-stars-wrapper half-star-support" onMouseLeave={() => setHoverRating(null)}>
+                  <div className="interactive-rating-stars-wrapper" onMouseLeave={() => setHoverRating(null)}>
                     {[...Array(5)].map((_, i) => {
                       const displayRating = hoverRating !== null ? hoverRating : newRating;
                       let StarIcon = FaRegStar;
@@ -267,14 +383,18 @@ const MovieDetail: React.FC = () => {
                         </div>
                       );
                     })}
-                    <span className="rating-num compact">{hoverRating !== null ? hoverRating : newRating}점</span>
+                    <span className="rating-num-display">{hoverRating !== null ? hoverRating : newRating}점</span>
                   </div>
-                  <textarea 
-                    className="write-textarea" 
-                    placeholder={`${userNickname}님, 솔직한 감상을 남겨주세요.`}
-                    value={newComment} 
-                    onChange={(e) => setNewComment(e.target.value)} 
-                  />
+                  <div className="textarea-wrapper">
+                    <textarea 
+                      className="write-textarea" 
+                      placeholder={`${userNickname}님, 솔직한 감상을 남겨주세요.`}
+                      value={newComment} 
+                      maxLength={200}
+                      onChange={(e) => setNewComment(e.target.value)} 
+                    />
+                    <span className="char-count">{newComment.length} / 200</span>
+                  </div>
                   <button className="btn-submit-review" onClick={handleReviewSubmit}>리뷰 등록</button>
                 </div>
               )}
