@@ -22,6 +22,8 @@ public class ContentDetailResponseDto {
     @Schema(hidden = true)
     private List<TmdbMovieResponseDto.TmdbCastItem> castList;
     private String backdropPath;
+    private Integer runtime;
+    private String ageRating;
 
     // AI 분석 영역
     private String aiSummary;
