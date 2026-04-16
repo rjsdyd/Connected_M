@@ -480,6 +480,7 @@ a {
   border-radius: 12px;
   margin-bottom: 12px;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .movie-poster span {
