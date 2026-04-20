@@ -13,25 +13,25 @@ interface CastMember {
 
 interface ReviewData {
   id: number;
-  nickname?: string;   // 유저 리뷰는 nickname으로 옴
-  criticName?: string; // 전문가 리뷰는 criticName으로 옴
+  nickname?: string;
+  criticName?: string;
   rating: string;
   comment: string;
-  sourceName?: string; // 전문가 리뷰에만 있음
-  createdAt?: string; // 백엔드 필드명 대응을 위해 추가
+  sourceName?: string;
+  createdAt?: string;
 }
 
 interface MovieDetailData {
-id: number;
+  id: number;
   title: string;
   overview: string;
-  posterPath: string;    
-  ottLogos: string;      
-  genres: string[];      
-  castList: CastMember[]; 
-  aiSummary: string;     
-  positiveRatio: number; 
-  topKeywords: string[]; 
+  posterPath: string;
+  ottLogos: string;
+  genres: string[];
+  castList: CastMember[];
+  aiSummary: string;
+  positiveRatio: number;
+  topKeywords: string[];
   expertReviews: ReviewData[];
   userReviews: ReviewData[];
   backdropPath: string;
@@ -43,6 +43,7 @@ const MovieDetail: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [])
+  
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<MovieDetailData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -50,12 +51,18 @@ const MovieDetail: React.FC = () => {
   const { isLoggedIn, userNickname } = useAuth();
   const [hasReviewed, setHasReviewed] = useState<boolean>(false);
 
-  // 이 부분의 비교 로직을 강화하여 새로고침 시에도 정확히 체크되도록 수정했습니다.
+  // 시간을 'H시간 M분' 형식으로 변환하는 함수
+  const formatRuntime = (totalMinutes: number): string => {
+    if (!totalMinutes) return "0분";
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return hours > 0 ? `${hours}시간 ${minutes}분` : `${minutes}분`;
+  };
+
   useEffect(() => {
     if (movie && isLoggedIn && userNickname) {
       const alreadyHasReview = movie.userReviews.some(
         (review) => {
-          // JSON 데이터의 nickname과 내 userNickname을 비교
           return review.nickname?.trim() === userNickname.trim();
         }
       );
@@ -106,11 +113,10 @@ const MovieDetail: React.FC = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        // 백엔드에서 받아온 리스트 중에 현재 보고 있는 영화(id)가 있는지 확인
         const wishlist = response.data;
         const isAlreadyWished = wishlist.some((item: any) => item.contentId === Number(id));
 
-        setIsWishlisted(isAlreadyWished); // 있으면 노란색 버튼으로 유지!
+        setIsWishlisted(isAlreadyWished);
       } catch (error) {
         console.error("찜 상태 로딩 실패:", error);
       }
@@ -159,20 +165,18 @@ const MovieDetail: React.FC = () => {
     );
   };
 
-  // 3. 리뷰 등록 API 연동 부분
   const handleReviewSubmit = async () => {
     if (!isLoggedIn) { alert("로그인이 필요합니다."); return; }
     if (hasReviewed) { alert("리뷰는 한 번만 작성 가능합니다."); return; }
     if (!newComment.trim()) { alert("내용을 입력해주세요."); return; }
     if (newRating === 0) { alert("별점을 선택해주세요."); return; }
 
-        try {
+    try {
       const reviewBody = {
         rating: newRating.toString(),
         comment: newComment
       };
 
-      // ⚠️ 주소 뒤에 ?contentId=${id} 가 반드시 붙어야 백엔드 500 에러가 안 납니다.
       const response = await axios.post(
         `http://localhost:8080/api/contents/user-reviews?contentId=${id}`, 
         reviewBody
@@ -183,7 +187,6 @@ const MovieDetail: React.FC = () => {
         setHasReviewed(true);
 
         if (movie) {
-          // UI 즉시 반영용 데이터 (필드명 nickname 주의!)
           const myNewReview: ReviewData = {
             id: Date.now(), 
             nickname: userNickname || "나",
@@ -228,7 +231,6 @@ const MovieDetail: React.FC = () => {
     return `https://www.google.com/search?q=${encodeURIComponent(movieTitle)}+시청하기`;
   };
 
-  // 연령 등급 배지 렌더링 함수
   const renderAgeBadge = (age: string | undefined) => {
     const text = age || "ALL";
     let className = "age-all";
@@ -257,15 +259,13 @@ const MovieDetail: React.FC = () => {
             </div>
             
             <div className="info-area">
-              {/* 연령과 런타임을 제목 위로 배치 */}
               <div className="meta-info-row">
                 {renderAgeBadge(movie.ageRating)}
-                <span className="runtime-label">{movie.runtime || '120'} min</span>
+                {/* 131 min 대신 2시간 11분 형식으로 출력 */}
+                <span className="runtime-label">{formatRuntime(movie.runtime)}</span>
               </div>
               <div className="title-row">
                 <h1 className="movie-title">{movie.title}</h1>
-                  {/* {renderAgeBadge(movie.ageRating)} 
-                  <span className="runtime-label">{movie.runtime || '120'} min</span>*/}
               </div>
               
               <div className="genre-row">
