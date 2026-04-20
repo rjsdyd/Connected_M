@@ -1,5 +1,6 @@
 package com.Connectedm.backend.global.auth;
 
+import com.Connectedm.backend.domain.user.repository.UserRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -21,12 +22,15 @@ public class JwtTokenProvider {
 
     private final SecretKey key;
     private final long accessTokenExpirationTime;
+    private final UserRepository userRepository;
 
     public JwtTokenProvider(
             @Value("${jwt.secret}") String secretKey,
-            @Value("${jwt.expiration}") long expirationTime) {
+            @Value("${jwt.expiration}") long expirationTime,
+            UserRepository userRepository) {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
         this.accessTokenExpirationTime = expirationTime;
+        this.userRepository = userRepository;
     }
 
     // 1. 액세스 토큰 생성
@@ -45,22 +49,22 @@ public class JwtTokenProvider {
     // ✨ 2. [추가] 토큰에서 인증 정보(Authentication) 가져오기
     // JwtAuthenticationFilter가 이 메서드를 호출해서 "이 토큰 누구꺼야?"라고 물어봅니다.
     public Authentication getAuthentication(String token) {
-        // 토큰의 Payload(내용물)를 엽니다.
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
 
-        // createAccessToken에서 넣었던 Subject(유저 PK 혹은 이메일)를 꺼냅니다.
-        String principal = claims.getSubject();
+        String subject = claims.getSubject(); // "이메일" 혹은 "카카오고유번호"
 
-        // 스프링 시큐리티가 이해할 수 있는 형태(UserDetails)로 유저 정보를 만듭니다.
-        // 현재는 권한(Role) 처리를 안 하므로 빈 리스트(Collections.emptyList())를 넣습니다.
-        UserDetails userDetails = new User(principal, "", Collections.emptyList());
+        // 💡 [핵심] 이메일로 찾아보고, 없으면 providerId로 다시 한 번 찾습니다.
+        Long userId = userRepository.findByEmail(subject) // 1. 이메일 탐색
+                .map(com.Connectedm.backend.domain.user.entity.User::getId)
+                .orElseGet(() -> userRepository.findByProviderId(subject) // 2. 없으면 카카오ID 탐색
+                        .map(com.Connectedm.backend.domain.user.entity.User::getId)
+                        .orElseThrow(() -> new RuntimeException("사용자 '" + subject + "'를 찾을 수 없습니다.")));
 
-        // 최종적으로 "이 사람은 인증된 사람이다!"라는 증명서를 발급합니다.
-        return new UsernamePasswordAuthenticationToken(userDetails, token, userDetails.getAuthorities());
+        return new UsernamePasswordAuthenticationToken(userId, token, Collections.emptyList());
     }
 
     // 3. 토큰 유효성 검사

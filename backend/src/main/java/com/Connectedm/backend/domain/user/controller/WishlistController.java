@@ -23,6 +23,7 @@ public class WishlistController {
     @PostMapping("/{contentId}")
     public ResponseEntity<String> toggleWishlist(
             @AuthenticationPrincipal Long userId, // 현재 로그인한 유저 ID 추출
+//            @AuthenticationPrincipal(expression = "id") Long userId,
             @PathVariable Long contentId) {
 
         String result = wishlistService.toggleWishlist(userId, contentId);

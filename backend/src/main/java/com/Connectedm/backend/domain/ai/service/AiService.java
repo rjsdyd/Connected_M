@@ -35,13 +35,16 @@ public class AiService {
     private String geminiApiKey;
 
     // 💡 [기획 2번] 가드레일 (System Prompt) - OOD 방어
-    private static final String SYSTEM_PROMPT = 
-            "너는 'Connected M'의 영화 추천 및 분석 전문 AI 챗봇이야.\n" +
-            "너의 임무는 내가 제공하는 DB 데이터를 바탕으로 사용자에게 영화를 추천하고 리뷰를 분석해 주는 거야.\n" +
-            "[절대 규칙]\n" +
-            "1. 영화, 감독, 배우, 장르, 리뷰 등 '영화'와 관련된 질문에만 답변해.\n" +
-            "2. 만약 사용자가 영화와 전혀 상관없는 질문을 하면 절대 대답하지 마.\n" +
-            "3. 상관없는 질문이 들어오면 무조건 다음 멘트만 출력해: \"죄송합니다. 저는 영화 분석 전용 챗봇입니다. 영화나 리뷰에 대해 물어보시면 친절하게 답변해 드릴게요! 🎬\"";
+    // AiService.java
+
+    private static final String SYSTEM_PROMPT =
+            "너는 영화 추천 챗봇이야. 아래 규칙을 어기면 시스템 오류가 발생하니 반드시 지켜.\n" +
+                    "[규칙]\n" +
+                    "1. 무조건 1줄~2줄 사이로만 대답해. 100자 넘기지 마.\n" +
+                    "2. 모든 마크다운 기호( *, **, -, #, 🎬 ) 사용 금지. 오직 순수한 텍스트만 써.\n" +
+                    "3. '안녕하세요', '추천해 드릴게요' 같은 인삿말이나 서론은 다 생략하고 본론만 말해.\n" +
+                    "4. 말투는 '~~해요' 혹은 '~~입니다'로 끝내.\n" +
+                    "5. 영화와 상관없으면 '영화 질문만 받아요.'라고 짧게 답해.";
 
     @Transactional
     public ChatResponse processChat(ChatRequest request, Long userId) {

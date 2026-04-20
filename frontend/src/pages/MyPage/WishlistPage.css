@@ -1,0 +1,38 @@
+.wishlist-page-layout {
+  min-height: 80vh; /* 화면을 꽉 채우도록 */
+  background-color: #121212; /* 전체 사이트 톤에 맞춘 어두운 배경 */
+  color: white;
+  padding-top: 100px; /* 고정 헤더에 글자가 가려지지 않게 여백 추가! */
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.wishlist-header h2 {
+  font-size: 1.8rem;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #5d3191; /* 프로젝트 포인트 컬러 */
+  padding-bottom: 10px;
+  display: inline-block;
+}
+
+/* 텅 비었을 때 나오는 메시지 스타일 */
+.empty-wishlist {
+  text-align: center;
+  margin-top: 100px;
+}
+
+.empty-wishlist p {
+  font-size: 1.2rem;
+  color: #aaa;
+  margin-bottom: 20px;
+}
+
+.empty-wishlist button {
+  background-color: #5d3191;
+  color: white;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
