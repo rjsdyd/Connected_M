@@ -9,4 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ChatRequest {
     private String prompt; // 사용자가 입력한 질문
+    private Long sessionId;
 }

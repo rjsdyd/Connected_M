@@ -38,3 +38,14 @@ out/
 .vscode/
 
 api-keys.properties
+
+
+### ChatBot ###
+ChatBot/.venv/
+ChatBot/__pycache__/
+ChatBot/.env
+
+
+backend/ChatBot/.env
+.env
+**/.env
