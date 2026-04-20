@@ -34,21 +34,13 @@ public class AiController {
     @PostMapping("/recommend")
     public ChatResponse recommendMovie(@RequestBody ChatRequest request, @AuthenticationPrincipal UserDetails userDetails) {
         Long userId = null;
-
         if (userDetails != null) {
-            String loginInfo = userDetails.getUsername(); // "4834407334" 또는 이메일이 들어옴
-
-            // 1. 먼저 이메일로 찾아봅니다 (로컬 유저용)
-            userId = userRepository.findByEmail(loginInfo)
-                    .map(User::getId)
-                    .orElseGet(() ->
-                            // 2. 없으면 번호(providerId)로 다시 찾습니다 (카카오 유저용)
-                            userRepository.findByProviderId(loginInfo)
-                                    .map(User::getId)
-                                    .orElse(null)
-                    );
+            String loginInfo = userDetails.getUsername();
+            userId = userRepository.findByEmail(loginInfo).map(User::getId)
+                    .orElseGet(() -> userRepository.findByProviderId(loginInfo).map(User::getId).orElse(null));
         }
 
+        // 회원이면 기록 저장, 비회원이면 일시적인 대화만 처리
         return aiService.processChat(request, userId);
     }
 }

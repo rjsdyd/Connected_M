@@ -81,7 +81,7 @@ def run_all_analysis():
     # 영화 ID 1번부터 25번까지 순회하며 분석
     # (팁: DB에서 실제 존재하는 content_id 목록을 가져와서 돌리는 게 더 정확하지만,
     #  현재는 1~25번까지 있다고 가정하고 진행.)
-    for movie_id in range(1, 26):
+    for movie_id in range(1, 27):
         try:
             perform_analysis(movie_id)
         except Exception as e:
