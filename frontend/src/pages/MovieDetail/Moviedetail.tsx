@@ -97,13 +97,49 @@ const MovieDetail: React.FC = () => {
     if (id) fetchMovieData();
   }, [id, isLoggedIn, userNickname]);
 
-  const handleWishlistToggle = () => {
-    if (!isLoggedIn) {
-      alert("로그인이 필요한 기능입니다.");
-      return;
+  useEffect(() => {
+  const checkWishlistStatus = async () => {
+    if (isLoggedIn && id) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`http://localhost:8080/api/members/wishlist`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        // 백엔드에서 받아온 리스트 중에 현재 보고 있는 영화(id)가 있는지 확인
+        const wishlist = response.data;
+        const isAlreadyWished = wishlist.some((item: any) => item.contentId === Number(id));
+
+        setIsWishlisted(isAlreadyWished); // 있으면 노란색 버튼으로 유지!
+      } catch (error) {
+        console.error("찜 상태 로딩 실패:", error);
+      }
+    } else {
+      setIsWishlisted(false);
     }
-    setIsWishlisted(!isWishlisted);
   };
+  checkWishlistStatus();
+}, [id, isLoggedIn]);
+
+  const handleWishlistToggle = async () => { 
+  if (!isLoggedIn) {
+    alert("로그인이 필요한 기능입니다.");
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('token');
+    
+    await axios.post(`http://localhost:8080/api/members/wishlist/${id}`, {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    setIsWishlisted(!isWishlisted); 
+  } catch (error) {
+    console.error("찜하기 실패:", error);
+    alert("요청 중 오류가 발생했습니다.");
+  }
+};
 
   const renderYellowStars = (rating: string | number) => {
     const numRating = typeof rating === 'string' ? parseFloat(rating) : rating;
