@@ -41,7 +41,9 @@
 .info-area { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
 .title-row { display: flex; align-items: baseline; gap: 15px; margin-bottom: 12px; }
 .movie-title { color: #ffffff; font-size: 3.5rem; font-weight: 800; margin: 0; line-height: 1.2; }
-.runtime-label { color: #aaa; font-size: 1.1rem; }
+.runtime-label { color: #aaa; font-size: 1.1rem; display: flex;
+  align-items: center;
+  gap: 15px; /* 글자 사이 간격 */ }
 .genre-row { display: flex; gap: 8px; margin-bottom: 40px; }
 .genre-tag { color: #d1b9ff; font-weight: 600; font-size: 1.1rem; }
 .genre-tag:not(:last-child)::after { content: "•"; margin-left: 8px; color: rgba(255,255,255,0.3); }
@@ -218,3 +220,39 @@
   .content-grid { grid-template-columns: 1fr; padding: 20px; }
   .left-column { max-width: 100%; }
 }
+.meta-info-row {
+  display: flex;         /* 1. 가로로 나란히 세우기 */
+  align-items: center;   /* 2. 높낮이 중앙 맞추기 */
+  gap: 15px;             /* 3. 둘 사이의 간격 주기 */
+  margin-bottom: 10px;   /* 4. 제목과의 거리 유지 */
+  
+  /* 중요: 공간이 좁아도 절대 줄바꿈하지 마! */
+  flex-wrap: nowrap; 
+}
+
+.runtime-label {
+  /* 글자가 길어져도 한 줄을 유지하게 함 */
+  white-space: nowrap; 
+  color: #aaa;
+  font-size: 1.1rem;
+}
+
+/* 연령 배지 공통 스타일 */
+.age-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 800; /* 글자를 두껍게 해서 가독성 확보 */
+  color: #ffffff;   /* 기본 글자색은 흰색 */
+  min-width: 35px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* 글자에 그림자를 살짝 줌 */
+}
+
+/* 등급별 배경색 설정 */
+.age-19 { background-color: #d32f2f; } /* 청불(19세 이상): 빨간색 */
+.age-15 { background-color: #f57c00; } /* 15세: 주황색 */
+.age-12 { background-color: #fbc02d; color: #000; } /* 12세: 노란색 (글자는 검정) */
+.age-all { background-color: #388e3c; } /* 전체(ALL): 초록색 */

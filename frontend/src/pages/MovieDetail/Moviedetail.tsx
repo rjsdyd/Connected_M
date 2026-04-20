@@ -230,9 +230,9 @@ const MovieDetail: React.FC = () => {
 
   // 연령 등급 배지 렌더링 함수
   const renderAgeBadge = (age: string | undefined) => {
-    const text = age || "전체";
+    const text = age || "ALL";
     let className = "age-all";
-    if (text.includes("18")) className = "age-18";
+    if (text.includes("19")) className = "age-19";
     else if (text.includes("15")) className = "age-15";
     else if (text.includes("12")) className = "age-12";
     return <span className={`age-badge ${className}`}>{text === "ALL" ? "전체" : text}</span>;
@@ -264,8 +264,8 @@ const MovieDetail: React.FC = () => {
               </div>
               <div className="title-row">
                 <h1 className="movie-title">{movie.title}</h1>
-                  {renderAgeBadge(movie.ageRating)} 
-                  <span className="runtime-label">{movie.runtime || '120'} min</span>
+                  {/* {renderAgeBadge(movie.ageRating)} 
+                  <span className="runtime-label">{movie.runtime || '120'} min</span>*/}
               </div>
               
               <div className="genre-row">
