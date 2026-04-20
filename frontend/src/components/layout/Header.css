@@ -71,25 +71,79 @@ input, button, textarea, select {
   font-size: 15px; 
 }
 
+/* 드롭다운 전체 외곽 상자 */
 .category-dropdown {
-  display: none; 
-  position: absolute; 
-  top: 100%; 
-  left: 0; 
-  background: white; 
-  min-width: 650px;
-  grid-template-columns: repeat(4, 1fr); 
-  gap: 16px; 
-  padding: 30px; 
-  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-  border-radius: 0 0 12px 12px; 
-  border: 1px solid #f3f4f6; 
-  z-index: 100;
+  position: absolute;
+  top: calc(100% + 4px);
+  border-radius: 12px;
+  left: 0;
+  background-color: #f0f0f0; /* 시안과 유사한 연회색 배경 */
+  padding: 30px;
+  display: none; /* 평소엔 숨김, hover 시 보여주는 로직은 기존대로 유지 */
+  /*min-width: 500px;*/
+  width: fit-content; 
+  min-width: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 1000;
+  
 }
 
-.category-parent:hover .category-dropdown { 
-  display: grid; 
+.category-parent:hover .category-dropdown {
+  display: block;
 }
+
+.dropdown-container {
+  display: flex;
+  gap: 80px; /* justify-content를 쓰므로 gap은 0으로 설정하거나 제거합니다. */
+  width: 100%; /* 부모 너비를 100% 꽉 채웁니다. */
+  padding-right: 0; /* 오른쪽 여백을 완전히 제거합니다! */
+}
+
+/* 각 열 스타일 */
+.dropdown-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 제목 부분 스타일 */
+.column-header {
+  margin-bottom: 8px;
+}
+
+.column-header h4 {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+  font-weight: bold;
+}
+
+/* 제목 아래 검은색 밑줄 */
+.header-line {
+  width: 100%;
+  height: 2px;
+  background-color: #333;
+  margin-top: 5px;
+}
+
+/* 제목이 없는 열의 높이를 맞춰주기 위한 패딩 (중요!) */
+.dropdown-column.no-header {
+  padding-top: 22px; /* 제목+밑줄 높이만큼 내려서 줄 맞춤 */
+}
+
+.dropdown-column p {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.dropdown-column p:hover {
+  color: #000;
+  font-weight: bold;
+}
+
 
 .nav-link { 
   font-weight: 700; 
