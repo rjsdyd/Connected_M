@@ -97,13 +97,49 @@ const MovieDetail: React.FC = () => {
     if (id) fetchMovieData();
   }, [id, isLoggedIn, userNickname]);
 
-  const handleWishlistToggle = () => {
-    if (!isLoggedIn) {
-      alert("로그인이 필요한 기능입니다.");
-      return;
+  useEffect(() => {
+  const checkWishlistStatus = async () => {
+    if (isLoggedIn && id) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`http://localhost:8080/api/members/wishlist`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        // 백엔드에서 받아온 리스트 중에 현재 보고 있는 영화(id)가 있는지 확인
+        const wishlist = response.data;
+        const isAlreadyWished = wishlist.some((item: any) => item.contentId === Number(id));
+
+        setIsWishlisted(isAlreadyWished); // 있으면 노란색 버튼으로 유지!
+      } catch (error) {
+        console.error("찜 상태 로딩 실패:", error);
+      }
+    } else {
+      setIsWishlisted(false);
     }
-    setIsWishlisted(!isWishlisted);
   };
+  checkWishlistStatus();
+}, [id, isLoggedIn]);
+
+  const handleWishlistToggle = async () => { 
+  if (!isLoggedIn) {
+    alert("로그인이 필요한 기능입니다.");
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('token');
+    
+    await axios.post(`http://localhost:8080/api/members/wishlist/${id}`, {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    setIsWishlisted(!isWishlisted); 
+  } catch (error) {
+    console.error("찜하기 실패:", error);
+    alert("요청 중 오류가 발생했습니다.");
+  }
+};
 
   const renderYellowStars = (rating: string | number) => {
     const numRating = typeof rating === 'string' ? parseFloat(rating) : rating;
@@ -194,9 +230,9 @@ const MovieDetail: React.FC = () => {
 
   // 연령 등급 배지 렌더링 함수
   const renderAgeBadge = (age: string | undefined) => {
-    const text = age || "전체";
+    const text = age || "ALL";
     let className = "age-all";
-    if (text.includes("18")) className = "age-18";
+    if (text.includes("19")) className = "age-19";
     else if (text.includes("15")) className = "age-15";
     else if (text.includes("12")) className = "age-12";
     return <span className={`age-badge ${className}`}>{text === "ALL" ? "전체" : text}</span>;
@@ -228,8 +264,8 @@ const MovieDetail: React.FC = () => {
               </div>
               <div className="title-row">
                 <h1 className="movie-title">{movie.title}</h1>
-                  {renderAgeBadge(movie.ageRating)} 
-                  <span className="runtime-label">{movie.runtime || '120'} min</span>
+                  {/* {renderAgeBadge(movie.ageRating)} 
+                  <span className="runtime-label">{movie.runtime || '120'} min</span>*/}
               </div>
               
               <div className="genre-row">

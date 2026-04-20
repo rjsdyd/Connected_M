@@ -21,6 +21,7 @@ import OAuth2RedirectHandler from './pages/Auth/OAuth2RedirectHandler';
 import ExtraInfo from './pages/Auth/ExtraInfo';
 import ResetPassword from './pages/Auth/ResetPassword'; // 비밀번호 재설정 링크 처리 페이지
 import EditProfile from './pages/MyPage/EditProfile';
+import WishlistPage from './pages/MyPage/WishlistPage';
 
 
 const AppContent = () => {
@@ -45,6 +46,7 @@ const AppContent = () => {
           <Route path="/terms" element={<Terms />} /> 
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/edit-profile" element={<EditProfile />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
         </Routes>
       </div>
       
