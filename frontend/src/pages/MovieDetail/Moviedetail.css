@@ -39,25 +39,41 @@
 
 /* --- 4. 중앙 정보 영역 및 OTT 버튼 --- */
 .info-area { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
-.title-row { display: flex; align-items: baseline; gap: 15px; margin-bottom: 12px; }
-.movie-title { color: #ffffff; font-size: 3.5rem; font-weight: 800; margin: 0; line-height: 1.2; }
-.runtime-label { color: #aaa; font-size: 1.1rem; display: flex;
-  align-items: center;
-  gap: 15px; /* 글자 사이 간격 */ }
-.genre-row { display: flex; gap: 8px; margin-bottom: 40px; }
+.movie-title { color: #ffffff; font-size: 3.5rem; font-weight: 800; margin: 0; line-height: 1.2; margin-bottom: 20px;}
+
+/* 장르 한 줄 정렬 */
+.genre-row { display: flex; gap: 8px; margin-top: 10px; margin-bottom: 30px; }
 .genre-tag { color: #d1b9ff; font-weight: 600; font-size: 1.1rem; }
 .genre-tag:not(:last-child)::after { content: "•"; margin-left: 8px; color: rgba(255,255,255,0.3); }
 
-.platform-buttons-container { display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
-.platform-label { color: #ffffff; font-size: 1.6rem; font-weight: 700; }
-.platform-logos-row { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
-.ott-logo-simple { height: 40px; width: auto; object-fit: contain; border-radius: 8px; }
+/* 플랫폼 섹션 */
+.platform-buttons-container { display: flex; flex-direction: column; align-items: flex-start; gap: 15px; }
+.platform-label { color: rgba(255, 255, 255, 0.8); font-size: 1.1rem; font-weight: 600; }
+.platform-logos-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 10px;
+  flex-wrap: wrap; /* 로고가 많을 경우 자동 줄바꿈 */
+}
+.ott-logo-simple {
+  height: 40px;
+  width: 40px; /* 로고 규격 통일 */
+  object-fit: cover;
+  border-radius: 8px; /* TMDB 로고 스타일 유지 */
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.ott-logo-simple:hover {
+  transform: scale(1.1);
+}
+
 .wishlist-btn {
-  display: flex; align-items: center; gap: 10px; padding: 10px 24px;
+  display: flex; align-items: center; gap: 10px; padding: 10px 24px; margin-top: 10px;
   background-color: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 30px; font-weight: 600; cursor: pointer; backdrop-filter: blur(10px);
 }
-.wishlist-btn.active { background-color: #ffd700; color: #000; border-color: #ffd700; }
+.wishlist-btn.active { background-color: #4b0082; color: #fff; border-color: #4b0082; }
 
 /* --- 5. AI 키워드 카드 --- */
 .ai-keyword-side-card {
@@ -79,180 +95,85 @@
 
 .cast-grid {
   display: flex; gap: 20px; overflow-x: auto; padding-bottom: 15px;
-  scrollbar-width: thin; scrollbar-color: #d1b9ff #eee;
 }
-.cast-grid::-webkit-scrollbar { height: 6px; }
-.cast-grid::-webkit-scrollbar-thumb { background: #d1b9ff; border-radius: 10px; }
 .cast-card { flex: 0 0 150px; }
 .cast-photo { width: 150px; height: 210px; object-fit: cover; border-radius: 12px; margin-bottom: 10px; }
 .cast-card .name { font-weight: 700; font-size: 1.1rem; }
-.cast-card .work { color: #777; font-size: 0.95rem; }
-
 .synopsis-text { line-height: 1.8; color: #444; word-break: keep-all; width: 100%; }
 
-/* --- 7. 리뷰 디자인 및 별점 인터랙션 --- */
+/* --- 7. 리뷰 및 별점 영역 --- */
+.filled, .star-icon.filled, .visible-star.filled {
+  color: #FFD700 !important;
+}
+
+.interactive-rating-stars-wrapper {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 20px;
+}
+.interactive-star-area {
+  position: relative; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;
+}
+.visible-star {
+  font-size: 40px !important; color: #e0e0e0;
+}
+.click-zones-wrapper {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; z-index: 2;
+}
+.click-zone {
+  width: 50%; height: 100%; cursor: pointer;
+}
+.rating-num-display {
+  font-size: 1.8rem; font-weight: 800; margin-left: 15px; color: #333;
+}
+
 .compact-card-container {
-  border: 1px solid #eee; border-radius: 15px; background-color: #fff;
-  overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  border: 1px solid #eee; border-radius: 15px; background-color: #fff; overflow: hidden;
 }
-.compact-card-content { padding: 20px; }
-.compact-review-row { padding: 15px 0; border-bottom: 1px solid #f5f5f5; }
-.compact-reviewer-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-/* 개별 리뷰 텍스트 영역 수정 */
+.compact-review-row {
+  padding: 20px; border-bottom: 1px solid #f5f5f5;
+}
+.compact-reviewer-meta {
+  display: flex; align-items: center; gap: 15px; margin-bottom: 10px;
+}
+.compact-reviewer-name {
+  font-weight: 700; font-size: 1.05rem;
+}
+.star-wrapper.compact {
+  display: flex; align-items: center; gap: 3px;
+}
+.star-icon {
+  font-size: 20px; color: #e0e0e0;
+}
+.rating-num {
+  font-size: 0.95rem; color: #666; margin-left: 5px; font-weight: 600;
+}
 .compact-comment-text {
-  font-size: 0.95rem;
-  line-height: 1.6;      /* 줄 간격 */
-  color: #444;
-  word-break: break-all; /* 단어가 길어도 줄바꿈 */
-  
-  /* 3줄 높이 제한 및 스크롤 설정 */
-  max-height: 4.8em;     /* line-height(1.6) * 3줄 = 4.8em */
-  overflow-y: auto;      /* 내용이 많으면 세로 스크롤 생성 */
-  padding-right: 5px;    /* 스크롤바와 텍스트 사이 간격 */
-  
-  /* 스크롤바를 얇고 깔끔하게 (선택 사항) */
-  scrollbar-width: thin;
-  scrollbar-color: #ccc transparent;
+  font-size: 1rem; line-height: 1.6; color: #444; padding-left: 2px;
 }
 
-/* 크롬, 사파리 등 브라우저용 스크롤바 디자인 */
-.compact-comment-text::-webkit-scrollbar {
-  width: 4px;
-}
-.compact-comment-text::-webkit-scrollbar-thumb {
-  background-color: #ddd;
-  border-radius: 10px;
-}
-.compact-comment-text::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-/* 리뷰 목록의 별 색상 설정 (전문가/일반 리뷰 공용) */
-.star-icon.compact.filled { color: #FFD700; } /* 꽉 찬 별 */
-.star-icon.compact.half { color: #FFD700; }   /* 반 별 - 여기서 검정색이 나오던 걸 노란색으로 수정함 */
-.star-icon.compact.empty { color: #e0e0e0; }  /* 빈 별 */
-
-.interactive-rating-stars-wrapper { display: flex; align-items: center; gap: 8px; margin-bottom: 15px; }
-.interactive-star-area { position: relative; width: 30px; height: 30px; cursor: pointer; }
-.interactive-star-icon { font-size: 30px; color: #e0e0e0; }
-.interactive-star-icon.visible-star { color: #ffd700; }
-.click-zones-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; }
-.click-zone { width: 50%; height: 100%; }
-.rating-num-display { font-size: 1.2rem; font-weight: 700; margin-left: 10px; }
-
-.textarea-wrapper { position: relative; width: 100%; }
 .write-textarea {
-  width: 100%; height: 120px; padding: 15px 15px 35px 15px;
-  border-radius: 12px; border: 1px solid #ddd; resize: none; font-size: 1rem;
+  width: 100%; height: 120px; padding: 15px; border-radius: 12px; border: 1px solid #ddd; resize: none;
 }
-.char-count { position: absolute; bottom: 10px; right: 15px; font-size: 0.85rem; color: #999; }
-
 .btn-submit-review {
-  margin-top: 15px; background-color: #ffd700; color: #000; border: none;
-  padding: 12px 30px; border-radius: 30px; font-weight: 700; cursor: pointer; float: right;
+  margin-top: 15px; background-color: #4b0082; color: #fff; border: none; padding: 12px 30px; border-radius: 30px; font-weight: 700; cursor: pointer; float: right;
 }
-
-.compact-controller {
-  display: flex !important;           /* 내부 요소를 가로로 나란히 배치 */
-  align-items: center !important;     /* 세로 높이를 중앙에 맞춤 */
-  justify-content: center !important; /* 전체를 가로 중앙에 배치 */
-  gap: 15px;                          /* 화살표와 숫자 사이 간격 */
-  padding: 15px 0;                    /* 박스 내부 상하 여백 */
-  width: 100%;                        /* 부모 너비를 꽉 채워 중앙 정렬 보장 */
-}
-.page-indicator {
-  font-size: 14px;
-  color: #666;
-  font-weight: 500;
-  min-width: 35px;                    /* 숫자가 바뀌어도 화살표 위치가 흔들리지 않게 고정 */
-  text-align: center;
-}
-
-.nav-btn {
-  background: transparent !important; /* 배경색 제거 */
-  border: none !important;            /* 테두리 제거 */
-  color: #333 !important;             /* 화살표 색상 */
-  font-size: 32px !important;         /* 화살표 크기 */
-  cursor: pointer;
-  display: flex !important;           /* 버튼 내부 정렬용 */
-  align-items: center !important;
-  justify-content: center !important;
-  line-height: 1;                     /* 화살표가 위아래로 튀지 않게 함 */
-  padding: 0 10px !important;
-}
-
-/* 마우스를 올렸을 때만 보라색으로 포인트 */
-.nav-btn:hover:not(:disabled) {
-  color: #d1b9ff !important;          /* 보라색 포인트 */
-}
-
-/* 버튼이 비활성화(disabled) 되었을 때 */
-.nav-btn:disabled {
-  color: #eeeeee !important;          /* 연한 회색으로 표시 */
-  cursor: default;
-}
-/* 중복 리뷰 작성 시 보여줄 안내 문구 스타일 */
 .already-reviewed-msg {
-  background-color: #f8f9fa;
-  border: 1px dashed #ced4da;
-  border-radius: 10px;
-  padding: 40px 20px;
-  text-align: center;
-  color: #6c757d;
-  font-weight: 600;
-  font-size: 1rem;
+  background-color: #f8f9fa; border: 1px dashed #ced4da; border-radius: 10px; padding: 40px 20px; text-align: center; color: #6c757d; font-weight: 600;
 }
+
+/* --- 8. 기타 메타 정보 --- */
+.meta-info-row { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
+.age-badge { padding: 2px 8px; border-radius: 4px; font-size: 0.9rem; font-weight: 800; color: #fff; }
+.age-19 { background-color: #d32f2f; }
+.age-all { background-color: #388e3c; }
 
 @media (max-width: 1024px) {
-  .content-grid {
-    grid-template-columns: 1fr;
-    padding: 40px;
-  }
-  .banner-section {
-  padding: 0 40px 40px;
-
-
-  
-  }
-}
-
-@media (max-width: 768px) {
-  .content-grid { grid-template-columns: 1fr; padding: 20px; }
-  .left-column { max-width: 100%; }
-}
-.meta-info-row {
-  display: flex;         /* 1. 가로로 나란히 세우기 */
-  align-items: center;   /* 2. 높낮이 중앙 맞추기 */
-  gap: 15px;             /* 3. 둘 사이의 간격 주기 */
-  margin-bottom: 10px;   /* 4. 제목과의 거리 유지 */
-  
-  /* 중요: 공간이 좁아도 절대 줄바꿈하지 마! */
-  flex-wrap: nowrap; 
+  .content-grid { grid-template-columns: 1fr; padding: 40px; }
 }
 
 .runtime-label {
-  /* 글자가 길어져도 한 줄을 유지하게 함 */
-  white-space: nowrap; 
-  color: #aaa;
-  font-size: 1.1rem;
+  color: #fff;
 }
 
-/* 연령 배지 공통 스타일 */
-.age-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: 800; /* 글자를 두껍게 해서 가독성 확보 */
-  color: #ffffff;   /* 기본 글자색은 흰색 */
-  min-width: 35px;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* 글자에 그림자를 살짝 줌 */
+.no-provider{
+  color: #fff;
 }
-
-/* 등급별 배경색 설정 */
-.age-19 { background-color: #d32f2f; } /* 청불(19세 이상): 빨간색 */
-.age-15 { background-color: #f57c00; } /* 15세: 주황색 */
-.age-12 { background-color: #fbc02d; color: #000; } /* 12세: 노란색 (글자는 검정) */
-.age-all { background-color: #388e3c; } /* 전체(ALL): 초록색 */
