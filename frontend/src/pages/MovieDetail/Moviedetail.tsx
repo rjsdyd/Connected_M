@@ -149,13 +149,13 @@ const MovieDetail: React.FC = () => {
     localStorage.setItem('wishlist', JSON.stringify(newWishlist));
   };
 
-  const handleReviewSubmit = () => {
+  const handleReviewSubmit = async () => { // 1. 여기에 async 꼭 추가!
     if (!isLoggedIn) { alert("로그인이 필요합니다."); return; }
     if (hasReviewed) { alert("이미 리뷰를 작성하셨습니다."); return; }
     if (!newComment.trim()) { alert("내용을 입력해주세요."); return; }
     if (newRating === 0) { alert("별점을 선택해주세요."); return; }
 
-try {
+    try {
       // 1. 로컬 스토리지에서 신분증(토큰) 꺼내기
       const token = localStorage.getItem('token'); 
 
@@ -183,7 +183,6 @@ try {
         if (movie) {
           const myNewReview: ReviewData = {
             id: Date.now(), 
-            // 💡 닉네임이 없으면 '익명사용자'보다는 명준님이 쓰던 '나' 또는 '익명'으로 처리
             nickname: userNickname || "익명사용자", 
             rating: newRating.toString(),
             comment: newComment,
@@ -202,15 +201,6 @@ try {
       console.error("리뷰 등록 실패 상세:", error);
       alert("리뷰 등록 중 오류가 발생했습니다.");
     }
-
-    if (movie) {
-      setMovie({ ...movie, userReviews: [myNewReview, ...movie.userReviews] });
-    }
-
-    alert("리뷰가 등록되었습니다!");
-    setHasReviewed(true);
-    setNewComment("");
-    setNewRating(0);
   };
 
   const renderStars = (rating: string | number) => {
