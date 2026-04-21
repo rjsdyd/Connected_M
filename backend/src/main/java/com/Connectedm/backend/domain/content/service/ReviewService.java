@@ -93,6 +93,7 @@ public class ReviewService {
      */
     @Transactional
     public void saveUserReview(Long userId, Long contentId, UserReviewRequestDto dto) {
+        System.out.println("DEBUG: userId=" + userId + ", contentId=" + contentId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
         Content content = contentRepository.findById(contentId)

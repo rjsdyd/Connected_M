@@ -172,14 +172,23 @@ const MovieDetail: React.FC = () => {
     if (newRating === 0) { alert("별점을 선택해주세요."); return; }
 
     try {
+      // 1. 로컬 스토리지에서 토큰 가져오기 (추가됨)
+      const token = localStorage.getItem('token'); 
+
       const reviewBody = {
         rating: newRating.toString(),
         comment: newComment
       };
 
+      // 2. axios 요청 시 세 번째 인자로 헤더 추가 (수정됨)
       const response = await axios.post(
         `http://localhost:8080/api/contents/user-reviews?contentId=${id}`, 
-        reviewBody
+        reviewBody,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
       );
 
       if (response.status === 200 || response.status === 201) {
