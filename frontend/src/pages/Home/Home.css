@@ -240,18 +240,26 @@ a {
   flex-direction: column;
   justify-content: flex-end;
   align-items: center; 
-  color: white; 
+  color: whitesmoke; 
   text-align: center;
-  padding-bottom: 295px;
+  padding-bottom: 310px;
+  
 }
 
-.hero-title { 
-  font-size: 52px; 
-  font-weight: 800; 
-  margin-bottom: 30px; 
-  letter-spacing: -2px; 
-  /* ✍️ 글자가 더 선명하게 보이도록 그림자 추가 */
-  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7); 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-title {
+  animation: fadeInUp 1.5s ease-out; /* 1초 동안 부드럽게 등장 */
+  margin-bottom: 15px;
 }
 
 .hero-search-wrapper { 
