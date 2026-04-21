@@ -146,7 +146,7 @@ public class ContentService {
         Double ratio = (content.getAnalysisCache() != null) ? content.getAnalysisCache().getPositiveRatio() : 0.0;
         List<String> keywords = Collections.emptyList();
 
-        List<ReviewResponseDto> expertReviews = reviewService.getExpertReviews(id);
+        List<ReviewResponseDto> expertReviews = reviewService.getExpertReviews(id); 
         List<UserReviewResponseDto> userReviews = reviewService.getUserReviews(id);
 
         List<TmdbMovieResponseDto.TmdbCastItem> majorCasts = Collections.emptyList();

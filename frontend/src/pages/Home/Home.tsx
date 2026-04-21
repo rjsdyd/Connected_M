@@ -106,6 +106,7 @@ const Home = () => {
   return (
     <main className="home-container">
       <section className="hero-section">
+  
         <h1 className="hero-title">환영합니다. 인생작품을 찾아드립니다.</h1>
         <div className="hero-search-wrapper">
           <input type="text" className="hero-search" placeholder="어떤 작품을 찾고 계신가요?" />

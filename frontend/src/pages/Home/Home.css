@@ -223,23 +223,35 @@ a {
   color: #fff;
 }
 
+/* ================= 메인 배너 수정본 ================= */
 .hero-section {
   width: 100%;
-  background-color: #757575; 
-  height: 420px; 
+  height: 900px;           /* 배너 높이 */
+  margin-top: 9px;        /* 헤더 높이만큼 띄우기 */
+  
+  /* 🖼️ 이미지를 배경으로 깔기 */
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                    url('image/영화관이미지5.jpg'); 
+  background-size: cover;    /* 이미지가 영역에 꽉 차게 */
+  background-position: center; /* 이미지 중앙 맞추기 */
+  background-repeat: no-repeat;
+
   display: flex; 
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center; 
   color: white; 
   text-align: center;
+  padding-bottom: 295px;
 }
 
 .hero-title { 
-  font-size: 40px; 
+  font-size: 52px; 
   font-weight: 800; 
   margin-bottom: 30px; 
-  letter-spacing: -1px; 
+  letter-spacing: -2px; 
+  /* ✍️ 글자가 더 선명하게 보이도록 그림자 추가 */
+  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7); 
 }
 
 .hero-search-wrapper { 
