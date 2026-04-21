@@ -155,12 +155,53 @@ const MovieDetail: React.FC = () => {
     if (!newComment.trim()) { alert("내용을 입력해주세요."); return; }
     if (newRating === 0) { alert("별점을 선택해주세요."); return; }
 
-    const myNewReview: ReviewData = {
-      id: Date.now(),
-      nickname: userNickname || "익명사용자",
-      rating: newRating.toString(),
-      comment: newComment
-    };
+try {
+      // 1. 로컬 스토리지에서 신분증(토큰) 꺼내기
+      const token = localStorage.getItem('token'); 
+
+      const reviewBody = {
+        rating: newRating.toString(),
+        comment: newComment
+      };
+
+      // 2. 백엔드에 리뷰 저장 요청 (헤더 포함!)
+      const response = await axios.post(
+        `http://localhost:8080/api/contents/user-reviews?contentId=${id}`, 
+        reviewBody,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      // 3. 저장 성공 시 프론트엔드 UI 업데이트
+      if (response.status === 200 || response.status === 201) {
+        alert("리뷰가 성공적으로 등록되었습니다!");
+        setHasReviewed(true);
+
+        if (movie) {
+          const myNewReview: ReviewData = {
+            id: Date.now(), 
+            // 💡 닉네임이 없으면 '익명사용자'보다는 명준님이 쓰던 '나' 또는 '익명'으로 처리
+            nickname: userNickname || "익명사용자", 
+            rating: newRating.toString(),
+            comment: newComment,
+            sourceName: "내 리뷰"
+          };
+
+          setMovie({
+            ...movie,
+            userReviews: [myNewReview, ...movie.userReviews]
+          });
+        }
+        setNewComment("");
+        setNewRating(0);
+      }
+    } catch (error) {
+      console.error("리뷰 등록 실패 상세:", error);
+      alert("리뷰 등록 중 오류가 발생했습니다.");
+    }
 
     if (movie) {
       setMovie({ ...movie, userReviews: [myNewReview, ...movie.userReviews] });
