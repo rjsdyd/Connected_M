@@ -4,7 +4,7 @@ from embedding_engine import MeaningVectorEngine
 app = Flask(__name__)
 engine = MeaningVectorEngine()
 
-@app.route('/vecotorize', methods=['POST'])
+@app.route('/vectorize', methods=['POST'])
 def vectorize():
     data = request.json
     text = data.get('text', '')

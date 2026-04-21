@@ -12,11 +12,13 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 import com.Connectedm.backend.global.auth.JwtTokenProvider;
 import com.Connectedm.backend.global.auth.filter.JwtAuthenticationFilter;
 import com.Connectedm.backend.global.auth.handler.OAuth2SuccessHandler;
 import com.Connectedm.backend.global.auth.oauth.CustomOAuth2UserService;
+
 
 import lombok.RequiredArgsConstructor;
 
@@ -58,10 +60,16 @@ public class SecurityConfig {
                         .requestMatchers("/register").permitAll()
                         // 4. OAuth2 관련 엔드포인트 허용 추가
                         .requestMatchers("/login/oauth2/**", "/oauth2/**").permitAll()
-                        .requestMatchers("/api/contents/**").permitAll()
+//                        .requestMatchers("/api/contents/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/contents/**").permitAll()
+                        .requestMatchers("/api/contents/user-reviews/**").authenticated()
+
                         .requestMatchers("/api/auth/update-extra-info").authenticated()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/api-docs/**","/api/main**").permitAll()
-                        .requestMatchers("/api/main/**", "/api/contents/**").permitAll()
+
+//                        .requestMatchers("/api/main/**", "/api/contents/**").permitAll()
+                       .requestMatchers("/api/main/**").permitAll()
+
                         .anyRequest().authenticated()
                 ) // 👈 여기서 세미콜론(;)을 지웠습니다!
 

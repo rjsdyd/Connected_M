@@ -146,7 +146,7 @@ public class ContentService {
         Double ratio = (content.getAnalysisCache() != null) ? content.getAnalysisCache().getPositiveRatio() : 0.0;
         List<String> keywords = Collections.emptyList();
 
-        List<ReviewResponseDto> expertReviews = reviewService.getExpertReviews(id);
+        List<ReviewResponseDto> expertReviews = reviewService.getExpertReviews(id); 
         List<UserReviewResponseDto> userReviews = reviewService.getUserReviews(id);
 
         List<TmdbMovieResponseDto.TmdbCastItem> majorCasts = Collections.emptyList();
@@ -238,5 +238,11 @@ public class ContentService {
                 .todayRecommendations(todayRecommendations)
                 .genreContents(genreContents)
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public Content findById(Long contentId) {
+        return contentRepository.findById(contentId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 콘텐츠입니다. ID: " + contentId));
     }
 }

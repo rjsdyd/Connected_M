@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ContentRepository extends JpaRepository<Content, Long> {
-    // MariaDB/MySQL의 RAND() 함수를 사용하여 랜덤으로 5개를 가져옵니다. -추가 4/20
-    //@Query(value = "SELECT * FROM content ORDER BY RAND() LIMIT 5", nativeQuery = true)
-    //List<Content> findRandomContents();
 
 
     // TMDB ID로 영화 찾는 기능

@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -17,6 +18,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Map;
 
 @Slf4j
@@ -63,7 +65,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                             .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다.")));
 
             // 4. 토큰 생성
-            String accessToken = tokenProvider.createAccessToken(authentication);
+//            String accessToken = tokenProvider.createAccessToken(authentication);
+            Authentication userAuth = new UsernamePasswordAuthenticationToken(user.getId().toString(), null, Collections.emptyList());
+            String accessToken = tokenProvider.createAccessToken(userAuth);
 
             // 5. 리다이렉트 (최신 유저 정보 전달)
             boolean needInfo = user.getPhoneNumber() == null || user.getPhoneNumber().equals("010-0000-0000");

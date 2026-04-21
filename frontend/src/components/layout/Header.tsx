@@ -57,16 +57,35 @@ const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
           <nav className="nav-menu">
             <div className="category-parent">
               <span className="category-title">카테고리 <FaPlus /></span>
+              
               <div className="category-dropdown">
                 <div className="dropdown-column">
-                  <h4>영화</h4>
-                  <p>최신 영화</p><p>개봉 예정</p><p>박스오피스</p>
+                  <h4>장르</h4>
+                  <p>액션</p>
+                  <p>코미디</p>
+                  <p>범죄</p>
+                  <p>스릴러</p>
+                  <p>드라마</p>
+                  <p>가족</p>
+                  <p>애니메이션</p>
                 </div>
                 <div className="dropdown-column">
-                  <h4>장르</h4>
-                  <p>드라마</p><p>범죄/스릴러</p><p>애니메이션</p><p>액션</p><p>코미디</p>
+                  <p>모험</p>
+                  <p>판타지</p>
+                  <p>미스터리</p>
+                  <p>공포</p>
+                  <p>SF</p>
                 </div>
-              </div>
+                <div className="dropdown-column">
+                <p>로맨스</p>
+                <p>다큐멘터리</p>
+                <p>역사</p>
+                <p>전쟁</p>
+                <p>음악</p>
+                <p>TV영화</p>
+                <p>서부</p>
+                </div>
+                </div>
             </div>
             <a href="#ranking" className="nav-link">랭킹</a>
             <a href="#keyword" className="nav-link">키워드</a>
