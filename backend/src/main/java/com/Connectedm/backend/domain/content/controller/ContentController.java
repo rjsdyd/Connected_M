@@ -26,7 +26,7 @@ public class ContentController {
     /**
      * 메인페이지 데이터 조회
      */
-    @GetMapping("")
+    @GetMapping("/main")
     public ApiResponse<MainPageResponseDto> getMainPage() {
         return ApiResponse.success(contentService.getMainPageData());
     }
