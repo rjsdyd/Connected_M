@@ -120,7 +120,7 @@ const Home = () => {
           <div 
             className="slider-3d-wrapper" 
             onMouseEnter={() => setIsSliderPaused(true)} 
-            onMouseLeave={() => setIsSliderPaused(false)}
+            onMouseLeave={() => setIsSliderPaused(false)} 
             onMouseDown={onTouchStart}
             onMouseMove={(e) => touchStart && onTouchMove(e)}
             onMouseUp={onTouchEnd}
