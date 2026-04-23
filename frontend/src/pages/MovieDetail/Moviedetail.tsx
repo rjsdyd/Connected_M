@@ -324,8 +324,9 @@ const MovieDetail: React.FC = () => {
               <div className="compact-card-container">
                 {userReviewsSlice.length > 0 ? userReviewsSlice.map((r) => {
                   const isExpanded = expandedReviews.includes(r.id);
-                  // 1. 글자 수가 100자를 초과하는지 체크하는 변수 생성
-                  
+                  // 1. 글자 수가 80자를 초과하는지 체크하는 변수 생성
+                  const isLongText = r.comment.length > 80;
+
                   return (
                     <div key={r.id} className="compact-review-row">
                       <div className="compact-reviewer-meta">
@@ -335,11 +336,11 @@ const MovieDetail: React.FC = () => {
                       <p className={`compact-comment-text ${isExpanded ? 'expanded' : 'clamped'}`}>
                         {r.comment}
                       </p>
-                    
-
-                      <button className="btn-more-detail" onClick={() => toggleReview(r.id)}>
-                        {isExpanded ? '접기' : '자세히 보기'}
-                      </button>
+                      {isLongText && (
+                        <button className="btn-more-detail" onClick={() => toggleReview(r.id)}>
+                          {isExpanded ? '접기' : '자세히 보기'}
+                        </button>
+                      )}
                     </div>
                   );
                 }) : <p className="placeholder-text">첫 번째 리뷰를 남겨보세요!</p>}
@@ -380,12 +381,12 @@ const MovieDetail: React.FC = () => {
                   </div>
                   <textarea 
                     className="write-textarea" 
-                    placeholder="감상을 남겨주세요. (최대 100자)" 
+                    placeholder="감상을 남겨주세요. (최대 200자)" 
                     value={newComment} 
                     onChange={(e) => setNewComment(e.target.value)} 
-                    maxLength={100}
+                    maxLength={200}
                   />
-                  <div className="char-count">{newComment.length} / 100</div>
+                  <div className="char-count">{newComment.length} / 200</div>
                   <button className="btn-submit-review" onClick={handleReviewSubmit}>리뷰 등록</button>
                 </div>
               )}
