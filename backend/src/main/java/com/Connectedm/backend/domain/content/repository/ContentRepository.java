@@ -28,4 +28,16 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
             "WHERE cg.genre.id = :genreId")
     List<Content> findByGenreId(@Param("genreId") Long genreId);
 
+
+    // 1. 오늘의 추천작용: 우리 DB 전체에서 랜덤하게 뽑기
+    @Query(value = "SELECT * FROM content ORDER BY RAND() LIMIT :limit", nativeQuery = true)
+    List<Content> findRandomContents(@Param("limit") int limit);
+
+    // 2. 카테고리 탭용: 특정 장르 내에서 랜덤하게 뽑기
+    @Query(value = "SELECT c.* FROM content c " +
+            "JOIN content_genre cg ON c.id = cg.content_id " +
+            "WHERE cg.genre_id = :genreId " +
+            "ORDER BY RAND() LIMIT :limit", nativeQuery = true)
+    List<Content> findRandomByGenreId(@Param("genreId") Long genreId, @Param("limit") int limit);
+
 }
