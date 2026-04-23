@@ -137,6 +137,9 @@
   color: #495057;
   line-height: 1.5;
   margin: 5px 0;
+  word-break: break-all;     /* 글자 단위로 강제 줄바꿈 */
+  overflow-wrap: break-word; /* 긴 단어가 있으면 쪼갬 */
+
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
