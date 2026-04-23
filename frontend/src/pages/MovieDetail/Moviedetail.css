@@ -161,10 +161,35 @@
 }
 
 /* --- 8. 기타 메타 정보 --- */
-.meta-info-row { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
-.age-badge { padding: 2px 8px; border-radius: 4px; font-size: 0.9rem; font-weight: 800; color: #fff; }
-.age-19 { background-color: #d32f2f; }
+/* 1. 기본 스타일 (공통 디자인) */
+.meta-info-row { 
+  display: flex; 
+  align-items: center; 
+  gap: 15px; 
+  margin-bottom: 10px; 
+}
+
+.age-badge { 
+  padding: 2px 8px; 
+  border-radius: 4px; 
+  font-size: 0.9rem; 
+  font-weight: 800; 
+  color: #fff; /* 글자색은 모두 하얀색으로 통일 */
+}
+
+/* 2. 등급별 색상 조끼 (배경색 설정) */
+
+/* ALL (전체 이용가): 안전한 초록색 */
 .age-all { background-color: #388e3c; }
+
+/* 12세 이용가: 파릇파릇한 초록색 (전체 이용가와 같은 느낌) */
+.age-12 { background-color: #4caf50; }
+
+/* 15세 이용가: 주의가 필요한 주황색 */
+.age-15 { background-color: #ff9800; }
+
+/* 19세 이용가: 강렬한 금지의 빨간색 */
+.age-19 { background-color: #d32f2f; }
 
 @media (max-width: 1024px) {
   .content-grid { grid-template-columns: 1fr; padding: 40px; }
@@ -176,4 +201,22 @@
 
 .no-provider{
   color: #fff;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60px;
+}
+
+.movie-genres-row {
+  font-size: 1.3rem;      /* 요청하신 글자 크기 */
+  font-weight: 600;       /* 약간 두껍게 해서 가독성 확보 */
+  color: rgba(255, 255, 255, 0.9); /* 흰색인데 살짝 투명하게 해서 고급스럽게 */
+  margin-top: 10px;       /* 등급 표시줄과의 간격 */
+  margin-bottom: 25px;     /* 제목과의 간격 */
+  white-space: nowrap;    /* 줄바꿈 없이 한 줄로 유지 */
+  overflow: hidden;       /* 혹시 넘치면 깔끔하게 가림 */
+  text-overflow: ellipsis; /* 너무 길면 ... 처리 */
 }
