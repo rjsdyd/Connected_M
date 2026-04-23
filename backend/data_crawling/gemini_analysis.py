@@ -13,7 +13,7 @@ api_key = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=api_key)
 
 # 사용할 모델 설정
-MODEL_NAME = "gemini-2.0-flash"  # 또는 "gemini-1.5-flash"
+MODEL_NAME = "gemini-2.5-flash"  # 또는 "gemini-1.5-flash"
 
 
 def get_db_connection():
