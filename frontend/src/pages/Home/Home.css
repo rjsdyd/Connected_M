@@ -231,7 +231,7 @@ a {
   
   /* 🖼️ 이미지를 배경으로 깔기 */
   background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
-                    url('image/영화관이미지5.jpg'); 
+                    url('/image/영화관이미지5.jpg'); 
   background-size: cover;    /* 이미지가 영역에 꽉 차게 */
   background-position: center; /* 이미지 중앙 맞추기 */
   background-repeat: no-repeat;

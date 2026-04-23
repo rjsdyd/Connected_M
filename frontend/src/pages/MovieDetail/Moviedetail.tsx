@@ -66,6 +66,17 @@ const MovieDetail: React.FC = () => {
   const [userPage, setUserPage] = useState(1);
   const itemsPerPage = 3;
 
+  // 자세히 보기 상태 관리용 추가
+  const [expandedReviews, setExpandedReviews] = useState<number[]>([]);
+
+  const toggleReview = (reviewId: number) => {
+    setExpandedReviews(prev => 
+      prev.includes(reviewId) 
+        ? prev.filter(id => id !== reviewId) 
+        : [...prev, reviewId]
+    );
+  };
+
   const getProviderUrl = (title: string, providerId?: number, logoPath?: string) => {
     const encodedTitle = encodeURIComponent(title);
     const platformLinks: { [key: string]: string } = {
@@ -126,8 +137,6 @@ const MovieDetail: React.FC = () => {
 
           if (isLoggedIn && userNickname) {
             setHasReviewed(data.userReviews.some((r: any) => r.nickname === userNickname));
-
-            // ✨ [찜하기 DB 동기화] 백엔드에서 찜 목록을 가져와 현재 영화가 있는지 확인 ㅋ
             const wishRes = await axios.get('http://localhost:8080/api/members/wishlist', {
               headers: { Authorization: `Bearer ${token}` }
             });
@@ -144,26 +153,20 @@ const MovieDetail: React.FC = () => {
     fetchMovieData();
   }, [id, isLoggedIn, userNickname]);
 
-  // ✨ [찜하기 토글 DB 동기화] API 호출 추가 ㅋ
   const handleWishlistToggle = async () => { 
     if (!isLoggedIn) { alert("로그인이 필요합니다."); return; }
     try {
       const token = localStorage.getItem('token');
-      // 백엔드 toggleWishlist API 호출 (명준님이 만든 POST /api/members/wishlist/{contentId})
       await axios.post(`http://localhost:8080/api/members/wishlist/${id}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
       setIsWishlisted(!isWishlisted);
-
-      // 로컬 스토리지도 보조로 업데이트 (원본 로직 유지 ㅋ)
       const savedWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
       const isAlreadyWished = savedWishlist.some((item: any) => item.contentId === Number(id));
       let newWishlist = isAlreadyWished 
         ? savedWishlist.filter((item: any) => item.contentId !== Number(id))
         : [...savedWishlist, { contentId: Number(id) }];
       localStorage.setItem('wishlist', JSON.stringify(newWishlist));
-      
     } catch (error) {
       alert("찜하기 처리 중 오류가 발생했습니다.");
     }
@@ -206,6 +209,10 @@ const MovieDetail: React.FC = () => {
 
   if (loading || !movie) return <div className="loading-container">로딩 중...</div>;
 
+  const hours = Math.floor(movie.runtime / 60);
+  const minutes = movie.runtime % 60;
+  const runtimeText = hours > 0 ? `${hours}시간 ${minutes}분` : `${minutes}분`;
+
   const expertReviewsSlice = movie.expertReviews.slice((expertPage - 1) * itemsPerPage, expertPage * itemsPerPage);
   const userReviewsSlice = movie.userReviews.slice((userPage - 1) * itemsPerPage, userPage * itemsPerPage);
   const totalExpertPages = Math.ceil(movie.expertReviews.length / itemsPerPage);
@@ -224,54 +231,47 @@ const MovieDetail: React.FC = () => {
               <img src={`https://image.tmdb.org/t/p/w500${movie.posterPath}`} alt={movie.title} className="main-poster" />
             </div>
             <div className="info-area">
-  <div className="meta-info-row">
-    {/* 등급 뱃지: 12, 15, 19, ALL 등급별 색상 적용 */}
-    <span className={`age-badge ${
-      movie.ageRating === '19' ? 'age-19' : 
-      movie.ageRating === '15' ? 'age-15' : 
-      movie.ageRating === '12' ? 'age-12' : 'age-all'
-    }`}>
-      {movie.ageRating}
-    </span>
-    <span className="runtime-label">{movie.runtime}분</span>
-  </div>
-
-  {/* 제목이 먼저 나옵니다 */}
-  <h1 className="movie-title">{movie.title}</h1>
-
-  {/* 장르가 제목 바로 밑에 위치합니다 */}
-  <div className="movie-genres-row">
-    {movie.genres.join(' · ')}
-  </div>
-
-  <div className="platform-buttons-container">
-    <span className="platform-label">시청 가능한 플랫폼</span>
-    <div className="platform-logos-row">
-      {movie.providers && movie.providers.length > 0 ? (
-        movie.providers.map((p) => (
-          <a key={p.provider_id} href={getProviderUrl(movie.title, p.provider_id)} target="_blank" rel="noopener noreferrer">
-            <img src={`https://image.tmdb.org/t/p/original${p.logo_path}`} alt={p.provider_name} className="ott-logo-simple" title={p.provider_name} />
-          </a>
-        ))
-      ) : movie.ottLogos ? (
-        movie.ottLogos.split(',').map((logo, idx) => {
-          const cleanLogo = logo.trim();
-          const fullUrl = cleanLogo.startsWith('http') ? cleanLogo : `https://image.tmdb.org/t/p/original${cleanLogo}`;
-          return (
-            <a key={idx} href={getProviderUrl(movie.title, undefined, cleanLogo)} target="_blank" rel="noopener noreferrer">
-               <img src={fullUrl} alt="OTT" className="ott-logo-simple" />
-            </a>
-          );
-        })
-      ) : <span className="no-provider">현재 제공 중인 OTT가 없습니다.</span>}
-    </div>
-    
-    <button className={`wishlist-btn ${isWishlisted ? 'active' : ''}`} onClick={handleWishlistToggle}>
-      {isWishlisted ? <FaBookmark /> : <FaRegBookmark />}
-      <span>{isWishlisted ? '찜한 영화' : '찜하기'}</span>
-    </button>
-  </div>
-</div>
+              <div className="meta-info-row">
+                <span className={`age-badge ${
+                  movie.ageRating === '19' ? 'age-19' : 
+                  movie.ageRating === '15' ? 'age-15' : 
+                  movie.ageRating === '12' ? 'age-12' : 'age-all'
+                }`}>
+                  {movie.ageRating}
+                </span>
+                <span className="runtime-label">{runtimeText}</span>
+              </div>
+              <h1 className="movie-title">{movie.title}</h1>
+              <div className="movie-genres-row">
+                {movie.genres.join(' · ')}
+              </div>
+              <div className="platform-buttons-container">
+                <span className="platform-label">시청 가능한 플랫폼</span>
+                <div className="platform-logos-row">
+                  {movie.providers && movie.providers.length > 0 ? (
+                    movie.providers.map((p) => (
+                      <a key={p.provider_id} href={getProviderUrl(movie.title, p.provider_id)} target="_blank" rel="noopener noreferrer">
+                        <img src={`https://image.tmdb.org/t/p/original${p.logo_path}`} alt={p.provider_name} className="ott-logo-simple" title={p.provider_name} />
+                      </a>
+                    ))
+                  ) : movie.ottLogos ? (
+                    movie.ottLogos.split(',').map((logo, idx) => {
+                      const cleanLogo = logo.trim();
+                      const fullUrl = cleanLogo.startsWith('http') ? cleanLogo : `https://image.tmdb.org/t/p/original${cleanLogo}`;
+                      return (
+                        <a key={idx} href={getProviderUrl(movie.title, undefined, cleanLogo)} target="_blank" rel="noopener noreferrer">
+                           <img src={fullUrl} alt="OTT" className="ott-logo-simple" />
+                        </a>
+                      );
+                    })
+                  ) : <span className="no-provider">현재 제공 중인 OTT가 없습니다.</span>}
+                </div>
+                <button className={`wishlist-btn ${isWishlisted ? 'active' : ''}`} onClick={handleWishlistToggle}>
+                  {isWishlisted ? <FaBookmark /> : <FaRegBookmark />}
+                  <span>{isWishlisted ? '찜한 영화' : '찜하기'}</span>
+                </button>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -297,7 +297,7 @@ const MovieDetail: React.FC = () => {
 
           <div className="right-column">
             <section className="detail-section">
-              <h2 className="section-title">전문가 평점 ({movie.expertReviews.length})</h2>
+              <h2 className="section-title">전문가 평점 {movie.expertReviews.length}건</h2>
               <div className="compact-card-container">
                 {expertReviewsSlice.length > 0 ? expertReviewsSlice.map((r) => (
                   <div key={r.id} className="compact-review-row">
@@ -320,17 +320,29 @@ const MovieDetail: React.FC = () => {
             </section>
 
             <section className="detail-section">
-              <h2 className="section-title">관람평 ({movie.userReviews.length})</h2>
+              <h2 className="section-title">관람평 {movie.userReviews.length}건</h2>
               <div className="compact-card-container">
-                {userReviewsSlice.length > 0 ? userReviewsSlice.map((r) => (
-                  <div key={r.id} className="compact-review-row">
-                    <div className="compact-reviewer-meta">
-                      <span className="compact-reviewer-name">{r.nickname}</span>
-                      {renderStars(r.rating)}
+                {userReviewsSlice.length > 0 ? userReviewsSlice.map((r) => {
+                  const isExpanded = expandedReviews.includes(r.id);
+                  // 1. 글자 수가 100자를 초과하는지 체크하는 변수 생성
+                  
+                  return (
+                    <div key={r.id} className="compact-review-row">
+                      <div className="compact-reviewer-meta">
+                        <span className="compact-reviewer-name">{r.nickname}</span>
+                        {renderStars(r.rating)}
+                      </div>
+                      <p className={`compact-comment-text ${isExpanded ? 'expanded' : 'clamped'}`}>
+                        {r.comment}
+                      </p>
+                    
+
+                      <button className="btn-more-detail" onClick={() => toggleReview(r.id)}>
+                        {isExpanded ? '접기' : '자세히 보기'}
+                      </button>
                     </div>
-                    <p className="compact-comment-text">{r.comment}</p>
-                  </div>
-                )) : <p className="placeholder-text">첫 번째 리뷰를 남겨보세요!</p>}
+                  );
+                }) : <p className="placeholder-text">첫 번째 리뷰를 남겨보세요!</p>}
 
                 {totalUserPages > 1 && (
                   <div className="pagination-controls">
@@ -348,7 +360,6 @@ const MovieDetail: React.FC = () => {
                 <div className="already-reviewed-msg" style={{color: '#4b0082', fontWeight: 'bold'}}>이미 소중한 리뷰를 작성하셨습니다. ✨</div>
               ) : (
                 <div className="write-form-container">
-                  
                   <div className="interactive-rating-stars-wrapper" onMouseLeave={() => setHoverRating(null)}>
                     {[...Array(5)].map((_, i) => {
                       const displayRating = hoverRating !== null ? hoverRating : newRating;
@@ -367,7 +378,14 @@ const MovieDetail: React.FC = () => {
                     })}
                     <span className="rating-num-display">{hoverRating !== null ? hoverRating : newRating}점</span>
                   </div>
-                  <textarea className="write-textarea" placeholder="감상을 남겨주세요." value={newComment} onChange={(e) => setNewComment(e.target.value)} />
+                  <textarea 
+                    className="write-textarea" 
+                    placeholder="감상을 남겨주세요. (최대 100자)" 
+                    value={newComment} 
+                    onChange={(e) => setNewComment(e.target.value)} 
+                    maxLength={100}
+                  />
+                  <div className="char-count">{newComment.length} / 100</div>
                   <button className="btn-submit-review" onClick={handleReviewSubmit}>리뷰 등록</button>
                 </div>
               )}
