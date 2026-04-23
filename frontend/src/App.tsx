@@ -23,6 +23,7 @@ import ResetPassword from './pages/Auth/ResetPassword'; // 비밀번호 재설�
 import EditProfile from './pages/MyPage/EditProfile';
 import WishlistPage from './pages/MyPage/WishlistPage';
 import MyReviewsPage from './pages/MyPage/MyReviewsPage';
+import RecentPage from './pages/MyPage/RecentPage';
 
 
 const AppContent = () => {
@@ -49,6 +50,7 @@ const AppContent = () => {
           <Route path="/edit-profile" element={<EditProfile />} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/my-reviews" element={<MyReviewsPage />} />
+          <Route path="/recent" element={<RecentPage />} />
         </Routes>
       </div>
       

@@ -17,7 +17,7 @@ import java.util.Optional;
 public class RecentViewService {
 
     private final RecentViewRepository recentViewRepository;
-    private final int MAX_RECENT_COUNT = 10;    // 최근 본 영화 갯(수정 가능)
+    private final int MAX_RECENT_COUNT = 5;    // 최근 본 영화 갯(수정 가능)
 
     /**
      *  최근 열람 기록 저장 및 업데이트(UPSERT)
