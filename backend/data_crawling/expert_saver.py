@@ -16,12 +16,12 @@ from dotenv import load_dotenv
 # .env 파일 로드
 load_dotenv()
 
-'''DB 정보 로드 (기본 포트 3310 설정)'''
 db_host = os.getenv('DB_HOST')
 db_port = int(os.getenv('DB_PORT')) if os.getenv('DB_PORT') else 3310
 db_user = os.getenv('DB_USER')
 db_pw = os.getenv('DB_PASSWORD')
 db_name = os.getenv('DB_NAME')
+
 
 class ExpertSaver:
     def __init__(self, host, user, password, db, port=3310):
@@ -34,43 +34,25 @@ class ExpertSaver:
             'charset': 'utf8mb4',
             'cursorclass': pymysql.cursors.DictCursor
         }
-        # 객체 생성 시 테이블과 필수 부모 데이터를 즉시 점검합니다.
         self._init_db()
 
     def _get_connection(self):
-        """DB 연결 객체를 생성합니다."""
         return pymysql.connect(**self.config)
 
     def _init_db(self):
-        """[자가 치유] 테이블 생성 및 컬럼 자동 추가"""
+        """테이블 생성 및 컬럼/인덱스 자가 치유"""
         conn = self._get_connection()
         try:
             with conn.cursor() as cur:
-                # 1. content 테이블 cine21_id 체크
-                try:
-                    cur.execute("SELECT cine21_id FROM content LIMIT 1")
-                except pymysql.err.InternalError as e:
-                    if e.args[0] == 1054:
-                        print("ℹ️ 'content' 테이블에 'cine21_id' 컬럼이 없어 추가합니다...")
-                        cur.execute("ALTER TABLE content ADD COLUMN cine21_id VARCHAR(50) UNIQUE")
-                        conn.commit()
-                
-                # 2. analysis_cache 필수 데이터 확인
-                cur.execute('''
-                    INSERT IGNORE INTO `analysis_cache` (id, summary, positive_ratio) 
-                    VALUES (1, '데이터 수집을 위한 임시 분석 객체', 0.0);
-                ''')
+                # 1. content 테이블 필수 컬럼 체크
+                cur.execute("SHOW COLUMNS FROM content")
+                columns = [col['Field'] for col in cur.fetchall()]
+                if 'cine21_id' not in columns:
+                    cur.execute("ALTER TABLE content ADD COLUMN cine21_id VARCHAR(50) UNIQUE")
+                if 'tmdb_id' not in columns:
+                    cur.execute("ALTER TABLE content ADD COLUMN tmdb_id VARCHAR(50)")
 
-                # --- [추가된 구간] 의미 좌표(벡터) 및 키워드 컬럼 자동 추가 ㅋㅋㅋㅋ ---
-                cur.execute("SHOW COLUMNS FROM analysis_cache LIKE 'embedding_vector'")
-                if not cur.fetchone():
-                    print("ℹ️ 'analysis_cache' 테이블에 '의미 좌표' 컬럼이 없어 추가합니다... ㅋㅋㅋㅋ")
-                    cur.execute("ALTER TABLE analysis_cache ADD COLUMN embedding_vector LONGTEXT")
-                    cur.execute("ALTER TABLE analysis_cache ADD COLUMN search_keywords VARCHAR(500)")
-                    conn.commit()
-                # ------------------------------------------------------------------
-
-                # 3. expert_review 테이블 생성
+                # 2. expert_review 테이블 생성
                 cur.execute('''
                     CREATE TABLE IF NOT EXISTS `expert_review` (
                         `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -85,75 +67,97 @@ class ExpertSaver:
                         INDEX idx_content_id (content_id)
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
                 ''')
+
+                # 3. content_genre 매핑 테이블 생성 (장르 저장을 위해 필수)
+                cur.execute('''
+                    CREATE TABLE IF NOT EXISTS `content_genre` (
+                        `content_id` BIGINT NOT NULL,
+                        `genre_id` BIGINT NOT NULL,
+                        PRIMARY KEY (`content_id`, `genre_id`)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+                ''')
+
+                # 중복 리뷰 방지를 위한 유니크 인덱스
+                try:
+                    cur.execute(
+                        "CREATE UNIQUE INDEX idx_unique_review ON expert_review (content_id, critic_name, comment(100))")
+                except:
+                    pass
+
             conn.commit()
-            print(f"✅ DB 초기화 및 '의미 좌표' 컬럼 체크 완료 (포트: {self.config['port']})")
+            print(f"✅ DB 초기화 및 장르 매핑 테이블 준비 완료")
         except Exception as e:
-            print(f"⚠️ 초기화 중 알림: {e}")
+            print(f"⚠️ 초기화 알림: {e}")
         finally:
             conn.close()
 
-    def save_review(self, cine21_id, analysis_id, movie_title, reviews, vector=None):
-        """리뷰 저장 (부모 데이터 자동 생성 포함)"""
-        if not reviews:
-            return
-
+    def save_review(self, cine21_id, tmdb_id, analysis_id, movie_title, reviews, genre_list, vector=None):
+        """
+        영화 정보, 리뷰, TMDB 장르 정보를 통합 저장합니다.
+        genre_list: ['액션', 'SF'] 형태의 리스트
+        """
         conn = self._get_connection()
         try:
             with conn.cursor() as cur:
-                # --- [방어 1] analysis_cache 1번 데이터 확인 및 재생성 ---
-                cur.execute("SELECT id FROM analysis_cache WHERE id = %s", (analysis_id,))
-                if not cur.fetchone():
-                    cur.execute(
-                        "INSERT INTO analysis_cache (id, summary, positive_ratio) VALUES (%s, %s, %s)",
-                        (analysis_id, '임시 분석 데이터', 0.0)
-                    )
+                # 외래 키 체크 일시 중지 (안전한 트랜잭션 처리)
+                cur.execute("SET FOREIGN_KEY_CHECKS = 0;")
 
+                # [1] 의미 좌표(Vector) 업데이트
                 if vector:
                     cur.execute(
                         "UPDATE analysis_cache SET embedding_vector = %s WHERE id = %s",
                         (vector, analysis_id)
                     )
-                    
-                # --- [방어 2] content 테이블 영화 정보 확인 및 재생성 (cine21_id 기준) ---
+
+                # [2] 영화 정보 확인 및 생성
                 cur.execute("SELECT id FROM content WHERE cine21_id = %s", (cine21_id,))
                 row = cur.fetchone()
-                
+
                 if row:
                     content_id = row['id']
+                    # tmdb_id 강제 업데이트 (데이터 정정)
+                    cur.execute("UPDATE content SET tmdb_id = %s WHERE id = %s", (tmdb_id, content_id))
                 else:
-                    # 영화 정보가 없으면 새로 생성 (cine21_id 포함)
-                    # tmdb_id는 현재 크롤러 구조상 cine21_id와 동일하게 임시로 저장하거나 NULL 가능하게 처리
                     cur.execute(
                         "INSERT INTO content (title, tmdb_id, cine21_id) VALUES (%s, %s, %s)",
-                        (movie_title, cine21_id, cine21_id)
+                        (movie_title, tmdb_id, cine21_id)
                     )
                     content_id = cur.lastrowid
-                    print(f"ℹ️ content 테이블에 '{movie_title}' 정보를 자동 생성했습니다. (ID: {content_id})")
 
-                # --- [방어 3] 리뷰 일괄 저장 ---
-                sql = """
-                      INSERT INTO expert_review (content_id, analysis_id, movie_title, critic_name, rating, comment, source) \
-                      VALUES (%s, %s, %s, %s, %s, %s, %s) \
-                      """
+                # [3] TMDB 장르 매핑 저장 (추가된 핵심 로직!)
+                if genre_list:
+                    for g_name in genre_list:
+                        # genre 테이블에서 ID 조회
+                        cur.execute("SELECT id FROM genre WHERE name = %s", (g_name.strip(),))
+                        genre_row = cur.fetchone()
 
-                data_insert = []
-                for r in reviews:
-                    row_data = (
-                        content_id,   
-                        analysis_id,  
-                        movie_title,  
-                        r['critic'],  
-                        str(r['score']),  # 문자열 그대로 저장 (float 형변환 제거)
-                        r['content'],  
-                        'Cine21'  
-                    )
-                    data_insert.append(row_data)
+                        if genre_row:
+                            genre_id = genre_row['id']
+                            # content_genre 테이블에 매핑 (중복 무시)
+                            cur.execute("INSERT IGNORE INTO content_genre (content_id, genre_id) VALUES (%s, %s)",
+                                        (content_id, genre_id))
+                    print(f"📁 '{movie_title}' 장르 {len(genre_list)}개 매핑 완료")
 
-                cur.executemany(sql, data_insert)
+                # [4] 리뷰 저장
+                if reviews:
+                    sql = """
+                        INSERT IGNORE INTO expert_review 
+                        (content_id, analysis_id, movie_title, critic_name, rating, comment, source) 
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """
+                    data_insert = [
+                        (content_id, analysis_id, movie_title, r['critic'], str(r['score']), r['content'], 'Cine21')
+                        for r in reviews
+                    ]
+                    cur.executemany(sql, data_insert)
+                    print(f"✨ '{movie_title}' 리뷰 {len(reviews)}건 저장 완료!")
+                else:
+                    print(f"✅ '{movie_title}' 영화 정보 등록 완료 (리뷰 없음)")
+
+                # 외래 키 체크 다시 활성화
+                cur.execute("SET FOREIGN_KEY_CHECKS = 1;")
 
             conn.commit()
-            print(f"✨ '{movie_title}' 리뷰 {len(reviews)}건 저장 성공!")
-
         except Exception as e:
             print(f"❌ 저장 에러 발생: {e}")
             conn.rollback()
