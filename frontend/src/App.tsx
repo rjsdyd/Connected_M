@@ -22,6 +22,7 @@ import ExtraInfo from './pages/Auth/ExtraInfo';
 import ResetPassword from './pages/Auth/ResetPassword'; // 비밀번호 재설정 링크 처리 페이지
 import EditProfile from './pages/MyPage/EditProfile';
 import WishlistPage from './pages/MyPage/WishlistPage';
+import MyReviewsPage from './pages/MyPage/MyReviewsPage';
 
 
 const AppContent = () => {
@@ -47,6 +48,7 @@ const AppContent = () => {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/edit-profile" element={<EditProfile />} />
           <Route path="/wishlist" element={<WishlistPage />} />
+          <Route path="/my-reviews" element={<MyReviewsPage />} />
         </Routes>
       </div>
       
