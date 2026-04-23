@@ -224,40 +224,54 @@ const MovieDetail: React.FC = () => {
               <img src={`https://image.tmdb.org/t/p/w500${movie.posterPath}`} alt={movie.title} className="main-poster" />
             </div>
             <div className="info-area">
-              <div className="meta-info-row">
-                <span className={`age-badge ${movie.ageRating === '19+' ? 'age-19' : 'age-all'}`}>{movie.ageRating}</span>
-                <span className="runtime-label">{movie.runtime}분</span>
-              </div>
-              <h1 className="movie-title">{movie.title}</h1>
-              
-              <div className="platform-buttons-container">
-                <span className="platform-label">시청 가능한 플랫폼</span>
-                <div className="platform-logos-row">
-                  {movie.providers && movie.providers.length > 0 ? (
-                    movie.providers.map((p) => (
-                      <a key={p.provider_id} href={getProviderUrl(movie.title, p.provider_id)} target="_blank" rel="noopener noreferrer">
-                        <img src={`https://image.tmdb.org/t/p/original${p.logo_path}`} alt={p.provider_name} className="ott-logo-simple" title={p.provider_name} />
-                      </a>
-                    ))
-                  ) : movie.ottLogos ? (
-                    movie.ottLogos.split(',').map((logo, idx) => {
-                      const cleanLogo = logo.trim();
-                      const fullUrl = cleanLogo.startsWith('http') ? cleanLogo : `https://image.tmdb.org/t/p/original${cleanLogo}`;
-                      return (
-                        <a key={idx} href={getProviderUrl(movie.title, undefined, cleanLogo)} target="_blank" rel="noopener noreferrer">
-                           <img src={fullUrl} alt="OTT" className="ott-logo-simple" />
-                        </a>
-                      );
-                    })
-                  ) : <span className="no-provider">현재 제공 중인 OTT가 없습니다.</span>}
-                </div>
-                
-                <button className={`wishlist-btn ${isWishlisted ? 'active' : ''}`} onClick={handleWishlistToggle}>
-                  {isWishlisted ? <FaBookmark /> : <FaRegBookmark />}
-                  <span>{isWishlisted ? '찜한 영화' : '찜하기'}</span>
-                </button>
-              </div>
-            </div>
+  <div className="meta-info-row">
+    {/* 등급 뱃지: 12, 15, 19, ALL 등급별 색상 적용 */}
+    <span className={`age-badge ${
+      movie.ageRating === '19' ? 'age-19' : 
+      movie.ageRating === '15' ? 'age-15' : 
+      movie.ageRating === '12' ? 'age-12' : 'age-all'
+    }`}>
+      {movie.ageRating}
+    </span>
+    <span className="runtime-label">{movie.runtime}분</span>
+  </div>
+
+  {/* 제목이 먼저 나옵니다 */}
+  <h1 className="movie-title">{movie.title}</h1>
+
+  {/* 장르가 제목 바로 밑에 위치합니다 */}
+  <div className="movie-genres-row">
+    {movie.genres.join(' · ')}
+  </div>
+
+  <div className="platform-buttons-container">
+    <span className="platform-label">시청 가능한 플랫폼</span>
+    <div className="platform-logos-row">
+      {movie.providers && movie.providers.length > 0 ? (
+        movie.providers.map((p) => (
+          <a key={p.provider_id} href={getProviderUrl(movie.title, p.provider_id)} target="_blank" rel="noopener noreferrer">
+            <img src={`https://image.tmdb.org/t/p/original${p.logo_path}`} alt={p.provider_name} className="ott-logo-simple" title={p.provider_name} />
+          </a>
+        ))
+      ) : movie.ottLogos ? (
+        movie.ottLogos.split(',').map((logo, idx) => {
+          const cleanLogo = logo.trim();
+          const fullUrl = cleanLogo.startsWith('http') ? cleanLogo : `https://image.tmdb.org/t/p/original${cleanLogo}`;
+          return (
+            <a key={idx} href={getProviderUrl(movie.title, undefined, cleanLogo)} target="_blank" rel="noopener noreferrer">
+               <img src={fullUrl} alt="OTT" className="ott-logo-simple" />
+            </a>
+          );
+        })
+      ) : <span className="no-provider">현재 제공 중인 OTT가 없습니다.</span>}
+    </div>
+    
+    <button className={`wishlist-btn ${isWishlisted ? 'active' : ''}`} onClick={handleWishlistToggle}>
+      {isWishlisted ? <FaBookmark /> : <FaRegBookmark />}
+      <span>{isWishlisted ? '찜한 영화' : '찜하기'}</span>
+    </button>
+  </div>
+</div>
           </div>
         </section>
 
@@ -334,7 +348,7 @@ const MovieDetail: React.FC = () => {
                 <div className="already-reviewed-msg" style={{color: '#4b0082', fontWeight: 'bold'}}>이미 소중한 리뷰를 작성하셨습니다. ✨</div>
               ) : (
                 <div className="write-form-container">
-                  {/* ✨ [명준님의 정교한 별점 로직] ㅋ */}
+                  
                   <div className="interactive-rating-stars-wrapper" onMouseLeave={() => setHoverRating(null)}>
                     {[...Array(5)].map((_, i) => {
                       const displayRating = hoverRating !== null ? hoverRating : newRating;
