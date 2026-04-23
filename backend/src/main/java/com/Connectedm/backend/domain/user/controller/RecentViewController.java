@@ -4,6 +4,7 @@ import com.Connectedm.backend.domain.content.entity.Content;
 import com.Connectedm.backend.domain.content.service.ContentService;
 import com.Connectedm.backend.domain.user.dto.RecentViewResponseDto;
 import com.Connectedm.backend.domain.user.entity.User;
+import com.Connectedm.backend.domain.user.repository.UserRepository;
 import com.Connectedm.backend.domain.user.service.RecentViewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,16 +19,18 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/users/recnet")
 public class RecentViewController {
     private final RecentViewService recentViewService;
-    private final ContentService contentService; // 영화 존재 여부 확인
+    private final ContentService contentService;
+    private final UserRepository userRepository;
 
-    /**
-     *  [GET} 최근 열람 목록 조회
-     */
     @GetMapping
     public ResponseEntity<List<RecentViewResponseDto>> getRecentViews(
             @AuthenticationPrincipal User user) {
 
-        List<RecentViewResponseDto> response = recentViewService.getRecentViews(user)
+        // 💡 [수정] 이메일 대신 ID로 찾습니다. 로그에 이미 id로 찾는 쿼리가 성공하는 게 보입니다.
+        User persistentUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        List<RecentViewResponseDto> response = recentViewService.getRecentViews(persistentUser)
                 .stream()
                 .map(RecentViewResponseDto::new)
                 .collect(Collectors.toList());
@@ -35,19 +38,19 @@ public class RecentViewController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     *  [POST] 최근 열람 기록 추가/갱신
-     */
     @PostMapping("/{contentId}")
     public ResponseEntity<Void> saveOrUpdateRecentView(
             @AuthenticationPrincipal User user,
             @PathVariable Long contentId) {
 
-        // 1. 해당 영화가 있는지 확인
+        // 💡 [수정] 여기서도 ID로 조회하여 '진짜 유저' 객체를 확보합니다.
+        User persistentUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
         Content content = contentService.findById(contentId);
 
-        // 2. 서비스 가동(UPSERT)
-        recentViewService.saveOrUpdateRecentView(user, content);
+        // 명준님이 짜신 서비스 로직 그대로 실행
+        recentViewService.saveOrUpdateRecentView(persistentUser, content);
 
         return ResponseEntity.ok().build();
     }
