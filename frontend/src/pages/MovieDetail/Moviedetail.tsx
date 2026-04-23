@@ -1,8 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaStar, FaRegStar, FaStarHalfAlt, FaBookmark, FaRegBookmark } from 'react-icons/fa';
+import { FaStar, FaRegStar, FaStarHalfAlt, FaBookmark, FaRegBookmark, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import './MovieDetail.css';
 import { useAuth } from '../../hooks/useAuth';
+import axios from 'axios';
+
+interface ExpertReviewData {
+  id: number;
+  criticName: string;
+  rating: string;
+  comment: string;
+  source: string;
+}
+
+interface UserReviewData {
+  id: number;
+  nickname: string;
+  rating: string;
+  comment: string;
+}
 
 interface CastMember {
   name: string;
@@ -10,14 +26,6 @@ interface CastMember {
   profile_path: string;
 }
 
-interface ReviewData {
-  id: number;
-  nickname: string;
-  rating: string;
-  comment: string;
-}
-
-// OTT 제공자 인터페이스
 interface WatchProvider {
   provider_id: number;
   provider_name: string;
@@ -35,9 +43,10 @@ interface MovieDetailData {
   runtime: number;
   ageRating: string;
   topKeywords: string[];
-  expertReviews: ReviewData[];
-  userReviews: ReviewData[];
+  expertReviews: ExpertReviewData[];
+  userReviews: UserReviewData[];
   providers: WatchProvider[]; 
+  ottLogos?: string;
 }
 
 const MovieDetail: React.FC = () => {
@@ -53,24 +62,51 @@ const MovieDetail: React.FC = () => {
   const [newRating, setNewRating] = useState(0); 
   const [hoverRating, setHoverRating] = useState<number | null>(null);
 
-  const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
-  const BASE_URL = import.meta.env.VITE_TMDB_BASE_URL;
+  const [expertPage, setExpertPage] = useState(1);
+  const [userPage, setUserPage] = useState(1);
+  const itemsPerPage = 3;
 
-  // OTT 클릭 시 이동할 URL 매핑
-  const getProviderUrl = (id: number) => {
-    const urls: { [key: number]: string } = {
-      8: "https://www.netflix.com",
-      337: "https://www.disneyplus.com",
-      370: "https://www.tving.com",         // 티빙
-      356: "https://www.wavve.com",         // 웨이브 (추가/수정)
-      97: "https://www.watcha.com",
-      350: "https://www.coupangplay.com",
-      119: "https://www.amazon.com/Prime-Video",
-      2: "https://www.apple.com/apple-tv-plus",
-    };
+  const getProviderUrl = (title: string, providerId?: number, logoPath?: string) => {
+    const encodedTitle = encodeURIComponent(title);
     
-    // 매핑된 URL이 있으면 해당 URL로, 없으면 영화 제목 구글 검색으로 연결
-    return urls[id] || `https://www.google.com/search?q=${encodeURIComponent(movie?.title + " 보러가기")}`;
+    const platformLinks: { [key: string]: string } = {
+      netflix: `https://www.netflix.com/search?q=${encodedTitle}`,
+      disney: `https://www.disneyplus.com/search?q=${encodedTitle}`,
+      tving: `https://www.tving.com/search/all?keyword=${encodedTitle}`,
+      wavve: `https://www.wavve.com/search/search?searchKeyword=${encodedTitle}`,
+      watcha: `https://watcha.com/search?query=${encodedTitle}`,
+      coupang: `https://www.coupangplay.com/search?q=${encodedTitle}`,
+      amazon: `https://www.amazon.com/s?k=${encodedTitle}&i=instant-video`,
+      apple: `https://tv.apple.com/kr/search?term=${encodedTitle}`,
+    };
+
+    if (providerId) {
+      const idMap: { [key: number]: string } = {
+        8: platformLinks.netflix,
+        337: platformLinks.disney,
+        370: platformLinks.tving,
+        356: platformLinks.wavve,
+        97: platformLinks.watcha,
+        350: platformLinks.coupang,
+        119: platformLinks.amazon,
+        2: platformLinks.apple,
+      };
+      if (idMap[providerId]) return idMap[providerId];
+    }
+
+    if (logoPath) {
+      const path = logoPath.toLowerCase();
+      if (path.includes('netflix')) return platformLinks.netflix;
+      if (path.includes('disney')) return platformLinks.disney;
+      if (path.includes('tving')) return platformLinks.tving;
+      if (path.includes('wavve')) return platformLinks.wavve;
+      if (path.includes('watcha')) return platformLinks.watcha;
+      if (path.includes('coupang')) return platformLinks.coupang;
+      if (path.includes('amazon')) return platformLinks.amazon;
+      if (path.includes('apple')) return platformLinks.apple;
+    }
+
+    return `https://www.google.com/search?q=${encodedTitle}+보러가기`;
   };
 
   useEffect(() => {
@@ -79,55 +115,30 @@ const MovieDetail: React.FC = () => {
 
   useEffect(() => {
     const fetchMovieData = async () => {
-      if (!id || !API_KEY || !BASE_URL) return;
+      if (!id) return;
       try {
         setLoading(true);
-        const [detailRes, creditsRes, watchRes] = await Promise.all([
-          fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=ko-KR`),
-          fetch(`${BASE_URL}/movie/${id}/credits?api_key=${API_KEY}&language=ko-KR`),
-          fetch(`${BASE_URL}/movie/${id}/watch/providers?api_key=${API_KEY}`)
-        ]);
+        const response = await fetch(`http://localhost:8080/api/contents/${id}`);
+        if (!response.ok) throw new Error("서버 응답 에러");
+        const result = await response.json();
 
-        const detailData = await detailRes.json();
-        const creditsData = await creditsRes.json();
-        const watchData = await watchRes.json();
+        if (result && result.data) {
+          const data = result.data;
+          
+          setMovie({
+            ...data,
+            posterPath: data.posterPath ? data.posterPath.replace('https://image.tmdb.org/t/p/w500', '') : "",
+            backdropPath: data.backdropPath ? data.backdropPath.replace('https://image.tmdb.org/t/p/original', '') : "",
+          });
 
-        // [핵심] 한국(KR) 지역의 모든 제공 방식(스트리밍, 대여, 구매)을 통합
-        const krData = watchData.results?.KR;
-        const allProviders: WatchProvider[] = [
-          ...(krData?.flatrate || []),
-          ...(krData?.rent || []),
-          ...(krData?.buy || [])
-        ];
+          if (isLoggedIn && userNickname) {
+            const alreadyReviewed = data.userReviews.some((r: any) => r.nickname === userNickname);
+            setHasReviewed(alreadyReviewed);
+          }
 
-        // 중복된 provider_id 제거
-        const uniqueProviders = allProviders.filter((v, i, a) => 
-          a.findIndex(t => t.provider_id === v.provider_id) === i
-        );
-
-        setMovie({
-          id: detailData.id,
-          title: detailData.title,
-          overview: detailData.overview,
-          posterPath: detailData.poster_path,
-          backdropPath: detailData.backdrop_path,
-          genres: detailData.genres.map((g: any) => g.name),
-          runtime: detailData.runtime,
-          ageRating: detailData.adult ? "19+" : "ALL",
-          castList: creditsData.cast.slice(0, 6).map((c: any) => ({
-            name: c.name,
-            character: c.character,
-            profile_path: c.profile_path
-          })),
-          topKeywords: ["몰입감", "연기력", "재미"],
-          expertReviews: [],
-          userReviews: [],
-          providers: uniqueProviders
-        });
-
-        const savedWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-        setIsWishlisted(savedWishlist.some((item: any) => item.contentId === Number(id)));
-
+          const savedWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+          setIsWishlisted(savedWishlist.some((item: any) => item.contentId === Number(id)));
+        }
       } catch (error) {
         console.error("데이터 로딩 실패:", error);
       } finally {
@@ -135,7 +146,7 @@ const MovieDetail: React.FC = () => {
       }
     };
     fetchMovieData();
-  }, [id, API_KEY, BASE_URL]);
+  }, [id, isLoggedIn, userNickname]);
 
   const handleWishlistToggle = () => { 
     if (!isLoggedIn) { alert("로그인이 필요합니다."); return; }
@@ -149,22 +160,19 @@ const MovieDetail: React.FC = () => {
     localStorage.setItem('wishlist', JSON.stringify(newWishlist));
   };
 
-  const handleReviewSubmit = async () => { // 1. 여기에 async 꼭 추가!
+  const handleReviewSubmit = async () => {
     if (!isLoggedIn) { alert("로그인이 필요합니다."); return; }
     if (hasReviewed) { alert("이미 리뷰를 작성하셨습니다."); return; }
     if (!newComment.trim()) { alert("내용을 입력해주세요."); return; }
     if (newRating === 0) { alert("별점을 선택해주세요."); return; }
 
     try {
-      // 1. 로컬 스토리지에서 신분증(토큰) 꺼내기
       const token = localStorage.getItem('token'); 
-
       const reviewBody = {
         rating: newRating.toString(),
         comment: newComment
       };
 
-      // 2. 백엔드에 리뷰 저장 요청 (헤더 포함!)
       const response = await axios.post(
         `http://localhost:8080/api/contents/user-reviews?contentId=${id}`, 
         reviewBody,
@@ -175,30 +183,13 @@ const MovieDetail: React.FC = () => {
         }
       );
 
-      // 3. 저장 성공 시 프론트엔드 UI 업데이트
       if (response.status === 200 || response.status === 201) {
         alert("리뷰가 성공적으로 등록되었습니다!");
         setHasReviewed(true);
-
-        if (movie) {
-          const myNewReview: ReviewData = {
-            id: Date.now(), 
-            nickname: userNickname || "익명사용자", 
-            rating: newRating.toString(),
-            comment: newComment,
-            sourceName: "내 리뷰"
-          };
-
-          setMovie({
-            ...movie,
-            userReviews: [myNewReview, ...movie.userReviews]
-          });
-        }
-        setNewComment("");
-        setNewRating(0);
+        window.location.reload();
       }
     } catch (error) {
-      console.error("리뷰 등록 실패 상세:", error);
+      console.error("리뷰 등록 실패:", error);
       alert("리뷰 등록 중 오류가 발생했습니다.");
     }
   };
@@ -226,6 +217,11 @@ const MovieDetail: React.FC = () => {
 
   if (loading || !movie) return <div className="loading-container">로딩 중...</div>;
 
+  const expertReviewsSlice = movie.expertReviews.slice((expertPage - 1) * itemsPerPage, expertPage * itemsPerPage);
+  const userReviewsSlice = movie.userReviews.slice((userPage - 1) * itemsPerPage, userPage * itemsPerPage);
+  const totalExpertPages = Math.ceil(movie.expertReviews.length / itemsPerPage);
+  const totalUserPages = Math.ceil(movie.userReviews.length / itemsPerPage);
+
   return (
     <div className="detail-container">
       <main className="main-content">
@@ -248,18 +244,27 @@ const MovieDetail: React.FC = () => {
               <div className="platform-buttons-container">
                 <span className="platform-label">시청 가능한 플랫폼</span>
                 <div className="platform-logos-row">
-                  {movie.providers.length > 0 ? (
+                  {movie.providers && movie.providers.length > 0 ? (
                     movie.providers.map((p) => (
-                      <a key={p.provider_id} href={getProviderUrl(p.provider_id)} target="_blank" rel="noopener noreferrer">
+                      <a key={p.provider_id} href={getProviderUrl(movie.title, p.provider_id)} target="_blank" rel="noopener noreferrer">
                         <img 
                           src={`https://image.tmdb.org/t/p/original${p.logo_path}`} 
                           alt={p.provider_name} 
                           className="ott-logo-simple" 
                           title={p.provider_name}
-                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
                         />
                       </a>
                     ))
+                  ) : movie.ottLogos ? (
+                    movie.ottLogos.split(',').map((logo, idx) => {
+                      const cleanLogo = logo.trim();
+                      const fullUrl = cleanLogo.startsWith('http') ? cleanLogo : `https://image.tmdb.org/t/p/original${cleanLogo}`;
+                      return (
+                        <a key={idx} href={getProviderUrl(movie.title, undefined, cleanLogo)} target="_blank" rel="noopener noreferrer">
+                           <img src={fullUrl} alt="OTT" className="ott-logo-simple" />
+                        </a>
+                      );
+                    })
                   ) : (
                     <span className="no-provider">현재 제공 중인 OTT가 없습니다.</span>
                   )}
@@ -296,9 +301,32 @@ const MovieDetail: React.FC = () => {
 
           <div className="right-column">
             <section className="detail-section">
+              <h2 className="section-title">전문가 평점 ({movie.expertReviews.length})</h2>
+              <div className="compact-card-container">
+                {expertReviewsSlice.length > 0 ? expertReviewsSlice.map((r) => (
+                  <div key={r.id} className="compact-review-row">
+                    <div className="compact-reviewer-meta">
+                      <span className="compact-reviewer-name">{r.criticName} <small>| {r.source}</small></span>
+                      {renderStars(r.rating)}
+                    </div>
+                    <p className="compact-comment-text">"{r.comment}"</p>
+                  </div>
+                )) : <p className="placeholder-text">전문가 리뷰가 없습니다.</p>}
+                
+                {totalExpertPages > 1 && (
+                  <div className="pagination-controls">
+                    <button disabled={expertPage === 1} onClick={() => setExpertPage(p => p - 1)}><FaChevronLeft /></button>
+                    <span>{expertPage} / {totalExpertPages}</span>
+                    <button disabled={expertPage === totalExpertPages} onClick={() => setExpertPage(p => p + 1)}><FaChevronRight /></button>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <section className="detail-section">
               <h2 className="section-title">관람평 ({movie.userReviews.length})</h2>
               <div className="compact-card-container">
-                {movie.userReviews.length > 0 ? movie.userReviews.map((r) => (
+                {userReviewsSlice.length > 0 ? userReviewsSlice.map((r) => (
                   <div key={r.id} className="compact-review-row">
                     <div className="compact-reviewer-meta">
                       <span className="compact-reviewer-name">{r.nickname}</span>
@@ -306,7 +334,15 @@ const MovieDetail: React.FC = () => {
                     </div>
                     <p className="compact-comment-text">{r.comment}</p>
                   </div>
-                )) : <p className="placeholder-text" style={{padding: '20px', color: '#999'}}>첫 번째 리뷰를 남겨보세요!</p>}
+                )) : <p className="placeholder-text">첫 번째 리뷰를 남겨보세요!</p>}
+
+                {totalUserPages > 1 && (
+                  <div className="pagination-controls">
+                    <button disabled={userPage === 1} onClick={() => setUserPage(p => p - 1)}><FaChevronLeft /></button>
+                    <span>{userPage} / {totalUserPages}</span>
+                    <button disabled={userPage === totalUserPages} onClick={() => setUserPage(p => p + 1)}><FaChevronRight /></button>
+                  </div>
+                )}
               </div>
             </section>
 
@@ -315,7 +351,7 @@ const MovieDetail: React.FC = () => {
               {!isLoggedIn ? (
                 <div className="already-reviewed-msg">로그인이 필요합니다.</div>
               ) : hasReviewed ? (
-                <div className="already-reviewed-msg">이미 리뷰를 작성하셨습니다.</div>
+                <div className="already-reviewed-msg" style={{color: '#4b0082', fontWeight: 'bold'}}>이미 소중한 리뷰를 작성하셨습니다. ✨</div>
               ) : (
                 <div className="write-form-container">
                   <div className="interactive-rating-stars-wrapper" onMouseLeave={() => setHoverRating(null)}>
