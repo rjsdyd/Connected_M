@@ -68,7 +68,6 @@ const MovieDetail: React.FC = () => {
 
   const getProviderUrl = (title: string, providerId?: number, logoPath?: string) => {
     const encodedTitle = encodeURIComponent(title);
-    
     const platformLinks: { [key: string]: string } = {
       netflix: `https://www.netflix.com/search?q=${encodedTitle}`,
       disney: `https://www.disneyplus.com/search?q=${encodedTitle}`,
@@ -82,14 +81,9 @@ const MovieDetail: React.FC = () => {
 
     if (providerId) {
       const idMap: { [key: number]: string } = {
-        8: platformLinks.netflix,
-        337: platformLinks.disney,
-        370: platformLinks.tving,
-        356: platformLinks.wavve,
-        97: platformLinks.watcha,
-        350: platformLinks.coupang,
-        119: platformLinks.amazon,
-        2: platformLinks.apple,
+        8: platformLinks.netflix, 337: platformLinks.disney, 370: platformLinks.tving,
+        356: platformLinks.wavve, 97: platformLinks.watcha, 350: platformLinks.coupang,
+        119: platformLinks.amazon, 2: platformLinks.apple,
       };
       if (idMap[providerId]) return idMap[providerId];
     }
@@ -118,13 +112,12 @@ const MovieDetail: React.FC = () => {
       if (!id) return;
       try {
         setLoading(true);
+        const token = localStorage.getItem('token');
         const response = await fetch(`http://localhost:8080/api/contents/${id}`);
-        if (!response.ok) throw new Error("서버 응답 에러");
         const result = await response.json();
 
         if (result && result.data) {
           const data = result.data;
-          
           setMovie({
             ...data,
             posterPath: data.posterPath ? data.posterPath.replace('https://image.tmdb.org/t/p/w500', '') : "",
@@ -132,12 +125,15 @@ const MovieDetail: React.FC = () => {
           });
 
           if (isLoggedIn && userNickname) {
-            const alreadyReviewed = data.userReviews.some((r: any) => r.nickname === userNickname);
-            setHasReviewed(alreadyReviewed);
-          }
+            setHasReviewed(data.userReviews.some((r: any) => r.nickname === userNickname));
 
-          const savedWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-          setIsWishlisted(savedWishlist.some((item: any) => item.contentId === Number(id)));
+            // ✨ [찜하기 DB 동기화] 백엔드에서 찜 목록을 가져와 현재 영화가 있는지 확인 ㅋ
+            const wishRes = await axios.get('http://localhost:8080/api/members/wishlist', {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            const isWished = wishRes.data.some((w: any) => w.contentId === Number(id));
+            setIsWishlisted(isWished);
+          }
         }
       } catch (error) {
         console.error("데이터 로딩 실패:", error);
@@ -148,50 +144,49 @@ const MovieDetail: React.FC = () => {
     fetchMovieData();
   }, [id, isLoggedIn, userNickname]);
 
-  const handleWishlistToggle = () => { 
+  // ✨ [찜하기 토글 DB 동기화] API 호출 추가 ㅋ
+  const handleWishlistToggle = async () => { 
     if (!isLoggedIn) { alert("로그인이 필요합니다."); return; }
-    const savedWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-    const isAlreadyWished = savedWishlist.some((item: any) => item.contentId === Number(id));
-    let newWishlist = isAlreadyWished 
-      ? savedWishlist.filter((item: any) => item.contentId !== Number(id))
-      : [...savedWishlist, { contentId: Number(id) }];
-    
-    setIsWishlisted(!isAlreadyWished);
-    localStorage.setItem('wishlist', JSON.stringify(newWishlist));
+    try {
+      const token = localStorage.getItem('token');
+      // 백엔드 toggleWishlist API 호출 (명준님이 만든 POST /api/members/wishlist/{contentId})
+      await axios.post(`http://localhost:8080/api/members/wishlist/${id}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      setIsWishlisted(!isWishlisted);
+
+      // 로컬 스토리지도 보조로 업데이트 (원본 로직 유지 ㅋ)
+      const savedWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+      const isAlreadyWished = savedWishlist.some((item: any) => item.contentId === Number(id));
+      let newWishlist = isAlreadyWished 
+        ? savedWishlist.filter((item: any) => item.contentId !== Number(id))
+        : [...savedWishlist, { contentId: Number(id) }];
+      localStorage.setItem('wishlist', JSON.stringify(newWishlist));
+      
+    } catch (error) {
+      alert("찜하기 처리 중 오류가 발생했습니다.");
+    }
   };
 
   const handleReviewSubmit = async () => {
     if (!isLoggedIn) { alert("로그인이 필요합니다."); return; }
     if (hasReviewed) { alert("이미 리뷰를 작성하셨습니다."); return; }
-    if (!newComment.trim()) { alert("내용을 입력해주세요."); return; }
-    if (newRating === 0) { alert("별점을 선택해주세요."); return; }
+    if (!newComment.trim() || newRating === 0) { alert("내용과 별점을 입력해주세요."); return; }
 
     try {
       const token = localStorage.getItem('token'); 
-      const reviewBody = {
-        rating: newRating.toString(),
-        comment: newComment
-      };
-
-      const response = await axios.post(
-        `http://localhost:8080/api/contents/user-reviews?contentId=${id}`, 
-        reviewBody,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+      const response = await axios.post(`http://localhost:8080/api/contents/user-reviews?contentId=${id}`, 
+        { rating: newRating.toString(), comment: newComment },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (response.status === 200 || response.status === 201) {
-        alert("리뷰가 성공적으로 등록되었습니다!");
+        alert("리뷰가 등록되었습니다!");
         setHasReviewed(true);
         window.location.reload();
       }
-    } catch (error) {
-      console.error("리뷰 등록 실패:", error);
-      alert("리뷰 등록 중 오류가 발생했습니다.");
-    }
+    } catch (error) { alert("리뷰 등록 실패!"); }
   };
 
   const renderStars = (rating: string | number) => {
@@ -202,13 +197,7 @@ const MovieDetail: React.FC = () => {
           const isFull = num >= i + 1;
           const isHalf = num >= i + 0.5 && num < i + 1;
           const starClass = (isFull || isHalf) ? "star-icon filled" : "star-icon";
-          return isFull ? (
-            <FaStar key={i} className={starClass} />
-          ) : isHalf ? (
-            <FaStarHalfAlt key={i} className={starClass} />
-          ) : (
-            <FaRegStar key={i} className={starClass} />
-          );
+          return isFull ? <FaStar key={i} className={starClass} /> : isHalf ? <FaStarHalfAlt key={i} className={starClass} /> : <FaRegStar key={i} className={starClass} />;
         })}
         <span className="rating-num">{rating}점</span>
       </div>
@@ -247,12 +236,7 @@ const MovieDetail: React.FC = () => {
                   {movie.providers && movie.providers.length > 0 ? (
                     movie.providers.map((p) => (
                       <a key={p.provider_id} href={getProviderUrl(movie.title, p.provider_id)} target="_blank" rel="noopener noreferrer">
-                        <img 
-                          src={`https://image.tmdb.org/t/p/original${p.logo_path}`} 
-                          alt={p.provider_name} 
-                          className="ott-logo-simple" 
-                          title={p.provider_name}
-                        />
+                        <img src={`https://image.tmdb.org/t/p/original${p.logo_path}`} alt={p.provider_name} className="ott-logo-simple" title={p.provider_name} />
                       </a>
                     ))
                   ) : movie.ottLogos ? (
@@ -265,9 +249,7 @@ const MovieDetail: React.FC = () => {
                         </a>
                       );
                     })
-                  ) : (
-                    <span className="no-provider">현재 제공 중인 OTT가 없습니다.</span>
-                  )}
+                  ) : <span className="no-provider">현재 제공 중인 OTT가 없습니다.</span>}
                 </div>
                 
                 <button className={`wishlist-btn ${isWishlisted ? 'active' : ''}`} onClick={handleWishlistToggle}>
@@ -348,12 +330,11 @@ const MovieDetail: React.FC = () => {
 
             <section className="review-write-section">
               <h2 className="section-title">리뷰 작성</h2>
-              {!isLoggedIn ? (
-                <div className="already-reviewed-msg">로그인이 필요합니다.</div>
-              ) : hasReviewed ? (
+              {!isLoggedIn ? <div className="already-reviewed-msg">로그인이 필요합니다.</div> : hasReviewed ? (
                 <div className="already-reviewed-msg" style={{color: '#4b0082', fontWeight: 'bold'}}>이미 소중한 리뷰를 작성하셨습니다. ✨</div>
               ) : (
                 <div className="write-form-container">
+                  {/* ✨ [명준님의 정교한 별점 로직] ㅋ */}
                   <div className="interactive-rating-stars-wrapper" onMouseLeave={() => setHoverRating(null)}>
                     {[...Array(5)].map((_, i) => {
                       const displayRating = hoverRating !== null ? hoverRating : newRating;
