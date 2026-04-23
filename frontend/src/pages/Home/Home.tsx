@@ -1,33 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css';
 import { useNavigate } from 'react-router-dom';
-import { fetchPopularMovies } from '../../api/tmdb'; 
 
 const Home = () => {
   const navigate = useNavigate();
-  // TMDB 실제 장르 ID (액션: 28, 드라마: 18, 범죄: 80, 코미디: 35, 애니메이션: 16)
-  const [activeGenre, setActiveGenre] = useState<number>(28); 
+  
+  // 1. 초기 장르를 우리 DB의 '액션(1번)'으로 설정
+  const [activeGenre, setActiveGenre] = useState<number>(1); 
   const [currentMovies, setCurrentMovies] = useState<any[]>([]);
   const [slideItems, setSlideItems] = useState<any[]>([]);
-  const [currentSlide, setCurrentSlide] = useState(0); // 0번부터 시작하도록 수정
+  const [currentSlide, setCurrentSlide] = useState(0); 
   const [isSliderPaused, setIsSliderPaused] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const minSwipeDistance = 50;
 
-  // 환경 변수 확인용
-  const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
-  const BASE_URL = import.meta.env.VITE_TMDB_BASE_URL;
+  // ================= 2. API 데이터 로드 (우리 DB 연동 및 매핑) =================
 
-  // ================= 2. API 데이터 로드 =================
-
-  // 1. 추천작 슬라이더용 데이터 (인기 영화)
+  // 1. 오늘의 추천작 (우리 DB에서 랜덤 5개)
   useEffect(() => {
     const loadHeroMovies = async () => {
       try {
-        const movies = await fetchPopularMovies();
-        if (movies && movies.length > 0) {
-          setSlideItems(movies.slice(0, 5)); // 상위 5개 사용
+        const response = await fetch('http://localhost:8080/api/contents/random');
+        const result = await response.json();
+        
+        if (result.data && result.data.length > 0) {
+          // DB의 CamelCase 필드와 전체 URL을 기존 UI 코드(SnakeCase)에 맞게 매핑
+          const mapped = result.data.map((m: any) => ({
+            ...m,
+            // DB에 이미 주소가 있으므로, 기존 src의 중복을 피하기 위해 앞부분 제거
+            poster_path: m.posterPath.replace('https://image.tmdb.org/t/p/w500', ''),
+            id: m.id // 상세 페이지 이동용 PK
+          }));
+          setSlideItems(mapped.slice(0, 5));
         }
       } catch (error) {
         console.error("추천작 로드 실패:", error);
@@ -36,28 +41,31 @@ const Home = () => {
     loadHeroMovies();
   }, []);
 
-  // 2. 카테고리별 영화 데이터 로드 (장르 선택 시마다 실행)
+  // 2. 카테고리별 영화 (우리 DB 장르 ID 기준 10개 랜덤)
   useEffect(() => {
     const loadGenreMovies = async () => {
-      if (!BASE_URL || !API_KEY) return;
-      
       try {
-        // fetch 요청 시 API_KEY를 쿼리 파라미터로 명확히 전달
         const response = await fetch(
-          `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${activeGenre}&language=ko-KR&sort_by=popularity.desc`
+          `http://localhost:8080/api/contents/category?genreId=${activeGenre}&limit=10`
         );
-        const data = await response.json();
-        if (data.results) {
-          setCurrentMovies(data.results);
+        const result = await response.json();
+        
+        if (result.data) {
+          const mapped = result.data.map((m: any) => ({
+            ...m,
+            poster_path: m.posterPath.replace('https://image.tmdb.org/t/p/w500', ''),
+            id: m.id
+          }));
+          setCurrentMovies(mapped);
         }
       } catch (error) {
         console.error("장르 영화 로드 실패:", error);
       }
     };
     loadGenreMovies();
-  }, [activeGenre, BASE_URL, API_KEY]);
+  }, [activeGenre]); // activeGenre가 바뀔 때마다 실행
 
-  // ================= 3. 슬라이더 & 이벤트 로직 =================
+  // ================= 3. 슬라이더 & 이벤트 로직 (원본 유지) =================
   useEffect(() => {
     if (isSliderPaused || slideItems.length === 0) return;
     const interval = setInterval(() => {
@@ -98,7 +106,6 @@ const Home = () => {
     }
   };
 
-  // 터치/마우스 스와이프 로직
   const onTouchStart = (e: any) => { setTouchEnd(null); const clientX = e.touches ? e.touches[0].clientX : e.clientX; setTouchStart(clientX); };
   const onTouchMove = (e: any) => { const clientX = e.touches ? e.touches[0].clientX : e.clientX; setTouchEnd(clientX); };
   const onTouchEnd = () => { if (touchStart === null || touchEnd === null) return; const distance = touchStart - touchEnd; if (distance > minSwipeDistance) moveSlider(1); else if (distance < -minSwipeDistance) moveSlider(-1); setTouchStart(null); setTouchEnd(null); };
@@ -106,8 +113,7 @@ const Home = () => {
   return (
     <main className="home-container">
       <section className="hero-section">
-  
-        <h1 className="hero-title">환영합니다. 인생작품을 찾아드립니다.</h1>
+        <h1 className="hero-title">환영합니다. 인생작품을 찾아드립니다</h1>
         <div className="hero-search-wrapper">
           <input type="text" className="hero-search" placeholder="어떤 작품을 찾고 계신가요?" />
           <button className="hero-search-btn">검색</button>
@@ -120,7 +126,7 @@ const Home = () => {
           <div 
             className="slider-3d-wrapper" 
             onMouseEnter={() => setIsSliderPaused(true)} 
-            onMouseLeave={() => setIsSliderPaused(false)}
+            onMouseLeave={() => setIsSliderPaused(false)} 
             onMouseDown={onTouchStart}
             onMouseMove={(e) => touchStart && onTouchMove(e)}
             onMouseUp={onTouchEnd}
@@ -152,11 +158,11 @@ const Home = () => {
           <h2 className="section-title">카테고리별 영화</h2>
           <div className="genre-tabs">
             {[
-              { id: 28, label: '액션' },
-              { id: 18, label: '드라마' },
-              { id: 80, label: '범죄' },
-              { id: 35, label: '코미디' },
-              { id: 16, label: '애니' }
+              { id: 1, label: '액션' },
+              { id: 2, label: '코미디' },
+              { id: 3, label: '범죄' },
+              { id: 5, label: '드라마' },
+              { id: 7, label: '애니' }
             ].map(genre => (
               <button 
                 key={genre.id}
@@ -186,7 +192,7 @@ const Home = () => {
                 />
               </div>
               <p className="movie-title_main">{movie.title}</p>
-              <p className="movie-info">{movie.release_date?.split('-')[0] || '개봉일 미정'}</p>
+              <p className="movie-info">상세 보기</p>
             </div>
           )) : <div className="loading">영화를 불러오는 중입니다...</div>}
         </div>

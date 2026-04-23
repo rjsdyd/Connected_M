@@ -96,4 +96,16 @@ public class ContentController {
         return ResponseEntity.ok(results);
     }
 
+    @GetMapping("/random")
+    public ApiResponse<List<ContentSummaryDto>> getRandomMovies() {
+        return ApiResponse.success(contentService.getRandomMovies());
+    }
+
+    @GetMapping("/category")
+    public ApiResponse<List<ContentSummaryDto>> getCategoryMovies(
+            @RequestParam("genreId") Long genreId,
+            @RequestParam(value = "limit", defaultValue = "10") int limit) {
+        return ApiResponse.success(contentService.getRandomMoviesByGenre(genreId, limit));
+    }
+
 }

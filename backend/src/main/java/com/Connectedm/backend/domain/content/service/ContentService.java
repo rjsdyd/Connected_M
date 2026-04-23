@@ -245,4 +245,26 @@ public class ContentService {
         return contentRepository.findById(contentId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 콘텐츠입니다. ID: " + contentId));
     }
+
+    @Transactional(readOnly = true)
+    public List<ContentSummaryDto> getRandomMovies() {
+        return contentRepository.findRandomContents(5).stream()
+                .map(c -> ContentSummaryDto.builder()
+                        .id(c.getId())
+                        .title(c.getTitle())
+                        .posterPath(c.getPosterPath())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<ContentSummaryDto> getRandomMoviesByGenre(Long genreId, int limit) {
+        return contentRepository.findRandomByGenreId(genreId, limit).stream()
+                .map(c -> ContentSummaryDto.builder()
+                        .id(c.getId())
+                        .title(c.getTitle())
+                        .posterPath(c.getPosterPath())
+                        .build())
+                .collect(Collectors.toList());
+    }
 }
