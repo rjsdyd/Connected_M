@@ -55,6 +55,7 @@ a {
   justify-content: space-between; 
   align-items: center; 
   padding: 12px 120px; 
+  
 }
 
 .header-left {
@@ -246,10 +247,10 @@ a {
   
 }
 
-@keyframes fadeInUp {
+@keyframes fadeInDown {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(-20px);
   }
   to {
     opacity: 1;
@@ -258,7 +259,7 @@ a {
 }
 
 .hero-title {
-  animation: fadeInUp 1.5s ease-out; /* 1초 동안 부드럽게 등장 */
+  animation: fadeInDown 1.5s ease-out; /* 1초 동안 부드럽게 등장 */
   margin-bottom: 15px;
 }
 
@@ -285,7 +286,7 @@ a {
 .hero-search-btn { 
   position: absolute; 
   right: 10px; 
-  background: #4b0082; 
+  background: #271236; 
   color: white; 
   padding: 12px 30px; 
   border-radius: 30px; 

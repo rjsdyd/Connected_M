@@ -24,6 +24,7 @@ import EditProfile from './pages/MyPage/EditProfile';
 import WishlistPage from './pages/MyPage/WishlistPage';
 import MyReviewsPage from './pages/MyPage/MyReviewsPage';
 import RecentPage from './pages/MyPage/RecentPage';
+import GenrePage from './pages/Genre/GenrePage';
 
 
 const AppContent = () => {
@@ -51,6 +52,7 @@ const AppContent = () => {
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/my-reviews" element={<MyReviewsPage />} />
           <Route path="/recent" element={<RecentPage />} />
+          <Route path="/genre/:genreName" element={<GenrePage />} />
         </Routes>
       </div>
       

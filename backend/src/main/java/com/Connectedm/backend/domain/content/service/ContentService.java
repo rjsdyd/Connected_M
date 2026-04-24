@@ -267,4 +267,17 @@ public class ContentService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    /**
+     * 장르 이름(String)으로 무작위 영화 리스트를 조회하는 메서드 (새로 추가됨)
+     */
+    @Transactional(readOnly = true)
+    public List<ContentSummaryDto> getMoviesByGenreName(String genreName) {
+        // 1. 장르 이름으로 DB에서 진짜 Genre 객체를 찾습니다.
+        Genre genre = genreRepository.findByName(genreName)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 장르입니다: " + genreName));
+
+        // 2. 찾은 장르 ID를 이용해 기존에 만들어두신 getRandomMoviesByGenre를 재사용합니다! (한 번에 20개 정도 보내주도록 설정)
+        return getRandomMoviesByGenre(genre.getId(), 20);
+    }
 }

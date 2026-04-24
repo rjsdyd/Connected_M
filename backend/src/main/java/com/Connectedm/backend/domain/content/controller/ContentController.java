@@ -108,4 +108,13 @@ public class ContentController {
         return ApiResponse.success(contentService.getRandomMoviesByGenre(genreId, limit));
     }
 
+    /**
+     * 장르 이름으로 영화 리스트 조회 (프론트엔드 /genre/{genreName} 대응)
+     */
+    @GetMapping("/genre/{genreName}")
+    public ApiResponse<List<ContentSummaryDto>> getMoviesByGenreName(@PathVariable("genreName") String genreName) {
+        List<ContentSummaryDto> movies = contentService.getMoviesByGenreName(genreName);
+        return ApiResponse.success(movies);
+    }
+
 }
