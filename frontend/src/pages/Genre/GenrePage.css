@@ -1,0 +1,84 @@
+/* 전체 배경 (다크 톤 유지) */
+.genre-page-container {
+  padding: 80px 40px;
+  color: #ffffff;
+  background-color: #121212;
+  min-height: 100vh;
+}
+
+/* 상단 타이틀 영역 */
+.genre-header {
+  display: flex;
+  align-items: baseline;
+  gap: 15px;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #333;
+  padding-bottom: 15px;
+}
+
+.genre-header h2 {
+  font-size: 32px;
+  font-weight: bold;
+  margin: 0;
+  color: #e0e0e0;
+}
+
+.genre-count {
+  font-size: 16px;
+  color: #888;
+}
+
+/* 로딩 및 빈 화면 상태 */
+.genre-loading, .genre-empty {
+  text-align: center;
+  padding: 150px 0;
+  font-size: 20px;
+  color: #aaa;
+  min-height: 50vh;
+}
+
+/* 포스터 그리드 (화면 크기에 따라 자동으로 칸 수가 조절됨) */
+.genre-movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 30px;
+}
+
+/* 개별 영화 카드 */
+.genre-movie-card {
+  background-color: #1a1a1a;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* ✨ 핵심! 마우스 올렸을 때 보라색 빛이 나며 떠오르는 효과 ✨ */
+.genre-movie-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 12px 24px rgba(75, 0, 130, 0.6); /* 사이트 메인 보라색 활용 */
+}
+
+/* 영화 포스터 이미지 */
+.genre-movie-poster {
+  width: 100%;
+  aspect-ratio: 2 / 3; /* 일반적인 영화 포스터 비율 강제 고정 */
+  object-fit: cover;
+  display: block;
+}
+
+/* 영화 제목 영역 */
+.genre-movie-info {
+  padding: 15px 12px;
+  text-align: center;
+}
+
+.genre-movie-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ddd;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* 제목이 너무 길면 ... 으로 표시 */
+}
