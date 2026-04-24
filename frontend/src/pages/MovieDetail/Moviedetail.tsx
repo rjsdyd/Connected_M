@@ -50,6 +50,14 @@ interface MovieDetailData {
 }
 
 const MovieDetail: React.FC = () => {
+  // 이름을 '홍*동' 형태로 만들어주는 도구예요.
+const maskName = (name: string) => {
+  if (name.length <= 1) return name; // 한 글자면 그대로 둬요.
+  if (name.length === 2) return name[0] + "*"; // 두 글자면 '홍*' 처럼 보여요.
+  
+  // 세 글자 이상일 때: 첫 글자 + 별 + 마지막 글자
+  return name[0] + "*".repeat(name.length - 2) + name.slice(-1);
+};
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<MovieDetailData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -76,6 +84,8 @@ const MovieDetail: React.FC = () => {
         : [...prev, reviewId]
     );
   };
+
+  
 
   const getProviderUrl = (title: string, providerId?: number, logoPath?: string) => {
     const encodedTitle = encodeURIComponent(title);
@@ -140,6 +150,7 @@ const MovieDetail: React.FC = () => {
             const wishRes = await axios.get('http://localhost:8080/api/members/wishlist', {
               headers: { Authorization: `Bearer ${token}` }
             });
+            
             const isWished = wishRes.data.some((w: any) => w.contentId === Number(id));
             setIsWishlisted(isWished);
           }
@@ -302,7 +313,8 @@ const MovieDetail: React.FC = () => {
                 {expertReviewsSlice.length > 0 ? expertReviewsSlice.map((r) => (
                   <div key={r.id} className="compact-review-row">
                     <div className="compact-reviewer-meta">
-                      <span className="compact-reviewer-name">{r.criticName} <small>| {r.source}</small></span>
+                      {/* maskName 도구를 사용해서 이름을 변환해서 보여줘요! */}
+<span className="compact-reviewer-name">{maskName(r.criticName)} <small>| {r.source}</small></span>
                       {renderStars(r.rating)}
                     </div>
                     <p className="compact-comment-text">"{r.comment}"</p>

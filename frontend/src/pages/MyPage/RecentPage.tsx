@@ -30,7 +30,7 @@ const RecentPage: React.FC = () => {
 
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:8080/api/users/recnet', {
+        const response = await axios.get('http://localhost:8080/api/users/recent', {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (response.data) {
