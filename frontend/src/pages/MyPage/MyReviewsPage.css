@@ -141,11 +141,17 @@
   overflow-wrap: break-word; /* 긴 단어가 있으면 쪼갬 */
 
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  
   -webkit-box-orient: vertical;
   overflow: hidden;
+  -webkit-line-clamp: 1; /* 1줄로 제한 (원하시는 사진처럼) */
 }
-
+/* [추가] 펼쳐졌을 때 제한을 푸는 코드 */
+.user-comment-text.expanded {
+  display: block;          /* 박스 제한 해제 */
+  -webkit-line-clamp: unset; /* 줄 제한 해제 */
+  overflow: visible;       /* 넘치는 글자 다 보여줌 */
+}
 .created-date-label {
   font-size: 0.8rem;
   color: #adb5bd;
@@ -205,4 +211,23 @@
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
+}
+
+/* 전체 삭제 버튼 스타일 */
+.delete-all-btn {
+  margin-left: auto;       /* 버튼을 오른쪽 끝으로 밀어냅니다 */
+  color: #180102;          
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 5px 10px;
+  transition: opacity 0.2s;
+  margin-top: 15px;
+}
+
+.delete-all-btn:hover {
+  opacity: 0.7;            /* 마우스 올렸을 때 살짝 흐려지는 효과 */
+  text-decoration: underline;
 }

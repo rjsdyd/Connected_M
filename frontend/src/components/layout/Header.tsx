@@ -59,6 +59,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
               <span className="category-title">카테고리 <FaPlus /></span>
               
               <div className="category-dropdown">
+                
                 <div className="dropdown-column">
                   <h4>장르</h4>
                   <p>액션</p>
@@ -69,14 +70,14 @@ const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
                   <p>가족</p>
                   <p>애니메이션</p>
                 </div>
-                <div className="dropdown-column">
+                <div className="dropdown-column no-header">
                   <p>모험</p>
                   <p>판타지</p>
                   <p>미스터리</p>
                   <p>공포</p>
                   <p>SF</p>
                 </div>
-                <div className="dropdown-column">
+                <div className="dropdown-column no-header">
                 <p>로맨스</p>
                 <p>다큐멘터리</p>
                 <p>역사</p>
@@ -86,7 +87,8 @@ const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
                 <p>서부</p>
                 </div>
                 </div>
-            </div>
+                </div>
+            
             <a href="#ranking" className="nav-link">랭킹</a>
             <a href="#keyword" className="nav-link">키워드</a>
           </nav>

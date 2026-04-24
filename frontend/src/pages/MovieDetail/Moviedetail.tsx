@@ -50,6 +50,14 @@ interface MovieDetailData {
 }
 
 const MovieDetail: React.FC = () => {
+  // 이름을 '홍*동' 형태로 만들어주는 도구예요.
+const maskName = (name: string) => {
+  if (name.length <= 1) return name; // 한 글자면 그대로 둬요.
+  if (name.length === 2) return name[0] + "*"; // 두 글자면 '홍*' 처럼 보여요.
+  
+  // 세 글자 이상일 때: 첫 글자 + 별 + 마지막 글자
+  return name[0] + "*".repeat(name.length - 2) + name.slice(-1);
+};
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<MovieDetailData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -79,16 +87,43 @@ const MovieDetail: React.FC = () => {
     );
   };
 
-  const getOttLink = (logoPath: string, movieTitle: string) => {
-    const path = logoPath.trim();
-    if (path.includes("pbpMk2JmcoNnQwx5JGpXngfoWtp")) return "https://www.netflix.com";
-    if (path.includes("dpR8r13zWDeUR0QkzWidrdMxa56")) return "https://www.netflix.com";
-    if (path.includes("97yvRBw1GzX7fXprcF80er19ot")) return "https://www.disneyplus.com";
-    if (path.includes("5gmEivxOGPdqQ0A09uXp9Gf1vSj")) return "https://www.coupangplay.com";
-    if (path.includes("hPcjSaWfMwEqXaCMu7Fkb529Dkc")) return "https://www.wavve.com";
-    if (path.includes("5gmEivxOGPdq4Afpq1f8ktLtEW1")) return "https://watcha.com";
-    if (path.includes("qHThQdkJuROK0k5QTCrknaNukWe")) return "https://www.tving.com";
-    return `https://www.google.com/search?q=${encodeURIComponent(movieTitle)}+시청하기`;
+  
+
+  const getProviderUrl = (title: string, providerId?: number, logoPath?: string) => {
+    const encodedTitle = encodeURIComponent(title);
+    const platformLinks: { [key: string]: string } = {
+      netflix: `https://www.netflix.com/search?q=${encodedTitle}`,
+      disney: `https://www.disneyplus.com/search?q=${encodedTitle}`,
+      tving: `https://www.tving.com/search/all?keyword=${encodedTitle}`,
+      wavve: `https://www.wavve.com/search/search?searchKeyword=${encodedTitle}`,
+      watcha: `https://watcha.com/search?query=${encodedTitle}`,
+      coupang: `https://www.coupangplay.com/search?q=${encodedTitle}`,
+      amazon: `https://www.amazon.com/s?k=${encodedTitle}&i=instant-video`,
+      apple: `https://tv.apple.com/kr/search?term=${encodedTitle}`,
+    };
+
+    if (providerId) {
+      const idMap: { [key: number]: string } = {
+        8: platformLinks.netflix, 337: platformLinks.disney, 370: platformLinks.tving,
+        356: platformLinks.wavve, 97: platformLinks.watcha, 350: platformLinks.coupang,
+        119: platformLinks.amazon, 2: platformLinks.apple,
+      };
+      if (idMap[providerId]) return idMap[providerId];
+    }
+
+    if (logoPath) {
+      const path = logoPath.toLowerCase();
+      if (path.includes('netflix')) return platformLinks.netflix;
+      if (path.includes('disney')) return platformLinks.disney;
+      if (path.includes('tving')) return platformLinks.tving;
+      if (path.includes('wavve')) return platformLinks.wavve;
+      if (path.includes('watcha')) return platformLinks.watcha;
+      if (path.includes('coupang')) return platformLinks.coupang;
+      if (path.includes('amazon')) return platformLinks.amazon;
+      if (path.includes('apple')) return platformLinks.apple;
+    }
+
+    return `https://www.google.com/search?q=${encodedTitle}+보러가기`;
   };
 
   useEffect(() => {
@@ -140,6 +175,9 @@ const MovieDetail: React.FC = () => {
                 console.error("인증 실패: 토큰이 만료되었거나 서버 키와 일치하지 않습니다.");
               }
             });
+            
+            const isWished = wishRes.data.some((w: any) => w.contentId === Number(id));
+            setIsWishlisted(isWished);
           }
         }
       } catch (error) {
@@ -302,7 +340,8 @@ const MovieDetail: React.FC = () => {
                 {expertReviewsSlice.length > 0 ? expertReviewsSlice.map((r) => (
                   <div key={r.id} className="compact-review-row">
                     <div className="compact-reviewer-meta">
-                      <span className="compact-reviewer-name">{r.criticName} <small>| {r.source}</small></span>
+                      {/* maskName 도구를 사용해서 이름을 변환해서 보여줘요! */}
+<span className="compact-reviewer-name">{maskName(r.criticName)} <small>| {r.source}</small></span>
                       {renderStars(r.rating)}
                     </div>
                     <p className="compact-comment-text">"{r.comment}"</p>
