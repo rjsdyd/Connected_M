@@ -20,6 +20,6 @@ public interface RecentViewRepository extends JpaRepository<RecentView, Long> {
     // 3. 유저별 기록 개수 제한할 때 필요한 카운트 쿼리
     Long countByUser(User user);
 
-    // 4. 가장 오래된 기록 하나 삭제
-    void deleteFirstByUserOrderByViewedAtAsc(User user);
+    // 4. 가장 오래된 기록 하나 찾기 (서비스에서 안전하게 지우기 위함)
+    Optional<RecentView> findFirstByUserOrderByViewedAtAsc(User user);
 }

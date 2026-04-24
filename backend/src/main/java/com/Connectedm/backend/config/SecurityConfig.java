@@ -55,9 +55,13 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.web.cors.CorsUtils::isPreFlightRequest).permitAll()
                         .requestMatchers("/", "/error", "/favicon.ico").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/user/**").permitAll()
+                                .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/api/users/recent/**").authenticated()
+                                .requestMatchers("/api/user/**", "/api/users/**").permitAll()
                         .requestMatchers("/api/ai/**").permitAll()
                         .requestMatchers("/register").permitAll()
+                                .requestMatchers("/api/members/**").permitAll()
+
                         // 4. OAuth2 관련 엔드포인트 허용 추가
                         .requestMatchers("/login/oauth2/**", "/oauth2/**").permitAll()
 //                        .requestMatchers("/api/contents/**").permitAll()
