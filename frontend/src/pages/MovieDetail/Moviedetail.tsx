@@ -58,6 +58,9 @@ const MovieDetail: React.FC = () => {
   const [hasReviewed, setHasReviewed] = useState<boolean>(false);
   const [isWishlisted, setIsWishlisted] = useState<boolean>(false); 
 
+  // ✨ 최근 본 목록 API가 여러 번 쏘아지는 걸 막는 자물쇠 상태 추가
+  const [hasLoggedRecentView, setHasLoggedRecentView] = useState<boolean>(false);
+
   const [newComment, setNewComment] = useState("");
   const [newRating, setNewRating] = useState(0); 
   const [hoverRating, setHoverRating] = useState<number | null>(null);
@@ -66,7 +69,6 @@ const MovieDetail: React.FC = () => {
   const [userPage, setUserPage] = useState(1);
   const itemsPerPage = 3;
 
-  // 자세히 보기 상태 관리용 추가
   const [expandedReviews, setExpandedReviews] = useState<number[]>([]);
 
   const toggleReview = (reviewId: number) => {
@@ -77,41 +79,16 @@ const MovieDetail: React.FC = () => {
     );
   };
 
-  const getProviderUrl = (title: string, providerId?: number, logoPath?: string) => {
-    const encodedTitle = encodeURIComponent(title);
-    const platformLinks: { [key: string]: string } = {
-      netflix: `https://www.netflix.com/search?q=${encodedTitle}`,
-      disney: `https://www.disneyplus.com/search?q=${encodedTitle}`,
-      tving: `https://www.tving.com/search/all?keyword=${encodedTitle}`,
-      wavve: `https://www.wavve.com/search/search?searchKeyword=${encodedTitle}`,
-      watcha: `https://watcha.com/search?query=${encodedTitle}`,
-      coupang: `https://www.coupangplay.com/search?q=${encodedTitle}`,
-      amazon: `https://www.amazon.com/s?k=${encodedTitle}&i=instant-video`,
-      apple: `https://tv.apple.com/kr/search?term=${encodedTitle}`,
-    };
-
-    if (providerId) {
-      const idMap: { [key: number]: string } = {
-        8: platformLinks.netflix, 337: platformLinks.disney, 370: platformLinks.tving,
-        356: platformLinks.wavve, 97: platformLinks.watcha, 350: platformLinks.coupang,
-        119: platformLinks.amazon, 2: platformLinks.apple,
-      };
-      if (idMap[providerId]) return idMap[providerId];
-    }
-
-    if (logoPath) {
-      const path = logoPath.toLowerCase();
-      if (path.includes('netflix')) return platformLinks.netflix;
-      if (path.includes('disney')) return platformLinks.disney;
-      if (path.includes('tving')) return platformLinks.tving;
-      if (path.includes('wavve')) return platformLinks.wavve;
-      if (path.includes('watcha')) return platformLinks.watcha;
-      if (path.includes('coupang')) return platformLinks.coupang;
-      if (path.includes('amazon')) return platformLinks.amazon;
-      if (path.includes('apple')) return platformLinks.apple;
-    }
-
-    return `https://www.google.com/search?q=${encodedTitle}+보러가기`;
+  const getOttLink = (logoPath: string, movieTitle: string) => {
+    const path = logoPath.trim();
+    if (path.includes("pbpMk2JmcoNnQwx5JGpXngfoWtp")) return "https://www.netflix.com";
+    if (path.includes("dpR8r13zWDeUR0QkzWidrdMxa56")) return "https://www.netflix.com";
+    if (path.includes("97yvRBw1GzX7fXprcF80er19ot")) return "https://www.disneyplus.com";
+    if (path.includes("5gmEivxOGPdqQ0A09uXp9Gf1vSj")) return "https://www.coupangplay.com";
+    if (path.includes("hPcjSaWfMwEqXaCMu7Fkb529Dkc")) return "https://www.wavve.com";
+    if (path.includes("5gmEivxOGPdq4Afpq1f8ktLtEW1")) return "https://watcha.com";
+    if (path.includes("qHThQdkJuROK0k5QTCrknaNukWe")) return "https://www.tving.com";
+    return `https://www.google.com/search?q=${encodeURIComponent(movieTitle)}+시청하기`;
   };
 
   useEffect(() => {
@@ -123,7 +100,8 @@ const MovieDetail: React.FC = () => {
       if (!id) return;
       try {
         setLoading(true);
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token'); 
+
         const response = await fetch(`http://localhost:8080/api/contents/${id}`);
         const result = await response.json();
 
@@ -135,13 +113,33 @@ const MovieDetail: React.FC = () => {
             backdropPath: data.backdropPath ? data.backdropPath.replace('https://image.tmdb.org/t/p/original', '') : "",
           });
 
+          // ✨ 1. 리뷰 중복 체크 및 찜 상태 확인 (userNickname이 들어왔을 때 정상 작동)
           if (isLoggedIn && userNickname) {
             setHasReviewed(data.userReviews.some((r: any) => r.nickname === userNickname));
-            const wishRes = await axios.get('http://localhost:8080/api/members/wishlist', {
+            
+            if (token) {
+              const wishRes = await axios.get('http://localhost:8080/api/members/wishlist', {
+                headers: { Authorization: `Bearer ${token}` }
+              });
+              const isWished = wishRes.data.some((w: any) => w.contentId === Number(id));
+              setIsWishlisted(isWished);
+            }
+          }
+
+          // ✨ 2. 최근 본 목록 저장 (hasLoggedRecentView가 false일 때 딱 한 번만 쏨)
+          if (isLoggedIn && token && !hasLoggedRecentView) {
+            axios.post(`http://localhost:8080/api/users/recent/${id}`, {}, {
               headers: { Authorization: `Bearer ${token}` }
+            })
+            .then(() => {
+              console.log("최근 본 목록 저장 성공");
+              setHasLoggedRecentView(true); // 요청 성공 시 자물쇠 잠금
+            })
+            .catch(err => {
+              if (err.response?.status === 401) {
+                console.error("인증 실패: 토큰이 만료되었거나 서버 키와 일치하지 않습니다.");
+              }
             });
-            const isWished = wishRes.data.some((w: any) => w.contentId === Number(id));
-            setIsWishlisted(isWished);
           }
         }
       } catch (error) {
@@ -150,8 +148,10 @@ const MovieDetail: React.FC = () => {
         setLoading(false);
       }
     };
+
     fetchMovieData();
-  }, [id, isLoggedIn, userNickname]);
+  // ✨ 3. 의존성 배열 복구: userNickname과 hasLoggedRecentView를 넣어서 에러 없이 돌아가게 함
+  }, [id, isLoggedIn, userNickname, hasLoggedRecentView]); 
 
   const handleWishlistToggle = async () => { 
     if (!isLoggedIn) { alert("로그인이 필요합니다."); return; }
@@ -250,7 +250,7 @@ const MovieDetail: React.FC = () => {
                 <div className="platform-logos-row">
                   {movie.providers && movie.providers.length > 0 ? (
                     movie.providers.map((p) => (
-                      <a key={p.provider_id} href={getProviderUrl(movie.title, p.provider_id)} target="_blank" rel="noopener noreferrer">
+                      <a key={p.provider_id} href={getOttLink(p.logo_path, movie.title)} target="_blank" rel="noopener noreferrer">
                         <img src={`https://image.tmdb.org/t/p/original${p.logo_path}`} alt={p.provider_name} className="ott-logo-simple" title={p.provider_name} />
                       </a>
                     ))
@@ -259,7 +259,7 @@ const MovieDetail: React.FC = () => {
                       const cleanLogo = logo.trim();
                       const fullUrl = cleanLogo.startsWith('http') ? cleanLogo : `https://image.tmdb.org/t/p/original${cleanLogo}`;
                       return (
-                        <a key={idx} href={getProviderUrl(movie.title, undefined, cleanLogo)} target="_blank" rel="noopener noreferrer">
+                        <a key={idx} href={getOttLink(cleanLogo, movie.title)} target="_blank" rel="noopener noreferrer">
                            <img src={fullUrl} alt="OTT" className="ott-logo-simple" />
                         </a>
                       );
@@ -324,7 +324,6 @@ const MovieDetail: React.FC = () => {
               <div className="compact-card-container">
                 {userReviewsSlice.length > 0 ? userReviewsSlice.map((r) => {
                   const isExpanded = expandedReviews.includes(r.id);
-                  // 1. 글자 수가 80자를 초과하는지 체크하는 변수 생성
                   const isLongText = r.comment.length > 80;
 
                   return (
