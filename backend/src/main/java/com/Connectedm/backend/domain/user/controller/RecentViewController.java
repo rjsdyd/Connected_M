@@ -7,6 +7,7 @@ import com.Connectedm.backend.domain.user.entity.User;
 import com.Connectedm.backend.domain.user.repository.UserRepository;
 import com.Connectedm.backend.domain.user.service.RecentViewService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -14,44 +15,78 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/users/recnet")
+@RequestMapping("/api/users/recent")
 public class RecentViewController {
     private final RecentViewService recentViewService;
     private final ContentService contentService;
     private final UserRepository userRepository;
 
-    @GetMapping
-    public ResponseEntity<List<RecentViewResponseDto>> getRecentViews(
-            @AuthenticationPrincipal User user) {
-
-        // 💡 [수정] 이메일 대신 ID로 찾습니다. 로그에 이미 id로 찾는 쿼리가 성공하는 게 보입니다.
-        User persistentUser = userRepository.findById(user.getId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        List<RecentViewResponseDto> response = recentViewService.getRecentViews(persistentUser)
-                .stream()
-                .map(RecentViewResponseDto::new)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(response);
-    }
-
     @PostMapping("/{contentId}")
-    public ResponseEntity<Void> saveOrUpdateRecentView(
-            @AuthenticationPrincipal User user,
+    public ResponseEntity<?> saveOrUpdateRecentView(
+            @AuthenticationPrincipal Object principal, // User 대신 Object로 변경
             @PathVariable Long contentId) {
 
-        // 💡 [수정] 여기서도 ID로 조회하여 '진짜 유저' 객체를 확보합니다.
-        User persistentUser = userRepository.findById(user.getId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        try {
+            // 1. 유저 ID 추출 (토큰 sub에 들어있던 값)
+            Long userId = extractUserId(principal);
+            if (userId == null) {
+                log.error("인증 정보가 없거나 유효하지 않습니다.");
+                return ResponseEntity.status(401).body("로그인이 필요합니다.");
+            }
 
-        Content content = contentService.findById(contentId);
+            // 2. DB에서 실제 유저 조회
+            User persistentUser = userRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("DB에 해당 유저가 없습니다. ID: " + userId));
 
-        // 명준님이 짜신 서비스 로직 그대로 실행
-        recentViewService.saveOrUpdateRecentView(persistentUser, content);
+            // 3. 영화 정보 조회
+            Content content = contentService.findById(contentId);
 
-        return ResponseEntity.ok().build();
+            // 4. 서비스 호출 (기존 코드 그대로)
+            recentViewService.saveOrUpdateRecentView(persistentUser, content);
+            log.info("최근 본 목록 저장 성공! 유저ID: {}, 영화: {}", userId, content.getTitle());
+
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            log.error("저장 중 에러 발생: ", e);
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getRecentViews(@AuthenticationPrincipal Object principal) {
+        try {
+            Long userId = extractUserId(principal);
+            if (userId == null) return ResponseEntity.status(401).build();
+
+            User persistentUser = userRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+            List<RecentViewResponseDto> response = recentViewService.getRecentViews(persistentUser).stream()
+                    .map(RecentViewResponseDto::new).collect(Collectors.toList());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    /**
+     * principal에서 유저 ID를 안전하게 추출하는 헬퍼 메서드
+     */
+    private Long extractUserId(Object principal) {
+        if (principal == null || principal.equals("anonymousUser")) return null;
+
+        if (principal instanceof User) {
+            return ((User) principal).getId();
+        } else if (principal instanceof String) {
+            // 토큰 sub의 "2" 같은 문자열 처리
+            return Long.parseLong((String) principal);
+        } else {
+            // 숫자로 바로 넘어올 경우 처리
+            return Long.valueOf(String.valueOf(principal));
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaClock, FaChevronLeft, FaChevronRight, FaPlayCircle } from 'react-icons/fa';
+// 재생 아이콘(FaPlayCircle)은 더 이상 안 쓰므로 제거했습니다.
+import { FaClock, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import './RecentPage.css';
 import axios from 'axios';
 
@@ -75,16 +76,18 @@ const RecentPage: React.FC = () => {
                       alt={item.title} 
                       className="small-poster"
                     />
-                    <div className="play-overlay"><FaPlayCircle /></div>
+                    {/* ✨ 1. 포스터 위에 있던 재생 버튼(<div className="play-overlay">...</div>) 삭제 완료 ✨ */}
                   </div>
                   
                   <div className="recent-main-info">
                     <h3 className="movie-name">{item.title}</h3>
                     <div className="viewed-time-row">
                       <FaClock className="clock-icon" />
-                      <span className="viewed-at-text">{item.viewedAt} 시청함</span>
+                      {/* ✨ 2. '시청함' 텍스트 삭제 완료 ✨ */}
+                      <span className="viewed-at-text">{item.viewedAt}</span>
                     </div>
-                    <button className="re-watch-btn">다시보기</button>
+                    {/* ✨ 3. '다시보기' -> '상세정보 보기'로 텍스트 변경 완료 ✨ */}
+                    <button className="re-watch-btn">상세정보 보기</button>
                   </div>
                 </div>
               ))}

@@ -17,10 +17,10 @@ import java.util.Optional;
 public class RecentViewService {
 
     private final RecentViewRepository recentViewRepository;
-    private final int MAX_RECENT_COUNT = 5;    // 최근 본 영화 갯(수정 가능)
+    private final int MAX_RECENT_COUNT = 10;    // 최근 본 영화 갯(수정 가능)
 
     /**
-     *  최근 열람 기록 저장 및 업데이트(UPSERT)
+     * 최근 열람 기록 저장 및 업데이트(UPSERT)
      */
     @Transactional
     public void saveOrUpdateRecentView(User user, Content content) {
@@ -48,8 +48,10 @@ public class RecentViewService {
      */
     private void cleanUpOldRecords(User user) {
         Long count = recentViewRepository.countByUser(user);
-        if (count>MAX_RECENT_COUNT) {
-            recentViewRepository.deleteFirstByUserOrderByViewedAtAsc(user);
+        if (count > MAX_RECENT_COUNT) {
+            // ✨ 버그 수정: 전체 초기화를 막기 위해, 가장 오래된 딱 1개만 찾아서 확실하게 삭제합니다.
+            recentViewRepository.findFirstByUserOrderByViewedAtAsc(user)
+                    .ifPresent(oldest -> recentViewRepository.delete(oldest));
         }
     }
 
