@@ -51,13 +51,15 @@ interface MovieDetailData {
 
 const MovieDetail: React.FC = () => {
   // 이름을 '홍*동' 형태로 만들어주는 도구예요.
-const maskName = (name: string) => {
-  if (name.length <= 1) return name; // 한 글자면 그대로 둬요.
-  if (name.length === 2) return name[0] + "*"; // 두 글자면 '홍*' 처럼 보여요.
-  
-  // 세 글자 이상일 때: 첫 글자 + 별 + 마지막 글자
-  return name[0] + "*".repeat(name.length - 2) + name.slice(-1);
-};
+  const maskName = (name: string) => {
+    if (!name) return "";
+    if (name.length <= 1) return name; // 한 글자면 그대로 둬요.
+    if (name.length === 2) return name[0] + "*"; // 두 글자면 '홍*' 처럼 보여요.
+    
+    // 세 글자 이상일 때: 첫 글자 + 별 + 마지막 글자
+    return name[0] + "*".repeat(name.length - 2) + name.slice(-1);
+  };
+
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<MovieDetailData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -87,43 +89,18 @@ const maskName = (name: string) => {
     );
   };
 
-  
-
-  const getProviderUrl = (title: string, providerId?: number, logoPath?: string) => {
-    const encodedTitle = encodeURIComponent(title);
-    const platformLinks: { [key: string]: string } = {
-      netflix: `https://www.netflix.com/search?q=${encodedTitle}`,
-      disney: `https://www.disneyplus.com/search?q=${encodedTitle}`,
-      tving: `https://www.tving.com/search/all?keyword=${encodedTitle}`,
-      wavve: `https://www.wavve.com/search/search?searchKeyword=${encodedTitle}`,
-      watcha: `https://watcha.com/search?query=${encodedTitle}`,
-      coupang: `https://www.coupangplay.com/search?q=${encodedTitle}`,
-      amazon: `https://www.amazon.com/s?k=${encodedTitle}&i=instant-video`,
-      apple: `https://tv.apple.com/kr/search?term=${encodedTitle}`,
-    };
-
-    if (providerId) {
-      const idMap: { [key: number]: string } = {
-        8: platformLinks.netflix, 337: platformLinks.disney, 370: platformLinks.tving,
-        356: platformLinks.wavve, 97: platformLinks.watcha, 350: platformLinks.coupang,
-        119: platformLinks.amazon, 2: platformLinks.apple,
-      };
-      if (idMap[providerId]) return idMap[providerId];
-    }
-
-    if (logoPath) {
-      const path = logoPath.toLowerCase();
-      if (path.includes('netflix')) return platformLinks.netflix;
-      if (path.includes('disney')) return platformLinks.disney;
-      if (path.includes('tving')) return platformLinks.tving;
-      if (path.includes('wavve')) return platformLinks.wavve;
-      if (path.includes('watcha')) return platformLinks.watcha;
-      if (path.includes('coupang')) return platformLinks.coupang;
-      if (path.includes('amazon')) return platformLinks.amazon;
-      if (path.includes('apple')) return platformLinks.apple;
-    }
-
-    return `https://www.google.com/search?q=${encodedTitle}+보러가기`;
+  // 🔴 명준님의 기존 코드 100% 원상복구! 🔴
+  const getOttLink = (logoPath: string, movieTitle: string) => {
+    if (!logoPath) return `https://www.google.com/search?q=${encodeURIComponent(movieTitle)}+시청하기`;
+    const path = logoPath.trim();
+    if (path.includes("pbpMk2JmcoNnQwx5JGpXngfoWtp")) return "https://www.netflix.com";
+    if (path.includes("dpR8r13zWDeUR0QkzWidrdMxa56")) return "https://www.netflix.com";
+    if (path.includes("97yvRBw1GzX7fXprcF80er19ot")) return "https://www.disneyplus.com";
+    if (path.includes("5gmEivxOGPdqQ0A09uXp9Gf1vSj")) return "https://www.coupangplay.com";
+    if (path.includes("hPcjSaWfMwEqXaCMu7Fkb529Dkc")) return "https://www.wavve.com";
+    if (path.includes("5gmEivxOGPdq4Afpq1f8ktLtEW1")) return "https://watcha.com";
+    if (path.includes("qHThQdkJuROK0k5QTCrknaNukWe")) return "https://www.tving.com";
+    return `https://www.google.com/search?q=${encodeURIComponent(movieTitle)}+시청하기`;
   };
 
   useEffect(() => {
@@ -148,36 +125,33 @@ const maskName = (name: string) => {
             backdropPath: data.backdropPath ? data.backdropPath.replace('https://image.tmdb.org/t/p/original', '') : "",
           });
 
-          // ✨ 1. 리뷰 중복 체크 및 찜 상태 확인 (userNickname이 들어왔을 때 정상 작동)
+          // ✨ 1. 리뷰 중복 체크 및 찜 상태 확인 (null 에러 방지 처리)
           if (isLoggedIn && userNickname) {
-            setHasReviewed(data.userReviews.some((r: any) => r.nickname === userNickname));
+            setHasReviewed(data.userReviews?.some((r: any) => r.nickname === userNickname) ?? false);
             
             if (token) {
               const wishRes = await axios.get('http://localhost:8080/api/members/wishlist', {
                 headers: { Authorization: `Bearer ${token}` }
               });
-              const isWished = wishRes.data.some((w: any) => w.contentId === Number(id));
+              const isWished = wishRes.data?.some((w: any) => w.contentId === Number(id)) ?? false;
               setIsWishlisted(isWished);
             }
           }
 
           // ✨ 2. 최근 본 목록 저장 (hasLoggedRecentView가 false일 때 딱 한 번만 쏨)
           if (isLoggedIn && token && !hasLoggedRecentView) {
+            setHasLoggedRecentView(true); // 요청 전에 자물쇠 먼저 잠금
             axios.post(`http://localhost:8080/api/users/recent/${id}`, {}, {
               headers: { Authorization: `Bearer ${token}` }
             })
-            .then(() => {
-              console.log("최근 본 목록 저장 성공");
-              setHasLoggedRecentView(true); // 요청 성공 시 자물쇠 잠금
-            })
+            .then(() => console.log("최근 본 목록 저장 성공"))
             .catch(err => {
               if (err.response?.status === 401) {
                 console.error("인증 실패: 토큰이 만료되었거나 서버 키와 일치하지 않습니다.");
               }
+              setHasLoggedRecentView(false); // 실패 시에만 다시 풀기
             });
-            
-            const isWished = wishRes.data.some((w: any) => w.contentId === Number(id));
-            setIsWishlisted(isWished);
+            // 🚨 여기에 있던 에러 유발 코드(중복된 wishRes 확인 로직) 삭제 완료
           }
         }
       } catch (error) {
@@ -247,14 +221,22 @@ const maskName = (name: string) => {
 
   if (loading || !movie) return <div className="loading-container">로딩 중...</div>;
 
-  const hours = Math.floor(movie.runtime / 60);
-  const minutes = movie.runtime % 60;
+  // ✨ 안전하게 데이터 가져오기 (null 방지 처리 추가) ✨
+  const safeGenres = movie.genres || [];
+  const safeCastList = movie.castList || [];
+  const safeProviders = movie.providers || [];
+  const safeExpertReviews = movie.expertReviews || [];
+  const safeUserReviews = movie.userReviews || [];
+
+  const runtime = movie.runtime || 0;
+  const hours = Math.floor(runtime / 60);
+  const minutes = runtime % 60;
   const runtimeText = hours > 0 ? `${hours}시간 ${minutes}분` : `${minutes}분`;
 
-  const expertReviewsSlice = movie.expertReviews.slice((expertPage - 1) * itemsPerPage, expertPage * itemsPerPage);
-  const userReviewsSlice = movie.userReviews.slice((userPage - 1) * itemsPerPage, userPage * itemsPerPage);
-  const totalExpertPages = Math.ceil(movie.expertReviews.length / itemsPerPage);
-  const totalUserPages = Math.ceil(movie.userReviews.length / itemsPerPage);
+  const expertReviewsSlice = safeExpertReviews.slice((expertPage - 1) * itemsPerPage, expertPage * itemsPerPage);
+  const userReviewsSlice = safeUserReviews.slice((userPage - 1) * itemsPerPage, userPage * itemsPerPage);
+  const totalExpertPages = Math.ceil(safeExpertReviews.length / itemsPerPage);
+  const totalUserPages = Math.ceil(safeUserReviews.length / itemsPerPage);
 
   return (
     <div className="detail-container">
@@ -281,13 +263,13 @@ const maskName = (name: string) => {
               </div>
               <h1 className="movie-title">{movie.title}</h1>
               <div className="movie-genres-row">
-                {movie.genres.join(' · ')}
+                {safeGenres.join(' · ')}
               </div>
               <div className="platform-buttons-container">
                 <span className="platform-label">시청 가능한 플랫폼</span>
                 <div className="platform-logos-row">
-                  {movie.providers && movie.providers.length > 0 ? (
-                    movie.providers.map((p) => (
+                  {safeProviders.length > 0 ? (
+                    safeProviders.map((p) => (
                       <a key={p.provider_id} href={getOttLink(p.logo_path, movie.title)} target="_blank" rel="noopener noreferrer">
                         <img src={`https://image.tmdb.org/t/p/original${p.logo_path}`} alt={p.provider_name} className="ott-logo-simple" title={p.provider_name} />
                       </a>
@@ -318,7 +300,7 @@ const maskName = (name: string) => {
             <section className="detail-section">
               <h2 className="section-title">주요 출연진</h2>
               <div className="cast-grid">
-                {movie.castList.map((p, i) => (
+                {safeCastList.map((p, i) => (
                   <div key={i} className="cast-card">
                     <img src={p.profile_path ? `https://image.tmdb.org/t/p/w200${p.profile_path}` : ''} alt="" className="cast-photo" />
                     <p className="name">{p.name}</p>
@@ -335,13 +317,12 @@ const maskName = (name: string) => {
 
           <div className="right-column">
             <section className="detail-section">
-              <h2 className="section-title">전문가 평점 {movie.expertReviews.length}건</h2>
+              <h2 className="section-title">전문가 평점 {safeExpertReviews.length}건</h2>
               <div className="compact-card-container">
                 {expertReviewsSlice.length > 0 ? expertReviewsSlice.map((r) => (
                   <div key={r.id} className="compact-review-row">
                     <div className="compact-reviewer-meta">
-                      {/* maskName 도구를 사용해서 이름을 변환해서 보여줘요! */}
-<span className="compact-reviewer-name">{maskName(r.criticName)} <small>| {r.source}</small></span>
+                      <span className="compact-reviewer-name">{maskName(r.criticName)} <small>| {r.source}</small></span>
                       {renderStars(r.rating)}
                     </div>
                     <p className="compact-comment-text">"{r.comment}"</p>
@@ -359,11 +340,11 @@ const maskName = (name: string) => {
             </section>
 
             <section className="detail-section">
-              <h2 className="section-title">관람평 {movie.userReviews.length}건</h2>
+              <h2 className="section-title">관람평 {safeUserReviews.length}건</h2>
               <div className="compact-card-container">
                 {userReviewsSlice.length > 0 ? userReviewsSlice.map((r) => {
                   const isExpanded = expandedReviews.includes(r.id);
-                  const isLongText = r.comment.length > 80;
+                  const isLongText = (r.comment || "").length > 80;
 
                   return (
                     <div key={r.id} className="compact-review-row">
