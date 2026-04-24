@@ -12,7 +12,7 @@ def vectorize():
     if not text:
         return jsonify({"error" : "텍스트가 없습니다."}), 400
     
-    vector = engine.model.encode(text),tolist()
+    vector = engine.model.encode(text).tolist()
     return jsonify(vector)
 
 if __name__ == '__main__':
