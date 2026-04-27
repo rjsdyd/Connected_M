@@ -51,6 +51,7 @@ public class UserReview {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private ReviewStatus status = ReviewStatus.NORMAL;
 
     public void changeStatusByAdmin(ReviewStatus status) {
