@@ -1,0 +1,99 @@
+/* SearchResult.css */
+
+.search-result-container {
+  max-width: 1100px;
+  margin: 100px auto 50px; /* 헤더 높이만큼 마진 */
+  padding: 0 20px;
+}
+
+.search-query-title {
+  font-size: 22px;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.search-query-title span {
+  color: #4b0082;
+  font-weight: 800;
+}
+
+/* 가로형 카드 리스트 스타일 */
+.search-list-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.search-result-card {
+  display: flex;
+  background-color: #777777; /* 보내주신 이미지의 진한 회색 배경 */
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+  height: 220px; /* 카드의 고정 높이 */
+}
+
+.search-result-card:hover {
+  background-color: #555555;
+  transform: scale(1.01);
+}
+
+/* 포스터 영역 (왼쪽) */
+.search-poster-box {
+  width: 160px;
+  min-width: 160px;
+  background-color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-poster-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 정보 영역 (오른쪽) */
+.search-info-box {
+  padding: 20px 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  color: #ffffff; /* 어두운 배경에 흰색 글씨 */
+  overflow: hidden;
+}
+
+.search-movie-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.search-movie-date {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-bottom: 15px;
+}
+
+.search-movie-overview {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #e0e0e0;
+  /* 줄거리가 너무 길면 말줄임표 처리 (3줄까지) */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 결과 없음/로딩 상태 */
+.loading-message, .no-search-results {
+  text-align: center;
+  padding: 100px 0;
+  color: #888;
+  font-size: 18px;
+}
