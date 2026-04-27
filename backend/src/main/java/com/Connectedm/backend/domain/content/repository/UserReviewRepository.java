@@ -27,4 +27,5 @@ public interface UserReviewRepository extends JpaRepository<UserReview, Long> {
     @Query("SELECT AVG(CAST(r.rating AS double)) FROM UserReview r WHERE r.content.id = :contentId")
     Double getAverageRatingByContentId(@Param("contentId") Long contentId);
 
+    List<UserReview> findAllByReportCountGreaterThanOrderByReportCountDesc(int count);
 }

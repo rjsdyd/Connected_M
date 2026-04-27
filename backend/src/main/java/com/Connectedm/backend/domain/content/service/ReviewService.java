@@ -3,6 +3,7 @@ package com.Connectedm.backend.domain.content.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -167,9 +168,6 @@ public class ReviewService {
         userReviewRepository.delete(review);
     }
 
-    /**
-     * [전체 삭제] 내가 작성한 모든 리뷰를 한 번에 삭제 (마이페이지용) ㅋ
-     */
     @Transactional
     public void deleteAllUserReviews(Long userId) {
         // userId에 해당하는 리뷰들만 찾아서 싹 다 밀어버리기 ㅋ
@@ -189,5 +187,21 @@ public class ReviewService {
                 .expertRatingAvg(expertAvg != null ? Math.round(expertAvg * 10) / 10.0 : 0.0)
                 .expertReviewCount(expertCount)
                 .build();
+    }
+
+    @Transactional
+    public void reportReview(Long reviewId) {
+        // 1. 해당 리뷰 소환
+        UserReview userReview = userReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new EntityNotFoundException("리뷰가 없습니다."));
+
+        // 2. 리뷰 신고 카운트
+        userReview.increaseReportCount();
+
+        // 3. 리뷰 작성자의 누적 신고 카운트
+        User writer = userReview.getUser();
+        if (writer != null) {
+            writer.increaseReportedCount();
+        }
     }
 }
