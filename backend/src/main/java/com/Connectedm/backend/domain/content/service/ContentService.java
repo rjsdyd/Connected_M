@@ -280,4 +280,34 @@ public class ContentService {
         // 2. 찾은 장르 ID를 이용해 기존에 만들어두신 getRandomMoviesByGenre를 재사용합니다! (한 번에 20개 정도 보내주도록 설정)
         return getRandomMoviesByGenre(genre.getId(), 20);
     }
+
+
+    /**
+     * 프론트엔드에서 넘어온 OTT 이름(netflix 등)으로 영화 리스트 조회
+     */
+    @Transactional(readOnly = true)
+    public List<ContentSummaryDto> getMoviesByOttName(String providerName) {
+        String logoHash = "";
+
+        // 프론트에서 보낸 이름에 맞춰 명준님이 저장해둔 고유 해시값 매핑
+        switch(providerName.toLowerCase()) {
+            case "netflix": logoHash = "pbpMk2JmcoNnQwx5JGpXngfoWtp"; break; // 넷플릭스는 해시가 2개지만 대표 하나로 검색
+            case "disney": logoHash = "97yvRBw1GzX7fXprcF80er19ot"; break;
+            case "tving": logoHash = "qHThQdkJuROK0k5QTCrknaNukWe"; break;
+            case "wavve": logoHash = "hPcjSaWfMwEqXaCMu7Fkb529Dkc"; break;
+            case "watcha": logoHash = "5gmEivxOGPdq4Afpq1f8ktLtEW1"; break;
+            case "coupang": logoHash = "5gmEivxOGPdqQ0A09uXp9Gf1vSj"; break;
+            default: return Collections.emptyList(); // 모르는 OTT면 빈 리스트 반환
+        }
+
+        // 해당 해시값을 포함하는 영화 30개를 뽑아서 DTO로 변환
+        return contentRepository.findByOttLogosContaining(logoHash).stream()
+                .limit(30)
+                .map(c -> ContentSummaryDto.builder()
+                        .id(c.getId())
+                        .title(c.getTitle())
+                        .posterPath(c.getPosterPath())
+                        .build())
+                .collect(Collectors.toList());
+    }
 }
