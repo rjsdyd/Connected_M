@@ -73,7 +73,7 @@ const OttPage: React.FC = () => {
             />
           )}
           {/* 서비스명(WATCHA, NETFLIX 등) 출력 */}
-          <span style={{ color: '#fff', fontSize: '28px', fontWeight: 'bold' }}>
+          <span style={{ color: '#000000', fontSize: '28px', fontWeight: 'bold' }}>
             {info.title}
           </span>
         </h2>
