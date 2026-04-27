@@ -117,4 +117,12 @@ public class ContentController {
         return ApiResponse.success(movies);
     }
 
+    /**
+     * OTT별 영화 리스트 조회 (프론트엔드 /ott/{providerName} 대응)
+     */
+    @GetMapping("/ott/{providerName}")
+    public ApiResponse<List<ContentSummaryDto>> getMoviesByOtt(@PathVariable("providerName") String providerName) {
+        List<ContentSummaryDto> movies = contentService.getMoviesByOttName(providerName);
+        return ApiResponse.success(movies);
+    }
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaStar, FaRegStar, FaStarHalfAlt, FaBookmark, FaRegBookmark, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaStar, FaRegStar, FaStarHalfAlt, FaBookmark, FaRegBookmark, FaChevronLeft, FaChevronRight, FaEdit, FaTrashAlt, FaCheck, FaTimes } from 'react-icons/fa'; // 🚀 FaTimes 등 아이콘 추가
 import './MovieDetail.css';
 import { useAuth } from '../../hooks/useAuth';
 import axios from 'axios';
@@ -47,16 +47,16 @@ interface MovieDetailData {
   userReviews: UserReviewData[];
   providers: WatchProvider[]; 
   ottLogos?: string;
+  userRatingAvg: number;
+  expertRatingAvg: number;
+  expertReviewCount: number
 }
 
 const MovieDetail: React.FC = () => {
-  // 이름을 '홍*동' 형태로 만들어주는 도구예요.
   const maskName = (name: string) => {
     if (!name) return "";
-    if (name.length <= 1) return name; // 한 글자면 그대로 둬요.
-    if (name.length === 2) return name[0] + "*"; // 두 글자면 '홍*' 처럼 보여요.
-    
-    // 세 글자 이상일 때: 첫 글자 + 별 + 마지막 글자
+    if (name.length <= 1) return name;
+    if (name.length === 2) return name[0] + "*";
     return name[0] + "*".repeat(name.length - 2) + name.slice(-1);
   };
 
@@ -68,12 +68,17 @@ const MovieDetail: React.FC = () => {
   const [hasReviewed, setHasReviewed] = useState<boolean>(false);
   const [isWishlisted, setIsWishlisted] = useState<boolean>(false); 
 
-  // ✨ 최근 본 목록 API가 여러 번 쏘아지는 걸 막는 자물쇠 상태 추가
   const [hasLoggedRecentView, setHasLoggedRecentView] = useState<boolean>(false);
 
   const [newComment, setNewComment] = useState("");
   const [newRating, setNewRating] = useState(0); 
   const [hoverRating, setHoverRating] = useState<number | null>(null);
+
+  // 🚀 [신규 상태] 상세페이지 내 내 리뷰 수정을 위한 상태
+  const [isEditingDetail, setIsEditingDetail] = useState(false);
+  const [editDetailComment, setEditDetailComment] = useState("");
+  const [editDetailRating, setEditDetailRating] = useState(0);
+  const [detailHoverRating, setDetailHoverRating] = useState<number | null>(null);
 
   const [expertPage, setExpertPage] = useState(1);
   const [userPage, setUserPage] = useState(1);
@@ -89,7 +94,6 @@ const MovieDetail: React.FC = () => {
     );
   };
 
-  // 🔴 명준님의 기존 코드 100% 원상복구! 🔴
   const getOttLink = (logoPath: string, movieTitle: string) => {
     if (!logoPath) return `https://www.google.com/search?q=${encodeURIComponent(movieTitle)}+시청하기`;
     const path = logoPath.trim();
@@ -125,7 +129,6 @@ const MovieDetail: React.FC = () => {
             backdropPath: data.backdropPath ? data.backdropPath.replace('https://image.tmdb.org/t/p/original', '') : "",
           });
 
-          // ✨ 1. 리뷰 중복 체크 및 찜 상태 확인 (null 에러 방지 처리)
           if (isLoggedIn && userNickname) {
             setHasReviewed(data.userReviews?.some((r: any) => r.nickname === userNickname) ?? false);
             
@@ -138,20 +141,18 @@ const MovieDetail: React.FC = () => {
             }
           }
 
-          // ✨ 2. 최근 본 목록 저장 (hasLoggedRecentView가 false일 때 딱 한 번만 쏨)
           if (isLoggedIn && token && !hasLoggedRecentView) {
-            setHasLoggedRecentView(true); // 요청 전에 자물쇠 먼저 잠금
+            setHasLoggedRecentView(true);
             axios.post(`http://localhost:8080/api/users/recent/${id}`, {}, {
               headers: { Authorization: `Bearer ${token}` }
             })
             .then(() => console.log("최근 본 목록 저장 성공"))
             .catch(err => {
               if (err.response?.status === 401) {
-                console.error("인증 실패: 토큰이 만료되었거나 서버 키와 일치하지 않습니다.");
+                console.error("인증 실패");
               }
-              setHasLoggedRecentView(false); // 실패 시에만 다시 풀기
+              setHasLoggedRecentView(false);
             });
-            // 🚨 여기에 있던 에러 유발 코드(중복된 wishRes 확인 로직) 삭제 완료
           }
         }
       } catch (error) {
@@ -162,7 +163,6 @@ const MovieDetail: React.FC = () => {
     };
 
     fetchMovieData();
-  // ✨ 3. 의존성 배열 복구: userNickname과 hasLoggedRecentView를 넣어서 에러 없이 돌아가게 함
   }, [id, isLoggedIn, userNickname, hasLoggedRecentView]); 
 
   const handleWishlistToggle = async () => { 
@@ -173,21 +173,13 @@ const MovieDetail: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setIsWishlisted(!isWishlisted);
-      const savedWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-      const isAlreadyWished = savedWishlist.some((item: any) => item.contentId === Number(id));
-      let newWishlist = isAlreadyWished 
-        ? savedWishlist.filter((item: any) => item.contentId !== Number(id))
-        : [...savedWishlist, { contentId: Number(id) }];
-      localStorage.setItem('wishlist', JSON.stringify(newWishlist));
-    } catch (error) {
-      alert("찜하기 처리 중 오류가 발생했습니다.");
-    }
+    } catch (error) { alert("찜하기 처리 중 오류가 발생했습니다."); }
   };
 
   const handleReviewSubmit = async () => {
     if (!isLoggedIn) { alert("로그인이 필요합니다."); return; }
     if (hasReviewed) { alert("이미 리뷰를 작성하셨습니다."); return; }
-    if (!newComment.trim() || newRating === 0) { alert("내용과 별점을 입력해주세요."); return; }
+    if (!newComment.trim()) { alert("내용을 입력해주세요."); return; }
 
     try {
       const token = localStorage.getItem('token'); 
@@ -198,10 +190,37 @@ const MovieDetail: React.FC = () => {
 
       if (response.status === 200 || response.status === 201) {
         alert("리뷰가 등록되었습니다!");
-        setHasReviewed(true);
         window.location.reload();
       }
     } catch (error) { alert("리뷰 등록 실패!"); }
+  };
+
+  // 🚀 [신규] 내 리뷰 수정 저장 핸들러
+  const handleDetailUpdate = async (reviewId: number) => {
+    if (!editDetailComment.trim()) { alert("내용을 입력해주세요."); return; }
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(`http://localhost:8080/api/contents/user-reviews/${reviewId}`, 
+        { rating: editDetailRating.toString(), comment: editDetailComment },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("리뷰가 수정되었습니다!");
+      setIsEditingDetail(false);
+      window.location.reload(); 
+    } catch (error) { alert("수정 실패!"); }
+  };
+
+  // 🚀 [신규] 내 리뷰 삭제 핸들러
+  const handleDetailDelete = async (reviewId: number) => {
+    if (!window.confirm("리뷰를 삭제하시겠습니까?")) return;
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`http://localhost:8080/api/contents/user-reviews/${reviewId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert("리뷰가 삭제되었습니다.");
+      window.location.reload();
+    } catch (error) { alert("삭제 실패!"); }
   };
 
   const renderStars = (rating: string | number) => {
@@ -221,12 +240,15 @@ const MovieDetail: React.FC = () => {
 
   if (loading || !movie) return <div className="loading-container">로딩 중...</div>;
 
-  // ✨ 안전하게 데이터 가져오기 (null 방지 처리 추가) ✨
   const safeGenres = movie.genres || [];
   const safeCastList = movie.castList || [];
   const safeProviders = movie.providers || [];
   const safeExpertReviews = movie.expertReviews || [];
   const safeUserReviews = movie.userReviews || [];
+
+  // 🚀 [필터링] 내 리뷰는 따로 빼고, 목록에서는 제외
+  const myReview = safeUserReviews.find(r => r.nickname === userNickname);
+  const otherUserReviews = safeUserReviews.filter(r => r.nickname !== userNickname);
 
   const runtime = movie.runtime || 0;
   const hours = Math.floor(runtime / 60);
@@ -234,9 +256,9 @@ const MovieDetail: React.FC = () => {
   const runtimeText = hours > 0 ? `${hours}시간 ${minutes}분` : `${minutes}분`;
 
   const expertReviewsSlice = safeExpertReviews.slice((expertPage - 1) * itemsPerPage, expertPage * itemsPerPage);
-  const userReviewsSlice = safeUserReviews.slice((userPage - 1) * itemsPerPage, userPage * itemsPerPage);
+  const userReviewsSlice = otherUserReviews.slice((userPage - 1) * itemsPerPage, userPage * itemsPerPage); // 👈 목록은 남의 리뷰만!
   const totalExpertPages = Math.ceil(safeExpertReviews.length / itemsPerPage);
-  const totalUserPages = Math.ceil(safeUserReviews.length / itemsPerPage);
+  const totalUserPages = Math.ceil(otherUserReviews.length / itemsPerPage);
 
   return (
     <div className="detail-container">
@@ -317,7 +339,10 @@ const MovieDetail: React.FC = () => {
 
           <div className="right-column">
             <section className="detail-section">
-              <h2 className="section-title">전문가 평점 {safeExpertReviews.length}건</h2>
+              <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                전문가 평점 {movie.expertReviewCount || 0}건
+                <span className="avg-score-badge">★ {movie.expertRatingAvg?.toFixed(1) || "0.0"}</span>
+              </h2>
               <div className="compact-card-container">
                 {expertReviewsSlice.length > 0 ? expertReviewsSlice.map((r) => (
                   <div key={r.id} className="compact-review-row">
@@ -340,7 +365,10 @@ const MovieDetail: React.FC = () => {
             </section>
 
             <section className="detail-section">
-              <h2 className="section-title">관람평 {safeUserReviews.length}건</h2>
+              <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                관람평 {otherUserReviews.length}건
+                <span className="avg-score-badge user">★ {movie.userRatingAvg?.toFixed(1) || "0.0"}</span>
+              </h2>
               <div className="compact-card-container">
                 {userReviewsSlice.length > 0 ? userReviewsSlice.map((r) => {
                   const isExpanded = expandedReviews.includes(r.id);
@@ -362,7 +390,7 @@ const MovieDetail: React.FC = () => {
                       )}
                     </div>
                   );
-                }) : <p className="placeholder-text">첫 번째 리뷰를 남겨보세요!</p>}
+                }) : <p className="placeholder-text">다른 관람객의 리뷰가 아직 없습니다.</p>}
 
                 {totalUserPages > 1 && (
                   <div className="pagination-controls">
@@ -376,11 +404,88 @@ const MovieDetail: React.FC = () => {
 
             <section className="review-write-section">
               <h2 className="section-title">리뷰 작성</h2>
-              {!isLoggedIn ? <div className="already-reviewed-msg">로그인이 필요합니다.</div> : hasReviewed ? (
-                <div className="already-reviewed-msg" style={{color: '#4b0082', fontWeight: 'bold'}}>이미 소중한 리뷰를 작성하셨습니다. ✨</div>
+              {!isLoggedIn ? (
+                <div className="already-reviewed-msg">로그인이 필요합니다.</div>
+              ) : hasReviewed && myReview ? (
+                // 🚀 [신규] 이미 작성한 경우: 내 리뷰 카드 + 수정 UI
+                <div className="my-detail-review-card">
+                  <div className="card-header-row">
+                    <span className="my-label">내가 남긴 리뷰 </span>
+                    <div className="my-review-btns">
+                      {isEditingDetail ? (
+                        <>
+                          <button className="save-btn" onClick={() => handleDetailUpdate(myReview.id)}><FaCheck /> 저장</button>
+                          <button className="cancel-btn" onClick={() => setIsEditingDetail(false)}><FaTimes /> 취소</button>
+                        </>
+                      ) : (
+                        <>
+                          <button className="edit-btn" onClick={() => {
+                            setIsEditingDetail(true);
+                            setEditDetailComment(myReview.comment);
+                            setEditDetailRating(Number(myReview.rating));
+                          }}><FaEdit /> 수정</button>
+                          <button className="delete-btn" onClick={() => handleDetailDelete(myReview.id)}><FaTrashAlt /> 삭제</button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {isEditingDetail ? (
+                    <div className="write-form-container" style={{padding: 0, marginTop: '10px'}}>
+                      <div className="interactive-rating-stars-wrapper" onMouseLeave={() => setDetailHoverRating(null)}>
+                        {/* 0점 조절용 투명 영역 */}
+                        <div 
+                          className="rating-zero-zone"
+                          style={{ width: '20px', minHeight: '30px', cursor: 'pointer' }}
+                          onMouseEnter={() => setDetailHoverRating(0)}
+                          onClick={() => setEditDetailRating(0)}
+                        />
+                        {[...Array(5)].map((_, i) => {
+                          const displayRating = detailHoverRating !== null ? detailHoverRating : editDetailRating;
+                          const isFull = displayRating >= (i + 1) * 2;
+                          const isHalf = displayRating === (i * 2) + 1;
+                          const starClass = (isFull || isHalf) ? "visible-star filled" : "visible-star";
+                          return (
+                            <div key={i} className="interactive-star-area">
+                              {isFull ? <FaStar className={starClass} /> : isHalf ? <FaStarHalfAlt className={starClass} /> : <FaRegStar className={starClass} />}
+                              <div className="click-zones-wrapper">
+                                <div className="click-zone left-half" onMouseEnter={() => setDetailHoverRating(i * 2 + 1)} onClick={() => setEditDetailRating(i * 2 + 1)} />
+                                <div className="click-zone right-half" onMouseEnter={() => setDetailHoverRating(i * 2 + 2)} onClick={() => setEditDetailRating(i * 2 + 2)} />
+                              </div>
+                            </div>
+                          );
+                        })}
+                        <span className="rating-num-display">{detailHoverRating !== null ? detailHoverRating : editDetailRating}점</span>
+                      </div>
+                      <textarea 
+                        className="write-textarea" 
+                        value={editDetailComment} 
+                        onChange={(e) => setEditDetailComment(e.target.value)}
+                        maxLength={200} 
+                        autoFocus
+                      />
+
+                      <div className="char-count" style={{ textAlign: 'right', fontSize: '12px', color: '#888', marginTop: '5px' }}>
+                        {editDetailComment.length} / 200
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="my-review-body">
+                      {renderStars(myReview.rating)}
+                      <p className="my-comment-text">{myReview.comment}</p>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div className="write-form-container">
                   <div className="interactive-rating-stars-wrapper" onMouseLeave={() => setHoverRating(null)}>
+                    {/* 0점 조절용 투명 영역 */}
+                    <div 
+                      className="rating-zero-zone"
+                      style={{ width: '20px', minHeight: '30px', cursor: 'pointer' }}
+                      onMouseEnter={() => setHoverRating(0)}
+                      onClick={() => setNewRating(0)}
+                    />
                     {[...Array(5)].map((_, i) => {
                       const displayRating = hoverRating !== null ? hoverRating : newRating;
                       const isFull = displayRating >= (i + 1) * 2;

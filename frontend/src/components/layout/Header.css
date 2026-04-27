@@ -36,7 +36,7 @@
 }
 
 .logo-img {
-  height: 50px;
+  height: 0px;
   display: block;
 }
 
@@ -58,8 +58,7 @@
 /* 🎯 드롭다운의 부모 (카테고리 + 부분) */
 .category-parent {
   position: relative; 
-  padding-bottom: 20px;
-  padding: 10px 0;
+  padding: 15px 0 !important; /* 위아래 간격을 균형 있게 조정 */
   cursor: pointer;
 }
 
@@ -77,24 +76,31 @@
   display: none !important; 
   position: absolute;
   
-  /* [변경] 100% + 25px에서 100%로 변경! 
-     이렇게 해야 '카테고리' 영역과 드롭다운이 빈틈없이 딱 붙습니다. */
-  top: 100% !important; 
+  /* 박스를 글자에서 적당히 떨어뜨립니다 (디자인 개선) */
+  top: 130% !important; 
   left: -120px !important; 
   
   background: white !important;
   grid-template-columns: repeat(6, 1fr) !important;
   gap: 20px 30px !important;
-  
   min-width: 800px !important;
 
-  /* [추가/변경] 위쪽 패딩을 줘서 디자인상으로는 떨어져 보이게 합니다. 
-     실제 영역은 붙어있지만, 글자들은 아래로 내려가서 보기에 예뻐집니다. */
-  padding: 35px 30px 30px 30px !important; 
+  /* 글자가 너무 위로 붙지 않도록 패딩을 적절히 줍니다 */
+  padding: 30px !important; 
   
   border-radius: 20px !important;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   z-index: 9999;
+}
+
+.category-dropdown::before {
+  content: "";
+  position: absolute;
+  top: -20px; /* 박스 위로 투명한 영역을 만들어 글자와 연결합니다 */
+  left: 0;
+  width: 100%;
+  height: 20px;
+  background: transparent;
 }
 
 /* 🎯 핵심: 부모 요소(category-parent)에 마우스를 올렸을 때만 'grid'로 보여줍니다 */
@@ -127,7 +133,7 @@
 
 
 /* =========================================
-   🚀 새로 추가된 OTT 드롭다운 & 아이콘 전용 스타일 🚀 
+  🚀 새로 추가된 OTT 드롭다운 & 아이콘 전용 스타일 🚀 
    ========================================= */
 
 /* OTT 메뉴는 800px가 아니라 이미지 5개 너비에 딱 맞게 덮어쓰기! */

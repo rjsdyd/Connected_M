@@ -108,6 +108,9 @@ public class ContentService {
     /**
      * 콘텐츠 상세 조회 및 누락된 데이터 자동 보완
      */
+    /**
+     * 콘텐츠 상세 조회 및 누락된 데이터 자동 보완
+     */
     @Transactional
     public ContentDetailResponseDto getContentDetail(Long id) {
         Content content = contentRepository.findWithCacheById(id)
@@ -146,8 +149,11 @@ public class ContentService {
         Double ratio = (content.getAnalysisCache() != null) ? content.getAnalysisCache().getPositiveRatio() : 0.0;
         List<String> keywords = Collections.emptyList();
 
-        List<ReviewResponseDto> expertReviews = reviewService.getExpertReviews(id); 
+        List<ReviewResponseDto> expertReviews = reviewService.getExpertReviews(id);
         List<UserReviewResponseDto> userReviews = reviewService.getUserReviews(id);
+
+        // 🚀 [추가] 평점 통계 데이터 가져오기! ㅋ
+        ReviewStatsResponseDto stats = reviewService.getReviewStats(id);
 
         List<TmdbMovieResponseDto.TmdbCastItem> majorCasts = Collections.emptyList();
         if (tmdbData != null && tmdbData.getCredits() != null && tmdbData.getCredits().getCast() != null) {
@@ -163,7 +169,7 @@ public class ContentService {
                 .title(content.getTitle())
                 .overview(content.getOverview())
                 .posterPath(content.getPosterPath())
-                .backdropPath(content.getBackdropPath()) // ✨ 추가
+                .backdropPath(content.getBackdropPath())
                 .castList(majorCasts)
                 .ottLogos(content.getOttLogos())
                 .genres(genreNames)
@@ -172,6 +178,10 @@ public class ContentService {
                 .topKeywords(keywords)
                 .expertReviews(expertReviews)
                 .userReviews(userReviews)
+                // 🚀 [추가] stats에서 꺼내서 넣어주기! ㅋ
+                .userRatingAvg(stats.getUserRatingAvg())
+                .expertRatingAvg(stats.getExpertRatingAvg())
+                .expertReviewCount(stats.getExpertReviewCount())
                 .runtime(content.getRuntime())
                 .ageRating(content.getAgeRating())
                 .build();
@@ -279,5 +289,35 @@ public class ContentService {
 
         // 2. 찾은 장르 ID를 이용해 기존에 만들어두신 getRandomMoviesByGenre를 재사용합니다! (한 번에 20개 정도 보내주도록 설정)
         return getRandomMoviesByGenre(genre.getId(), 20);
+    }
+
+
+    /**
+     * 프론트엔드에서 넘어온 OTT 이름(netflix 등)으로 영화 리스트 조회
+     */
+    @Transactional(readOnly = true)
+    public List<ContentSummaryDto> getMoviesByOttName(String providerName) {
+        String logoHash = "";
+
+        // 프론트에서 보낸 이름에 맞춰 명준님이 저장해둔 고유 해시값 매핑
+        switch(providerName.toLowerCase()) {
+            case "netflix": logoHash = "pbpMk2JmcoNnQwx5JGpXngfoWtp"; break; // 넷플릭스는 해시가 2개지만 대표 하나로 검색
+            case "disney": logoHash = "97yvRBw1GzX7fXprcF80er19ot"; break;
+            case "tving": logoHash = "qHThQdkJuROK0k5QTCrknaNukWe"; break;
+            case "wavve": logoHash = "hPcjSaWfMwEqXaCMu7Fkb529Dkc"; break;
+            case "watcha": logoHash = "5gmEivxOGPdq4Afpq1f8ktLtEW1"; break;
+            case "coupang": logoHash = "5gmEivxOGPdqQ0A09uXp9Gf1vSj"; break;
+            default: return Collections.emptyList(); // 모르는 OTT면 빈 리스트 반환
+        }
+
+        // 해당 해시값을 포함하는 영화 30개를 뽑아서 DTO로 변환
+        return contentRepository.findByOttLogosContaining(logoHash).stream()
+                .limit(30)
+                .map(c -> ContentSummaryDto.builder()
+                        .id(c.getId())
+                        .title(c.getTitle())
+                        .posterPath(c.getPosterPath())
+                        .build())
+                .collect(Collectors.toList());
     }
 }
