@@ -1,12 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './Home.css';
 import { useNavigate } from 'react-router-dom';
+import { IoIosTimer } from "react-icons/io";
 
 const Home = () => {
   const navigate = useNavigate();
   
-  // 1. 초기 장르를 우리 DB의 '액션(1번)'으로 설정
   const [activeGenre, setActiveGenre] = useState<number>(1); 
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
   const [currentMovies, setCurrentMovies] = useState<any[]>([]);
   const [slideItems, setSlideItems] = useState<any[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0); 
@@ -15,22 +20,42 @@ const Home = () => {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const minSwipeDistance = 50;
 
-  // ================= 2. API 데이터 로드 (우리 DB 연동 및 매핑) =================
+  useEffect(() => {
+    const saved = localStorage.getItem('searchHistory');
+    if (saved) setSearchHistory(JSON.parse(saved));
 
-  // 1. 오늘의 추천작 (우리 DB에서 랜덤 5개)
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setIsSearchOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSearch = () => {
+    if (!searchQuery.trim()) return;
+    const updatedHistory = [searchQuery, ...searchHistory.filter(h => h !== searchQuery)].slice(0, 10);
+    setSearchHistory(updatedHistory);
+    localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
+    setIsSearchOpen(false);
+    navigate(`/search?q=${searchQuery}`);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleSearch();
+  };
+
   useEffect(() => {
     const loadHeroMovies = async () => {
       try {
         const response = await fetch('http://localhost:8080/api/contents/random');
         const result = await response.json();
-        
         if (result.data && result.data.length > 0) {
-          // DB의 CamelCase 필드와 전체 URL을 기존 UI 코드(SnakeCase)에 맞게 매핑
           const mapped = result.data.map((m: any) => ({
             ...m,
-            // DB에 이미 주소가 있으므로, 기존 src의 중복을 피하기 위해 앞부분 제거
             poster_path: m.posterPath.replace('https://image.tmdb.org/t/p/w500', ''),
-            id: m.id // 상세 페이지 이동용 PK
+            id: m.id
           }));
           setSlideItems(mapped.slice(0, 5));
         }
@@ -41,15 +66,11 @@ const Home = () => {
     loadHeroMovies();
   }, []);
 
-  // 2. 카테고리별 영화 (우리 DB 장르 ID 기준 10개 랜덤)
   useEffect(() => {
     const loadGenreMovies = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/contents/category?genreId=${activeGenre}&limit=10`
-        );
+        const response = await fetch(`http://localhost:8080/api/contents/category?genreId=${activeGenre}&limit=10`);
         const result = await response.json();
-        
         if (result.data) {
           const mapped = result.data.map((m: any) => ({
             ...m,
@@ -63,9 +84,8 @@ const Home = () => {
       }
     };
     loadGenreMovies();
-  }, [activeGenre]); // activeGenre가 바뀔 때마다 실행
+  }, [activeGenre]);
 
-  // ================= 3. 슬라이더 & 이벤트 로직 (원본 유지) =================
   useEffect(() => {
     if (isSliderPaused || slideItems.length === 0) return;
     const interval = setInterval(() => {
@@ -98,53 +118,68 @@ const Home = () => {
     };
   };
 
-  const handleSlideClick = (index: number, id: number) => {
-    if (index === currentSlide) {
-      navigate(`/movie/${id}`);
-    } else {
-      setCurrentSlide(index);
-    }
-  };
-
-  const onTouchStart = (e: any) => { setTouchEnd(null); const clientX = e.touches ? e.touches[0].clientX : e.clientX; setTouchStart(clientX); };
+  const onTouchStart = (e: any) => { const clientX = e.touches ? e.touches[0].clientX : e.clientX; setTouchStart(clientX); };
   const onTouchMove = (e: any) => { const clientX = e.touches ? e.touches[0].clientX : e.clientX; setTouchEnd(clientX); };
   const onTouchEnd = () => { if (touchStart === null || touchEnd === null) return; const distance = touchStart - touchEnd; if (distance > minSwipeDistance) moveSlider(1); else if (distance < -minSwipeDistance) moveSlider(-1); setTouchStart(null); setTouchEnd(null); };
 
+  const removeHistory = (e: React.MouseEvent, textToRemove: string) => {
+  e.stopPropagation(); // 중요: 부모의 클릭(검색 이동) 이벤트가 실행되지 않게 막음
+  const updatedHistory = searchHistory.filter(item => item !== textToRemove);
+  setSearchHistory(updatedHistory);
+  localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
+  };
   return (
     <main className="home-container">
       <section className="hero-section">
         <h1 className="hero-title">환영합니다. 인생작품을 찾아드립니다</h1>
-        <div className="hero-search-wrapper">
-          <input type="text" className="hero-search" placeholder="어떤 작품을 찾고 계신가요?" />
-          <button className="hero-search-btn">검색</button>
+        <div className="hero-search-wrapper" ref={searchContainerRef}>
+          <div className={`google-search-container ${isSearchOpen && searchHistory.length > 0 ? 'active' : ''}`}>
+            <div className="search-input-row">
+              <span className="search-icon">🔍</span>
+              <input 
+                type="text" 
+                className="hero-search" 
+                placeholder="어떤 작품을 찾고 계신가요?" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsSearchOpen(true)}
+                onKeyPress={handleKeyPress}
+              />
+              <button className="hero-search-btn" onClick={handleSearch}>검색</button>
+            </div>
+            {isSearchOpen && searchHistory.length > 0 && (
+              <ul className="search-list">
+                {searchHistory.map((item, index) => (
+                  <li key={index} className="search-item" onClick={() => {
+                    setSearchQuery(item);
+                    setIsSearchOpen(false);
+                    navigate(`/search?q=${item}`);
+                  }}>
+                    <IoIosTimer className="history-icon" />
+                    <span className="search-text">{item}</span>
+                    <button 
+          className="delete-history-btn" 
+          onClick={(e) => removeHistory(e, item)}
+        >
+          ✕
+        </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </section>
 
       <section className="slider-section">
         <div className="slider-header-wrapper">
           <h2 className="section-title">오늘의 추천작</h2>
-          <div 
-            className="slider-3d-wrapper" 
-            onMouseEnter={() => setIsSliderPaused(true)} 
-            onMouseLeave={() => setIsSliderPaused(false)} 
-            onMouseDown={onTouchStart}
-            onMouseMove={(e) => touchStart && onTouchMove(e)}
-            onMouseUp={onTouchEnd}
-          >
+          <div className="slider-3d-wrapper" onMouseEnter={() => setIsSliderPaused(true)} onMouseLeave={() => setIsSliderPaused(false)} onMouseDown={onTouchStart} onMouseMove={(e) => touchStart && onTouchMove(e)} onMouseUp={onTouchEnd}>
             <button className="nav-btn-3d left" onClick={() => moveSlider(-1)}>◀</button>
             <div className="slider-3d-container">
               {slideItems.length > 0 ? slideItems.map((item, index) => (
-                <div 
-                  key={item.id} 
-                  className="slide-card-3d" 
-                  style={getSlideStyle(index)} 
-                  onClick={() => handleSlideClick(index, item.id)}
-                >
-                  <img 
-                    src={`https://image.tmdb.org/t/p/w500${item.poster_path}`} 
-                    alt={item.title} 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }} 
-                  />
+                <div key={item.id} className="slide-card-3d" style={getSlideStyle(index)} onClick={() => index === currentSlide ? navigate(`/movie/${item.id}`) : setCurrentSlide(index)}>
+                  <img src={`https://image.tmdb.org/t/p/w500${item.poster_path}`} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }} />
                 </div>
               )) : <div className="loading">추천 영화를 불러오는 중...</div>}
             </div>
@@ -180,16 +215,11 @@ const Home = () => {
             ))}
           </div>
         </div>
-
         <div className="movie-grid">
           {currentMovies.length > 0 ? currentMovies.map((movie) => (
             <div key={movie.id} className="movie-item" onClick={() => navigate(`/movie/${movie.id}`)}>
               <div className="movie-poster">
-                <img 
-                  src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
-                  alt={movie.title} 
-                  style={{width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px'}} 
-                />
+                <img src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} alt={movie.title} style={{width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px'}} />
               </div>
               <p className="movie-title_main">{movie.title}</p>
               <p className="movie-info">상세 보기</p>

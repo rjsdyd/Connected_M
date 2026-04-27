@@ -26,7 +26,7 @@ import MyReviewsPage from './pages/MyPage/MyReviewsPage';
 import RecentPage from './pages/MyPage/RecentPage';
 import GenrePage from './pages/Genre/GenrePage';
 import OttPage from './pages/Ott/OttPage';
-
+import SearchResult from './pages/SearchResult/SearchResult';
 
 const AppContent = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -40,6 +40,7 @@ const AppContent = () => {
       
       <div className="main-content" style={{ minHeight: '80vh' }}> 
         <Routes>
+          <Route path="/search" element={<SearchResult />} />
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/extra-info" element={<ExtraInfo />} />
