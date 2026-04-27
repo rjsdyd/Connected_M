@@ -60,31 +60,42 @@ const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
               <span className="category-title">카테고리 <FaPlus /></span>
               
               <div className="category-dropdown">
-  {/* 모든 p 태그를 div 묶음 없이 일렬로 배치합니다. CSS Grid가 알아서 6개씩 잘라줍니다. */}
-  <p onClick={() => navigate('/genre/액션')}>액션</p>
-  <p onClick={() => navigate('/genre/코미디')}>코미디</p>
-  <p onClick={() => navigate('/genre/범죄')}>범죄</p>
-  <p onClick={() => navigate('/genre/스릴러')}>스릴러</p>
-  <p onClick={() => navigate('/genre/드라마')}>드라마</p>
-  <p onClick={() => navigate('/genre/가족')}>가족</p>
-  
-  <p onClick={() => navigate('/genre/모험')}>모험</p>
-  <p onClick={() => navigate('/genre/판타지')}>판타지</p>
-  <p onClick={() => navigate('/genre/미스터리')}>미스터리</p>
-  <p onClick={() => navigate('/genre/공포')}>공포</p>
-  <p onClick={() => navigate('/genre/SF')}>SF</p>
-  <p onClick={() => navigate('/genre/애니메이션')}>애니메이션</p>
-  
-  <p onClick={() => navigate('/genre/로맨스')}>로맨스</p>
-  <p onClick={() => navigate('/genre/역사')}>역사</p>
-  <p onClick={() => navigate('/genre/전쟁')}>전쟁</p>
-  <p onClick={() => navigate('/genre/음악')}>음악</p>
-  <p onClick={() => navigate('/genre/TV영화')}>TV영화</p>
-  <p onClick={() => navigate('/genre/서부')}>서부</p>
-</div>
-                </div>
+                {/* 모든 p 태그를 div 묶음 없이 일렬로 배치합니다. CSS Grid가 알아서 6개씩 잘라줍니다. */}
+                <p onClick={() => navigate('/genre/액션')}>액션</p>
+                <p onClick={() => navigate('/genre/코미디')}>코미디</p>
+                <p onClick={() => navigate('/genre/범죄')}>범죄</p>
+                <p onClick={() => navigate('/genre/스릴러')}>스릴러</p>
+                <p onClick={() => navigate('/genre/드라마')}>드라마</p>
+                <p onClick={() => navigate('/genre/가족')}>가족</p>
+                
+                <p onClick={() => navigate('/genre/모험')}>모험</p>
+                <p onClick={() => navigate('/genre/판타지')}>판타지</p>
+                <p onClick={() => navigate('/genre/미스터리')}>미스터리</p>
+                <p onClick={() => navigate('/genre/공포')}>공포</p>
+                <p onClick={() => navigate('/genre/SF')}>SF</p>
+                <p onClick={() => navigate('/genre/애니메이션')}>애니메이션</p>
+                
+                <p onClick={() => navigate('/genre/로맨스')}>로맨스</p>
+                <p onClick={() => navigate('/genre/역사')}>역사</p>
+                <p onClick={() => navigate('/genre/전쟁')}>전쟁</p>
+                <p onClick={() => navigate('/genre/음악')}>음악</p>
+                <p onClick={() => navigate('/genre/TV영화')}>TV영화</p>
+                <p onClick={() => navigate('/genre/서부')}>서부</p>
+              </div>
+            </div>
             
-            <a href="#ranking" className="nav-link">랭킹</a>
+            <div className="category-parent">
+              <span className="category-title" style={{ fontWeight: 'normal' }}>OTT <FaPlus /></span>
+              
+              <div className="category-dropdown ott-dropdown">
+                <img src="https://image.tmdb.org/t/p/original/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg" alt="Netflix" onClick={() => navigate('/ott/netflix')} className="ott-logo-btn" title="넷플릭스" />
+                <img src="https://image.tmdb.org/t/p/original/97yvRBw1GzX7fXprcF80er19ot.jpg" alt="Disney+" onClick={() => navigate('/ott/disney')} className="ott-logo-btn" title="디즈니+" />
+                <img src="https://image.tmdb.org/t/p/original/qHThQdkJuROK0k5QTCrknaNukWe.jpg" alt="TVING" onClick={() => navigate('/ott/tving')} className="ott-logo-btn" title="티빙" />
+                <img src="https://image.tmdb.org/t/p/original/hPcjSaWfMwEqXaCMu7Fkb529Dkc.jpg" alt="Wavve" onClick={() => navigate('/ott/wavve')} className="ott-logo-btn" title="웨이브" />
+                <img src="https://image.tmdb.org/t/p/original/5gmEivxOGPdq4Afpq1f8ktLtEW1.jpg" alt="Watcha" onClick={() => navigate('/ott/watcha')} className="ott-logo-btn" title="왓챠" />
+              </div>
+            </div>
+
             <a href="#keyword" className="nav-link">키워드</a>
           </nav>
         </div>
@@ -92,11 +103,9 @@ const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
         <div className="header-right">
           <input type="text" placeholder="검색어를 입력하세요" className="search-input" />
           
-          {/* ✨ 기준을 nickname에서 isLoggedIn으로 변경했습니다. */}
           {isLoggedIn ? (
             <div className="user-info">
               <span className="user-nickname">
-                {/* 닉네임이 로컬스토리지에 없으면 '사용자'라고 표시해주는 센스! */}
                 <strong>{nickname || "사용자"}</strong>님
               </span>
               <button className="text-btn" onClick={handleLogout}>로그아웃</button>
