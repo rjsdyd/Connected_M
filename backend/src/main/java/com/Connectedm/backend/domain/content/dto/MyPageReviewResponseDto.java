@@ -20,6 +20,7 @@ public class MyPageReviewResponseDto {
     private String rating;
     private String comment;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public static MyPageReviewResponseDto from(UserReview review) {
         return MyPageReviewResponseDto.builder()
@@ -30,6 +31,7 @@ public class MyPageReviewResponseDto {
                 .rating(review.getRating())
                 .comment(review.getComment())
                 .createdAt(review.getCreatedAt())
+                .updatedAt(review.getUpdatedAt())
                 .build();
     }
 }
