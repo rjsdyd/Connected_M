@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logo from '../../assets/img/Project_M_Logo_Dark.png';
+import logo from '../../assets/img/Project_M_Logo_Dark_R.png';
 import { FaPlus } from "react-icons/fa";
 import './Header.css';
 
@@ -96,7 +96,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
               </div>
             </div>
 
-            <a href="#keyword" className="nav-link">키워드</a>
+            <a href="/keyword" className="nav-link">키워드</a>
           </nav>
         </div>
 
