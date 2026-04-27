@@ -160,4 +160,22 @@ public class AiService {
         chatMessageRepository.save(ChatMessage.builder().chatSession(session).role("user").message(userMsg).build());
         chatMessageRepository.save(ChatMessage.builder().chatSession(session).role("assistant").message(aiMsg).build());
     }
+
+    /**
+     * 모든 영화의 중복 없는 키워드 리스트 조회 (신규 로직)
+     */
+    @Transactional(readOnly = true)
+    public List<String> getAllUniqueKeywords() {
+        log.info(">>>> [Keywords] 모든 영화 키워드 통합 조회 중...");
+
+        return analysisCacheRepository.findAll().stream()
+                .map(AnalysisCache::getTopKeywords)      // 각 행의 키워드 문자열 추출
+                .filter(Objects::nonNull)                // null 값 제외
+                .flatMap(s -> Arrays.stream(s.split(","))) // 쉼표 기준 분리 후 하나의 스트림으로 평탄화
+                .map(String::trim)                       // 앞뒤 공백 제거
+                .filter(word -> !word.isEmpty())         // 빈 단어 제외
+                .distinct()                              // 중복 제거
+                .sorted()                                // 사전순 정렬
+                .toList();
+    }
 }

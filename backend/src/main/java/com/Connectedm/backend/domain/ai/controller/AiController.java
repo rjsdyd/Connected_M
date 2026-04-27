@@ -57,12 +57,23 @@ public class AiController {
     }
 
     /**
-     * 4. 영화 관련 키워드 추출 (DB 데이터 반환)
+     * 4-1. 개별 영화 관련 키워드 조회
+     * GET /api/ai/keywords/123
      */
     @GetMapping("/keywords/{contentId}")
     public ResponseEntity<List<String>> getMovieKeywords(@PathVariable Long contentId) {
         return ResponseEntity.ok(aiService.getMovieKeywords(contentId));
     }
+
+    /**
+     * 4-2. 서비스 내 모든 영화의 전체 키워드 조회 (중복 제거)
+     * GET /api/ai/keywords
+     */
+    @GetMapping("/keywords")
+    public ResponseEntity<List<String>> getAllKeywords() {
+        return ResponseEntity.ok(aiService.getAllUniqueKeywords());
+    }
+
 
     // --- 내부 헬퍼 메서드 ---
 
