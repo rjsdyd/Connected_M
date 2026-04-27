@@ -48,7 +48,7 @@ public class UserReviewController {
             @AuthenticationPrincipal Long userId,
             @RequestBody UserReviewRequestDto dto) {
 
-        // reviewService.updateUserReview(userId, reviewId, dto);
+         reviewService.updateUserReview(userId, reviewId, dto);
         return ApiResponse.success("리뷰가 수정되었습니다!");
     }
 

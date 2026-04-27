@@ -113,6 +113,7 @@ public class ReviewService {
                 .content(content)
                 .rating(dto.getRating()) // 프론트 별점 애니메이션 점수 수신 ㅋ
                 .comment(dto.getComment())
+                .status(ReviewStatus.NORMAL)
                 .build();
 
         userReviewRepository.save(userReview);
@@ -147,6 +148,8 @@ public class ReviewService {
         // UserReview 엔티티에 update 메서드가 있으면 더 좋습니다
         // review.update(dto.getRating(), dto.getComment());
         review.update(dto.getRating(), dto.getComment());
+
+        userReviewRepository.save(review);
     }
 
     /**
