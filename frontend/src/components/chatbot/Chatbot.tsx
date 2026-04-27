@@ -51,7 +51,7 @@ const Chatbot = () => {
     try {
       // 로컬 스토리지에서 JWT 토큰 가져오기
       //const token = localStorage.getItem('accessToken');
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token')?.replace(/^['"]|['"]$/g, '');
 
       // 백엔드 API로 사용자의 질문(prompt) 전송
       const response = await axios.post('http://localhost:8080/api/ai/recommend', { // 명세에 맞는 엔드포인트 사용
