@@ -40,4 +40,8 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
             "ORDER BY RAND() LIMIT :limit", nativeQuery = true)
     List<Content> findRandomByGenreId(@Param("genreId") Long genreId, @Param("limit") int limit);
 
+    // 특정 OTT 로고 해시값을 포함하는 영화 찾기
+    @Query("SELECT c FROM Content c WHERE c.ottLogos LIKE %:logoHash%")
+    List<Content> findByOttLogosContaining(@Param("logoHash") String logoHash);
+
 }
