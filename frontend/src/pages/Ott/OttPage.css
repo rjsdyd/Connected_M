@@ -93,3 +93,36 @@
   text-overflow: ellipsis;
   text-align: center;
 }
+
+/* 1. 헤더 정렬을 baseline에서 center로 강제 변경 (처짐 완벽 방지) */
+.ott-header {
+  display: flex !important;
+  align-items: center !important; 
+}
+
+.ott-header h2 {
+  display: flex !important;
+  align-items: center !important; 
+  gap: 18px !important;
+  margin: 0 !important;
+}
+
+/* 2. 로고 크기 및 비율 최적화 */
+.ott-title-logo {
+  height: 52px !important; 
+  width: 52px !important;
+  margin: 0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6) !important;
+  object-fit: contain !important;
+}
+
+/* 3. WATCHA 글씨가 로고와 수평이 되도록 높이 보정 */
+.ott-header h2 span {
+  font-size: 34px !important; 
+  line-height: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  font-weight: 900 !important;
+  padding-top: 2px !important; /* 미세한 수평 오차 수정 */
+}
