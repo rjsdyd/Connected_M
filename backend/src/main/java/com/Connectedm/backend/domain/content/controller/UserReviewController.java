@@ -46,7 +46,7 @@ public class UserReviewController {
             @AuthenticationPrincipal Long userId,
             @RequestBody UserReviewRequestDto dto) {
 
-        // reviewService.updateUserReview(userId, reviewId, dto);
+         reviewService.updateUserReview(userId, reviewId, dto);
         return ApiResponse.success("리뷰가 수정되었습니다!");
     }
 
@@ -75,5 +75,18 @@ public class UserReviewController {
             @AuthenticationPrincipal Long userId) { // 💡 진짜 유저 ID 주입
 
         return ApiResponse.success(reviewService.getMyReviews(userId));
+    }
+
+    /**
+     * [내 리뷰 전체 삭제] DELETE /api/user-reviews/me
+     * 🚀 마이페이지 전용 전체 삭제 기능 추가
+     */
+    @DeleteMapping("/user-reviews/me")
+    @Operation(summary = "내 리뷰 전체 삭제", description = "마이페이지에서 내가 작성한 모든 리뷰를 한 번에 삭제합니다.")
+    public ApiResponse<String> deleteAllMyReviews(
+            @AuthenticationPrincipal Long userId) {
+
+        reviewService.deleteAllUserReviews(userId);
+        return ApiResponse.success("모든 리뷰가 삭제되었습니다!");
     }
 }
