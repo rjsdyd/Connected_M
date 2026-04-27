@@ -1,7 +1,7 @@
 import os
 import httpx
 import asyncio
-from google import genai  # 최신 SDK 방식으로 변경
+from google import genai
 from dotenv import load_dotenv
 
 load_dotenv()

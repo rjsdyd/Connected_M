@@ -5,9 +5,8 @@
   padding-left: 5%;
   padding-right: 5%;
   padding-bottom: 60px;
-  
-  color: #ffffff;
-  background-color: #121212;
+  color: #000000;
+  background-color: #ffffff;
   min-height: 100vh;
   box-sizing: border-box; /* 패딩이 너비에 영향을 주지 않도록 설정 */
 }
@@ -82,7 +81,7 @@
   margin: 0;
   font-size: 15px;
   font-weight: 600;
-  color: #e5e5e5;
+  color: #000000;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

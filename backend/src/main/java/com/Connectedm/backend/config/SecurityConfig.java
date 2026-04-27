@@ -72,7 +72,8 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/api-docs/**","/api/main**").permitAll()
 
 //                        .requestMatchers("/api/main/**", "/api/contents/**").permitAll()
-                       .requestMatchers("/api/main/**").permitAll()
+                        .requestMatchers("/api/main/**").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated()
                 ) // 👈 여기서 세미콜론(;)을 지웠습니다!

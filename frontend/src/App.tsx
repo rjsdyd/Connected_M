@@ -27,6 +27,8 @@ import RecentPage from './pages/MyPage/RecentPage';
 import GenrePage from './pages/Genre/GenrePage';
 import OttPage from './pages/Ott/OttPage';
 import SearchResult from './pages/SearchResult/SearchResult';
+import KeywordPage from './pages/Keyword/KeywordPage';
+
 
 const AppContent = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -56,6 +58,7 @@ const AppContent = () => {
           <Route path="/recent" element={<RecentPage />} />
           <Route path="/genre/:genreName" element={<GenrePage />} />
           <Route path="/ott/:providerName" element={<OttPage />} />
+          <Route path="/keyword" element={<KeywordPage/>} />
         </Routes>
       </div>
       

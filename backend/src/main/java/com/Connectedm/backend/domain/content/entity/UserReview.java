@@ -4,21 +4,8 @@ import java.time.LocalDateTime; // user 엔티티 참조
 
 import com.Connectedm.backend.domain.user.entity.User;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Getter
@@ -51,6 +38,24 @@ public class UserReview {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    // 리뷰별 신고 횟수
+    @Column(nullable = false)
+    private int reportCount = 0;
+
+    public void increaseReportCount() {
+        this.reportCount++;
+    }
+
+    // NORMAL = default
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ReviewStatus status = ReviewStatus.NORMAL;
+
+    public void changeStatusByAdmin(ReviewStatus status) {
+        this.status = status;
+    }
 
     @PrePersist
     public void prePersist() {

@@ -1,12 +1,14 @@
 package com.Connectedm.backend.domain.content.controller;
 
 import com.Connectedm.backend.domain.content.dto.MyPageReviewResponseDto;
+import com.Connectedm.backend.domain.content.dto.ReviewReportRequestDto;
 import com.Connectedm.backend.domain.content.dto.UserReviewRequestDto;
 import com.Connectedm.backend.domain.content.service.ReviewService;
 import com.Connectedm.backend.global.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -75,5 +77,15 @@ public class UserReviewController {
             @AuthenticationPrincipal Long userId) { // 💡 진짜 유저 ID 주입
 
         return ApiResponse.success(reviewService.getMyReviews(userId));
+    }
+
+    /**
+     * [POST] 특정 리뷰 신고
+     */
+    @PostMapping("/contents/reviews/{id}/report")
+    public ResponseEntity<Void> reportReview(@PathVariable Long id,
+                                             @RequestBody(required = false)ReviewReportRequestDto requestDto) {
+        reviewService.reportReview(id);
+        return ResponseEntity.ok().build();
     }
 }
