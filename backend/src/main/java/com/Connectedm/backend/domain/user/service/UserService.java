@@ -4,9 +4,11 @@ import com.Connectedm.backend.domain.user.dto.UserLoginRequest;
 import com.Connectedm.backend.domain.user.dto.UserResponse;
 import com.Connectedm.backend.domain.user.dto.UserSignupRequest;
 import com.Connectedm.backend.domain.user.entity.User;
+import com.Connectedm.backend.domain.user.entity.UserStatus;
 import com.Connectedm.backend.domain.user.repository.UserRepository;
 import com.Connectedm.backend.global.error.CustomException;
 import com.Connectedm.backend.global.error.ErrorCode;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -115,5 +117,17 @@ public class UserService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         return UserResponse.from(user);
+    }
+
+    /**
+     *  [관리자용] 유저 상태 변경(BANNED, PENDING)
+     */
+    @Transactional
+    public void updateUserStatus(Long userId, UserStatus status) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("찾을 수 없는 사용자입니다."));
+
+        // 엔티티에 만든 전용 Setter 이용
+        user.setStatus(status);
     }
 }

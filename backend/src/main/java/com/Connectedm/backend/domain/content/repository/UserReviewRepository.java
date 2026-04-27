@@ -18,4 +18,5 @@ public interface UserReviewRepository extends JpaRepository<UserReview, Long> {
     // [핵심 추가] 1인 1영화 1리뷰 검증용
     boolean existsByUserIdAndContentId(Long userId, Long contentId);
 
+    List<UserReview> findAllByReportCountGreaterThanOrderByReportCountDesc(int count);
 }

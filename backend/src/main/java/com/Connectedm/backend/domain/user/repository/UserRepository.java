@@ -6,6 +6,7 @@ import com.Connectedm.backend.domain.user.entity.User.AuthProvider;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -46,4 +47,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // 소셜 서비스 공급자(provider)와 해당 서비스의 고유 ID(providerId)로 유저 찾기
     Optional<User> findByProviderAndProviderId(AuthProvider provider, String providerId);
+
+    List<User> findAllByReportedCountGreaterThanOrderByReportedCountDesc(int count);
 }
