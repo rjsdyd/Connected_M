@@ -18,7 +18,4 @@ public interface UserReviewRepository extends JpaRepository<UserReview, Long> {
     // [핵심 추가] 1인 1영화 1리뷰 검증용
     boolean existsByUserIdAndContentId(Long userId, Long contentId);
 
-    // 내 리뷰 전체 삭제를 위한 메서드
-    void deleteAllByUserId(Long userId);
-
 }

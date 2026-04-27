@@ -166,13 +166,4 @@ public class ReviewService {
 
         userReviewRepository.delete(review);
     }
-
-    /**
-     * [전체 삭제] 내가 작성한 모든 리뷰를 한 번에 삭제 (마이페이지용) ㅋ
-     */
-    @Transactional
-    public void deleteAllUserReviews(Long userId) {
-        // userId에 해당하는 리뷰들만 찾아서 싹 다 밀어버리기 ㅋ
-        userReviewRepository.deleteAllByUserId(userId);
-    }
 }
