@@ -75,6 +75,8 @@ public class AiController {
     }
 
 
+
+
     // --- 내부 헬퍼 메서드 ---
 
     private Long resolveUserId(UserDetails userDetails) {

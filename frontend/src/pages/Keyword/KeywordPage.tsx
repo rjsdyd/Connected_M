@@ -3,99 +3,107 @@ import './KeywordPage.css';
 
 interface MovieData {
   id: number;
+  title: string;
+  posterPath: string;
   summary: string;
   top_keywords: string;
-  poster_path: string;
-  title: string;
 }
 
 const KeywordPage: React.FC = () => {
-  // 실제 DB 데이터를 저장할 상태
   const [movies, setMovies] = useState<MovieData[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  
   const itemsPerPage = 2;
 
-  // 컴포넌트가 마운트될 때 DB 데이터를 가져옴
   useEffect(() => {
-    const fetchMovies = async () => {
+    const fetchAndCombineData = async () => {
       try {
         setIsLoading(true);
-        // 여기에 실제 백엔드 API 주소를 넣으세요 (예: '/api/movies')
-        const response = await fetch(''); 
-        const data = await response.json();
-        setMovies(data);
+
+        const [mainRes, aiRes] = await Promise.all([
+          fetch('http://localhost:8080/api/contents/main'),
+          fetch('http://localhost:8080/api/ai/keywords')  // 이부분 수정 필요
+        ]);
+
+        const mainJson = await mainRes.json();
+        const aiData = await aiRes.json();
+
+        // 이미지의 todayRecommendations 경로에 접근
+        const mainList = mainJson.data.todayRecommendations;
+
+        const combined = mainList.map((movie: any) => {
+          /**
+           * 핵심: content_id 매칭
+           * aiData의 content_id와 movie.id의 타입을 맞추기 위해 Number() 처리
+           */
+          const aiMatch = aiData.find((ai: any) => 
+            Number(ai.content_id) === Number(movie.id)
+          );
+          
+          return {
+            id: movie.id,
+            title: movie.title,
+            posterPath: movie.posterPath,
+            // 이미지의 summary와 top_keywords 필드 매칭
+            summary: aiMatch ? aiMatch.summary : "줄거리 정보를 불러올 수 없습니다.",
+            top_keywords: aiMatch ? aiMatch.top_keywords : "분석중"
+          };
+        });
+
+        setMovies(combined);
       } catch (error) {
-        console.error("데이터 로드 실패:", error);
+        console.error("데이터 매칭 실패:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchMovies();
+    fetchAndCombineData();
   }, []);
 
-  // 페이지네이션 계산
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = movies.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(movies.length / itemsPerPage);
 
-  if (isLoading) return <div className="loading">데이터를 불러오는 중...</div>;
+  if (isLoading) return <div className="loading">DB 매칭 중...</div>;
 
   return (
     <div className="keyword-container">
       <div className="purple-frame">
-        {currentItems.length > 0 ? (
-          currentItems.map((movie) => (
-            <div key={movie.id} className="movie-card">
-              <div className="poster-area">
-                {/* DB의 poster_path가 실제 URL인지 확인 필요 */}
-                {movie.poster_path ? (
-                  <img src={movie.poster_path} alt={movie.title} className="poster-image" />
-                ) : (
-                  <span className="poster-fallback">이미지 없음</span>
-                )}
+        {currentItems.map((movie) => (
+          <div key={movie.id} className="movie-card">
+            <div className="poster-area">
+              {movie.posterPath ? (
+                <img src={movie.posterPath} alt={movie.title} className="poster-image" />
+              ) : (
+                <div className="poster-fallback">이미지 없음</div>
+              )}
+            </div>
+            
+            <div className="info-area">
+              <div className="summary-box">
+                <h3 className="movie-title">{movie.title}</h3>
+                <p className="summary-text">{movie.summary}</p>
               </div>
               
-              <div className="info-area">
-                <div className="summary-box">
-                  <h3 className="movie-title">{movie.title}</h3>
-                  <p className="summary-text">{movie.summary}</p>
-                </div>
-                
-                <div className="keyword-row">
-                  {movie.top_keywords && movie.top_keywords.split(',').map((keyword, index) => (
-                    <span key={index} className="keyword-tag">
-                      # {keyword.trim()}
-                    </span>
-                  ))}
-                </div>
+              <div className="keyword-row">
+                {/* ,로 구분된 키워드를 배열로 변환 */}
+                {movie.top_keywords.split(',').map((tag: string, index: number) => (
+                  <span key={index} className="keyword-tag">
+                    # {tag.trim()}
+                  </span>
+                ))}
               </div>
             </div>
-          ))
-        ) : (
-          <p>표시할 영화 데이터가 없습니다.</p>
-        )}
+          </div>
+        ))}
       </div>
 
       <div className="pagination-bar">
-        <button 
-          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-          className="page-btn"
-        >
-          &lt;
-        </button>
+        <button onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1}>&lt;</button>
         <span className="page-info">{currentPage} / {totalPages || 1} page</span>
-        <button 
-          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages || totalPages === 0}
-          className="page-btn"
-        >
-          &gt;
-        </button>
+        <button onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages}>&gt;</button>
       </div>
     </div>
   );
