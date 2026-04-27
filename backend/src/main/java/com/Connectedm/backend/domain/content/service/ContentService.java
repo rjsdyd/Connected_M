@@ -108,6 +108,9 @@ public class ContentService {
     /**
      * 콘텐츠 상세 조회 및 누락된 데이터 자동 보완
      */
+    /**
+     * 콘텐츠 상세 조회 및 누락된 데이터 자동 보완
+     */
     @Transactional
     public ContentDetailResponseDto getContentDetail(Long id) {
         Content content = contentRepository.findWithCacheById(id)
@@ -146,8 +149,11 @@ public class ContentService {
         Double ratio = (content.getAnalysisCache() != null) ? content.getAnalysisCache().getPositiveRatio() : 0.0;
         List<String> keywords = Collections.emptyList();
 
-        List<ReviewResponseDto> expertReviews = reviewService.getExpertReviews(id); 
+        List<ReviewResponseDto> expertReviews = reviewService.getExpertReviews(id);
         List<UserReviewResponseDto> userReviews = reviewService.getUserReviews(id);
+
+        // 🚀 [추가] 평점 통계 데이터 가져오기! ㅋ
+        ReviewStatsResponseDto stats = reviewService.getReviewStats(id);
 
         List<TmdbMovieResponseDto.TmdbCastItem> majorCasts = Collections.emptyList();
         if (tmdbData != null && tmdbData.getCredits() != null && tmdbData.getCredits().getCast() != null) {
@@ -163,7 +169,7 @@ public class ContentService {
                 .title(content.getTitle())
                 .overview(content.getOverview())
                 .posterPath(content.getPosterPath())
-                .backdropPath(content.getBackdropPath()) // ✨ 추가
+                .backdropPath(content.getBackdropPath())
                 .castList(majorCasts)
                 .ottLogos(content.getOttLogos())
                 .genres(genreNames)
@@ -172,6 +178,10 @@ public class ContentService {
                 .topKeywords(keywords)
                 .expertReviews(expertReviews)
                 .userReviews(userReviews)
+                // 🚀 [추가] stats에서 꺼내서 넣어주기! ㅋ
+                .userRatingAvg(stats.getUserRatingAvg())
+                .expertRatingAvg(stats.getExpertRatingAvg())
+                .expertReviewCount(stats.getExpertReviewCount())
                 .runtime(content.getRuntime())
                 .ageRating(content.getAgeRating())
                 .build();

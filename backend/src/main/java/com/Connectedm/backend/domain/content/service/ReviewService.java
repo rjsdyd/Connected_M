@@ -175,4 +175,19 @@ public class ReviewService {
         // userId에 해당하는 리뷰들만 찾아서 싹 다 밀어버리기 ㅋ
         userReviewRepository.deleteAllByUserId(userId);
     }
+
+    /**
+     *  영화 상세페이지용 리뷰 통계 데이터 생성
+     */
+    public ReviewStatsResponseDto getReviewStats(Long contentId) {
+        Double userAvg = userReviewRepository.getAverageRatingByContentId(contentId);
+        Double expertAvg = expertReviewRepository.getAverageRatingByContentId(contentId);
+        long expertCount = expertReviewRepository.countByContentId(contentId);
+
+        return ReviewStatsResponseDto.builder()
+                .userRatingAvg(userAvg != null ? Math.round(userAvg * 10) / 10.0 : 0.0)
+                .expertRatingAvg(expertAvg != null ? Math.round(expertAvg * 10) / 10.0 : 0.0)
+                .expertReviewCount(expertCount)
+                .build();
+    }
 }
