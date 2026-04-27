@@ -209,3 +209,88 @@
   font-size: 1.3rem; font-weight: 600; color: rgba(255, 255, 255, 0.9);
   margin-top: 10px; margin-bottom: 25px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+
+.my-detail-review-card {
+  background: rgba(123, 78, 163, 0.05); /* 연보라색 투명 배경 */
+  border: 1.5px solid #7b4ea3;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 15px;
+}
+
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+
+.my-label {
+  font-weight: 800;
+  color: #7b4ea3;
+  font-size: 0.95rem;
+}
+
+.my-review-btns {
+  display: flex;
+  gap: 12px;
+}
+
+.my-review-btns button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.edit-btn { color: #888; }
+.delete-btn { color: #ff4d4d; }
+.save-btn { color: #2ecc71; }
+.cancel-btn { color: #999; }
+
+.my-review-btns button:hover { opacity: 0.7; }
+
+.my-review-body {
+  margin-top: 10px;
+}
+
+.my-comment-text {
+  margin-top: 12px;
+  color: #444;
+  line-height: 1.7;
+  font-size: 1rem;
+  word-break: break-all;
+}
+
+/* 수정용 텍스트 영역 미세 조정 */
+.my-detail-review-card .write-textarea {
+  width: 100%;
+  height: 120px;
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid #7b4ea3;
+  background-color: #ffffff !important; /* 배경은 하얗게 */
+  color: #333 !important;             /* 글자는 진한 회색으로 확실하게! */
+  font-size: 1rem;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+  margin-top: 10px;
+}
+
+.my-detail-review-card .write-textarea:focus {
+  border-color: #4b0082;
+  box-shadow: 0 0 5px rgba(75, 0, 130, 0.2);
+}
+
+/* 입력창 안에 글자가 없을 때 나오는 placeholder 색상 */
+.my-detail-review-card .write-textarea::placeholder {
+  color: #aaa;
+}
