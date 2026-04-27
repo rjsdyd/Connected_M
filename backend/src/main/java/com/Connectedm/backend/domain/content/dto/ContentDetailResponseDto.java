@@ -33,4 +33,9 @@ public class ContentDetailResponseDto {
     // 리뷰 영역
     private List<ReviewResponseDto> expertReviews;
     private List<UserReviewResponseDto> userReviews;
+
+    // 평점 통계 필드
+    private Double userRatingAvg;    // 관람평 평균
+    private Double expertRatingAvg;  // 전문가 평점 평균
+    private Long expertReviewCount;  // 전문가 리뷰 건수
 }

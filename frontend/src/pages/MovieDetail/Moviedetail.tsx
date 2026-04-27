@@ -47,6 +47,9 @@ interface MovieDetailData {
   userReviews: UserReviewData[];
   providers: WatchProvider[]; 
   ottLogos?: string;
+  userRatingAvg: number;
+  expertRatingAvg: number;
+  expertReviewCount: number
 }
 
 const MovieDetail: React.FC = () => {
@@ -176,7 +179,7 @@ const MovieDetail: React.FC = () => {
   const handleReviewSubmit = async () => {
     if (!isLoggedIn) { alert("로그인이 필요합니다."); return; }
     if (hasReviewed) { alert("이미 리뷰를 작성하셨습니다."); return; }
-    if (!newComment.trim() || newRating === 0) { alert("내용과 별점을 입력해주세요."); return; }
+    if (!newComment.trim()) { alert("내용을 입력해주세요."); return; }
 
     try {
       const token = localStorage.getItem('token'); 
@@ -194,7 +197,7 @@ const MovieDetail: React.FC = () => {
 
   // 🚀 [신규] 내 리뷰 수정 저장 핸들러
   const handleDetailUpdate = async (reviewId: number) => {
-    if (!editDetailComment.trim() || editDetailRating === 0) { alert("내용과 별점을 입력해주세요."); return; }
+    if (!editDetailComment.trim()) { alert("내용을 입력해주세요."); return; }
     try {
       const token = localStorage.getItem('token');
       await axios.put(`http://localhost:8080/api/contents/user-reviews/${reviewId}`, 
@@ -336,7 +339,10 @@ const MovieDetail: React.FC = () => {
 
           <div className="right-column">
             <section className="detail-section">
-              <h2 className="section-title">전문가 평점 {safeExpertReviews.length}건</h2>
+              <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                전문가 평점 {movie.expertReviewCount || 0}건
+                <span className="avg-score-badge">★ {movie.expertRatingAvg?.toFixed(1) || "0.0"}</span>
+              </h2>
               <div className="compact-card-container">
                 {expertReviewsSlice.length > 0 ? expertReviewsSlice.map((r) => (
                   <div key={r.id} className="compact-review-row">
@@ -359,7 +365,10 @@ const MovieDetail: React.FC = () => {
             </section>
 
             <section className="detail-section">
-              <h2 className="section-title">관람평 {otherUserReviews.length}건</h2>
+              <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                관람평 {otherUserReviews.length}건
+                <span className="avg-score-badge user">★ {movie.userRatingAvg?.toFixed(1) || "0.0"}</span>
+              </h2>
               <div className="compact-card-container">
                 {userReviewsSlice.length > 0 ? userReviewsSlice.map((r) => {
                   const isExpanded = expandedReviews.includes(r.id);
@@ -424,6 +433,13 @@ const MovieDetail: React.FC = () => {
                   {isEditingDetail ? (
                     <div className="write-form-container" style={{padding: 0, marginTop: '10px'}}>
                       <div className="interactive-rating-stars-wrapper" onMouseLeave={() => setDetailHoverRating(null)}>
+                        {/* 0점 조절용 투명 영역 */}
+                        <div 
+                          className="rating-zero-zone"
+                          style={{ width: '20px', minHeight: '30px', cursor: 'pointer' }}
+                          onMouseEnter={() => setDetailHoverRating(0)}
+                          onClick={() => setEditDetailRating(0)}
+                        />
                         {[...Array(5)].map((_, i) => {
                           const displayRating = detailHoverRating !== null ? detailHoverRating : editDetailRating;
                           const isFull = displayRating >= (i + 1) * 2;
@@ -439,7 +455,7 @@ const MovieDetail: React.FC = () => {
                             </div>
                           );
                         })}
-                        <span className="rating-num-display">{editDetailRating}점</span>
+                        <span className="rating-num-display">{detailHoverRating !== null ? detailHoverRating : editDetailRating}점</span>
                       </div>
                       <textarea 
                         className="write-textarea" 
@@ -463,6 +479,13 @@ const MovieDetail: React.FC = () => {
               ) : (
                 <div className="write-form-container">
                   <div className="interactive-rating-stars-wrapper" onMouseLeave={() => setHoverRating(null)}>
+                    {/* 0점 조절용 투명 영역 */}
+                    <div 
+                      className="rating-zero-zone"
+                      style={{ width: '20px', minHeight: '30px', cursor: 'pointer' }}
+                      onMouseEnter={() => setHoverRating(0)}
+                      onClick={() => setNewRating(0)}
+                    />
                     {[...Array(5)].map((_, i) => {
                       const displayRating = hoverRating !== null ? hoverRating : newRating;
                       const isFull = displayRating >= (i + 1) * 2;

@@ -14,4 +14,6 @@ public interface ExpertReviewRepository extends JpaRepository<ExpertReview, Long
     // 영화 ID로 평균 평점 계산 (String -> Double 변환 후 평균)
     @Query("SELECT AVG(CAST(e.rating AS double)) FROM ExpertReview e WHERE e.content.id = :contentId")
     Double getAverageRatingByContentId(@Param("contentId") Long contentId);
+
+    long countByContentId(Long contentId);
 }

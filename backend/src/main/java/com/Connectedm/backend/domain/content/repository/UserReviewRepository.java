@@ -2,6 +2,8 @@ package com.Connectedm.backend.domain.content.repository;
 
 import com.Connectedm.backend.domain.content.entity.UserReview;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface UserReviewRepository extends JpaRepository<UserReview, Long> {
@@ -17,5 +19,12 @@ public interface UserReviewRepository extends JpaRepository<UserReview, Long> {
 
     // [핵심 추가] 1인 1영화 1리뷰 검증용
     boolean existsByUserIdAndContentId(Long userId, Long contentId);
+
+    // 내 리뷰 전체 삭제를 위한 메서드
+    void deleteAllByUserId(Long userId);
+
+    // 일반 관람객 평점 평균 계산
+    @Query("SELECT AVG(CAST(r.rating AS double)) FROM UserReview r WHERE r.content.id = :contentId")
+    Double getAverageRatingByContentId(@Param("contentId") Long contentId);
 
 }

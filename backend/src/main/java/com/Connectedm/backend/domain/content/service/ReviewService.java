@@ -166,4 +166,28 @@ public class ReviewService {
 
         userReviewRepository.delete(review);
     }
+
+    /**
+     * [전체 삭제] 내가 작성한 모든 리뷰를 한 번에 삭제 (마이페이지용) ㅋ
+     */
+    @Transactional
+    public void deleteAllUserReviews(Long userId) {
+        // userId에 해당하는 리뷰들만 찾아서 싹 다 밀어버리기 ㅋ
+        userReviewRepository.deleteAllByUserId(userId);
+    }
+
+    /**
+     *  영화 상세페이지용 리뷰 통계 데이터 생성
+     */
+    public ReviewStatsResponseDto getReviewStats(Long contentId) {
+        Double userAvg = userReviewRepository.getAverageRatingByContentId(contentId);
+        Double expertAvg = expertReviewRepository.getAverageRatingByContentId(contentId);
+        long expertCount = expertReviewRepository.countByContentId(contentId);
+
+        return ReviewStatsResponseDto.builder()
+                .userRatingAvg(userAvg != null ? Math.round(userAvg * 10) / 10.0 : 0.0)
+                .expertRatingAvg(expertAvg != null ? Math.round(expertAvg * 10) / 10.0 : 0.0)
+                .expertReviewCount(expertCount)
+                .build();
+    }
 }
