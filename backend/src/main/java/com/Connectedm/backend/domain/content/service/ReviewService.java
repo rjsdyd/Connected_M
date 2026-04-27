@@ -3,6 +3,7 @@ package com.Connectedm.backend.domain.content.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -165,5 +166,24 @@ public class ReviewService {
         }
 
         userReviewRepository.delete(review);
+    }
+
+    /**
+     * 리뷰 신고하기
+     */
+    @Transactional
+    public void reportReview(Long reviewId) {
+        // 1. 해당 리뷰 소환
+        UserReview userReview = userReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new EntityNotFoundException("리뷰가 없습니다."));
+
+        // 2. 리뷰 신고 카운트
+        userReview.increaseReportCount();
+
+        // 3. 리뷰 작성자의 누적 신고 카운트
+        User writer = userReview.getUser();
+        if (writer != null) {
+            writer.increaseReportedCount();
+        }
     }
 }
