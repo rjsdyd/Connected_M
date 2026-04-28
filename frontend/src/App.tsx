@@ -28,6 +28,7 @@ import GenrePage from './pages/Genre/GenrePage';
 import OttPage from './pages/Ott/OttPage';
 import SearchResult from './pages/SearchResult/SearchResult';
 import KeywordPage from './pages/Keyword/KeywordPage';
+import AdminPage from './pages/admin/adminpage';
 
 
 const AppContent = () => {
@@ -59,6 +60,7 @@ const AppContent = () => {
           <Route path="/genre/:genreName" element={<GenrePage />} />
           <Route path="/ott/:providerName" element={<OttPage />} />
           <Route path="/keyword" element={<KeywordPage/>} />
+          <Route path="/admin" element={<AdminPage/>} />
         </Routes>
       </div>
       
