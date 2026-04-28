@@ -29,23 +29,14 @@ const SearchResult = () => {
 
         if (result.data) {
           const mapped = result.data.map((m: any) => {
-            let genreArray: string[] = [];
-            
- 
-            const raw = m.genres || m.genre || m.genre_name || m.genreNames || m.category || "";
-
-         if (m.title.includes("범죄")) {
-    genreArray = ["범죄", "액션"];
-  } else if (m.title.includes("괴물")) {
-    genreArray = ["애니메이션", "가족", "모험"];
-  }
+            const genreArray = Array.isArray(m.genres) ? m.genres : [];
 
             return {
               ...m,
               poster_path: m.poster_path || m.posterpath || m.posterPath || "",
               id: m.id,
               overview: m.overview || m.contents_overview || "줄거리 정보가 없습니다.",
-              genreList: genreArray // 이제 이 배열에 ["액션", "모험"] 등이 담깁니다.
+              genreList: genreArray 
             };
           });
           setResults(mapped);
