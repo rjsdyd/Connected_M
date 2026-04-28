@@ -3,8 +3,11 @@ package com.Connectedm.backend.domain.user.service;
 import com.Connectedm.backend.domain.user.dto.UserLoginRequest;
 import com.Connectedm.backend.domain.user.dto.UserResponse;
 import com.Connectedm.backend.domain.user.dto.UserSignupRequest;
+import com.Connectedm.backend.domain.user.entity.LoginLog;
 import com.Connectedm.backend.domain.user.entity.User;
+import com.Connectedm.backend.domain.user.entity.UserRole;
 import com.Connectedm.backend.domain.user.entity.UserStatus;
+import com.Connectedm.backend.domain.user.repository.LoginLogRepository;
 import com.Connectedm.backend.domain.user.repository.UserRepository;
 import com.Connectedm.backend.global.error.CustomException;
 import com.Connectedm.backend.global.error.ErrorCode;
@@ -23,6 +26,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final MailService mailService;
+    private final LoginLogRepository loginLogRepository;
 
     @Transactional
     public Long signUp(UserSignupRequest request) {
@@ -50,6 +54,9 @@ public class UserService {
                 .realName(request.getRealName())
                 .phoneNumber(request.getPhoneNumber())
                 .provider(User.AuthProvider.LOCAL)
+                .role(UserRole.ROLE_USER)
+                .status(UserStatus.ACTIVE)
+                .reportedCount(0)
                 .build();
 
         return userRepository.save(user).getId();
@@ -63,6 +70,10 @@ public class UserService {
         // DB에서 이메일+이름+전화번호가 일치하는지 확인
         User user = userRepository.findByEmailAndRealNameAndPhoneNumber(email, realName, normalizedPhone)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (user.getStatus() == UserStatus.BANNED) {
+            throw new CustomException(ErrorCode.USER_BANNED);
+        }
 
         // 비밀번호 재설정 토큰을 생성하여 DB에 저장하고, 이메일로 링크 전송
         String resetToken = java.util.UUID.randomUUID().toString();
@@ -100,14 +111,27 @@ public class UserService {
         }
         return phoneNumber;
     }
-
+    @Transactional
     public UserResponse login(UserLoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+        if (user.getStatus() == UserStatus.BANNED) {
+            throw new CustomException(ErrorCode.USER_BANNED);
+        }
+
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new CustomException(ErrorCode.INVALID_PASSWORD);
         }
+
+        user.updateLastLoginAt();
+
+        LoginLog log = LoginLog.builder()
+                .user(user)
+                .loginAt(LocalDateTime.now())
+                .build();
+        loginLogRepository.save(log);
+
         return UserResponse.from(user);
     }
 
@@ -116,6 +140,9 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+        if (user.getStatus() == UserStatus.BANNED) {
+            throw new CustomException(ErrorCode.USER_BANNED);
+        }
         return UserResponse.from(user);
     }
 
@@ -125,7 +152,7 @@ public class UserService {
     @Transactional
     public void updateUserStatus(Long userId, UserStatus status) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("찾을 수 없는 사용자입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 엔티티에 만든 전용 Setter 이용
         user.setStatus(status);

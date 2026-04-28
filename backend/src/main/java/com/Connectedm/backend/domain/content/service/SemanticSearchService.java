@@ -3,7 +3,7 @@ package com.Connectedm.backend.domain.content.service;
 import com.Connectedm.backend.domain.content.dto.ContentSearchRequest;
 import com.Connectedm.backend.domain.content.dto.ContentSearchResponse;
 import com.Connectedm.backend.domain.content.repository.AnalysisCacheRepository;
-import com.Connectedm.backend.global.Utils.VectorUtils;
+import com.Connectedm.backend.global.utils.VectorUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

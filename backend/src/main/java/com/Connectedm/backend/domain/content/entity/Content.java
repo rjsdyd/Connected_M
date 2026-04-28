@@ -58,6 +58,17 @@ public class Content {
     @Column(name = "age_rating")
     private String ageRating;
 
+    @Column(name = "view_count", columnDefinition = "INT DEFAULT 0")
+    private Integer viewCount = 0;
+
+    @Column(name = "wish_count", columnDefinition = "INT DEFAULT 0")
+    private Integer wishCount = 0;
+
+    // 조회수 증가 메서드
+    public void incrementViewCount() {
+        this.viewCount++;
+    }
+
     // 장르와 연결 (1:N)
     @Builder.Default
     @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true )

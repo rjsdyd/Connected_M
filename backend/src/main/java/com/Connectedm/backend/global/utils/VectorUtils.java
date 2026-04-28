@@ -1,4 +1,4 @@
-package com.Connectedm.backend.global.Utils;
+package com.Connectedm.backend.global.utils;
 
 import java.util.Arrays;
 
