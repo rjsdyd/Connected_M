@@ -9,6 +9,8 @@ import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserServ
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import com.Connectedm.backend.domain.user.entity.UserRole;
+import com.Connectedm.backend.domain.user.entity.UserStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -97,6 +99,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                             .phoneNumber(null)
                             .provider(finalProvider)
                             .providerId(providerId)
+                            .role(UserRole.ROLE_USER)
+                            .status(UserStatus.ACTIVE)
                             .build());
                 });
 
