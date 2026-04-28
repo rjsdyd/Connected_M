@@ -50,6 +50,7 @@ interface MovieDetailData {
   userRatingAvg: number;
   expertRatingAvg: number;
   expertReviewCount: number
+  trailerKey?: string;
 }
 
 const MovieDetail: React.FC = () => {
@@ -335,6 +336,24 @@ const MovieDetail: React.FC = () => {
               <h2 className="section-title">줄거리</h2>
               <p className="synopsis-text">{movie.overview}</p>
             </section>
+            
+            {movie.trailerKey && (
+              <section className="detail-section">
+                <h2 className="section-title">메인 예고편</h2>
+                <div className="video-container">
+                  <iframe
+                    width="100%"
+                    height="450"
+                    src={`https://www.youtube.com/embed/${movie.trailerKey}`}
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+              </section>
+            )}
+
           </div>
 
           <div className="right-column">

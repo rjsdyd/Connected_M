@@ -178,12 +178,12 @@ public class ContentService {
                 .topKeywords(keywords)
                 .expertReviews(expertReviews)
                 .userReviews(userReviews)
-                // 🚀 [추가] stats에서 꺼내서 넣어주기! ㅋ
                 .userRatingAvg(stats.getUserRatingAvg())
                 .expertRatingAvg(stats.getExpertRatingAvg())
                 .expertReviewCount(stats.getExpertReviewCount())
                 .runtime(content.getRuntime())
                 .ageRating(content.getAgeRating())
+                .trailerKey(tmdbData != null ? tmdbData.getTrailerKey() : null)
                 .build();
     }
 
