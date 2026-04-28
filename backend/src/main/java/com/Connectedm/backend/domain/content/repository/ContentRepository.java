@@ -44,4 +44,7 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
     @Query("SELECT c FROM Content c WHERE c.ottLogos LIKE %:logoHash%")
     List<Content> findByOttLogosContaining(@Param("logoHash") String logoHash);
 
+    // 영화 제목으로 검색 (LIKE %query% 효과)
+    List<Content> findByTitleContaining(String title);
+
 }
