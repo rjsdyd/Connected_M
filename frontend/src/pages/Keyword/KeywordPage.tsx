@@ -73,7 +73,7 @@ const KeywordPage: React.FC = () => {
       <div className="purple-frame">
         {currentItems.map((movie) => (
           <div key={movie.id} className="movie-card">
-            <div className="poster-area">
+            <div className="poster-area_keyword">
               {movie.posterPath ? (
                 <img src={movie.posterPath} alt={movie.title} className="poster-image" />
               ) : (
@@ -83,7 +83,7 @@ const KeywordPage: React.FC = () => {
             
             <div className="info-area">
               <div className="summary-box">
-                <h3 className="movie-title">{movie.title}</h3>
+                <h3 className="movie-title_keyword">{movie.title}</h3>
                 <p className="summary-text">{movie.summary}</p>
               </div>
               

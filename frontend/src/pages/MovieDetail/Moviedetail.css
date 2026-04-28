@@ -295,3 +295,38 @@
   color: #aaa;
 }
 
+/* 기본 배지 공통 (전문가용: 황금색) */
+.avg-score-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    background-color: #fcc419; /* 황금색 */
+    color: #000;
+    border-radius: 20px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-left: 10px;
+    box-shadow: 0 2px 8px rgba(252, 196, 25, 0.3);
+}
+
+/* 유저 평점 배지 (보라색 포인트) */
+.avg-score-badge.user {
+    background-color: #7b4ea3; /* Connected-M 보라색 */
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(123, 78, 163, 0.3);
+}
+
+/* 섹션 타이틀이랑 정렬 맞추기 */
+.section-title {
+    display: flex;
+    align-items: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: #212529;
+}
+
+/* 평점 아이콘과 텍스트 간격 */
+.avg-score-badge::before {
+    margin-right: 4px;
+}
