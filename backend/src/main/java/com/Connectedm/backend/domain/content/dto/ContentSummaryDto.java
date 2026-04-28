@@ -14,4 +14,5 @@ public class ContentSummaryDto {
     private String title;
     private String posterPath;
     private Double positiveRatio;
+    private String overview;
 }
