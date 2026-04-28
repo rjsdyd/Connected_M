@@ -1,5 +1,6 @@
 package com.Connectedm.backend.domain.content.repository;
 
+import com.Connectedm.backend.domain.content.entity.ReviewStatus;
 import com.Connectedm.backend.domain.content.entity.UserReview;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -23,9 +24,15 @@ public interface UserReviewRepository extends JpaRepository<UserReview, Long> {
     // 내 리뷰 전체 삭제를 위한 메서드
     void deleteAllByUserId(Long userId);
 
+    // 정상 노출 상태인 리뷰만 가져오기
+    List<UserReview> findAllByContentIdAndStatus(Long contentId, ReviewStatus status);
+
+
+
     // 일반 관람객 평점 평균 계산
     @Query("SELECT AVG(CAST(r.rating AS double)) FROM UserReview r WHERE r.content.id = :contentId")
     Double getAverageRatingByContentId(@Param("contentId") Long contentId);
 
+    // [관리자용] 신고 0회 초과인 리뷰만 긁어오기
     List<UserReview> findAllByReportCountGreaterThanOrderByReportCountDesc(int count);
 }
