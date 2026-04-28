@@ -125,4 +125,17 @@ public class ContentController {
         List<ContentSummaryDto> movies = contentService.getMoviesByOttName(providerName);
         return ApiResponse.success(movies);
     }
+
+    /**
+     * 영화 제목으로 검색 (프론트엔드 /search?query={query} 대응)
+     */
+    @GetMapping("/search")
+    public ApiResponse<List<ContentSummaryDto>> searchMovies(@RequestParam("query") String query) {
+        // 🚀 로그를 찍어서 검색어가 컨트롤러까지 잘 오는지 확인!
+        System.out.println("DEBUG: 제목 검색 요청 -> " + query);
+
+        List<ContentSummaryDto> results = contentService.searchContents(query);
+
+        return ApiResponse.success(results);
+    }
 }

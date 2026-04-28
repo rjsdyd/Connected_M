@@ -178,12 +178,12 @@ public class ContentService {
                 .topKeywords(keywords)
                 .expertReviews(expertReviews)
                 .userReviews(userReviews)
-                // 🚀 [추가] stats에서 꺼내서 넣어주기! ㅋ
                 .userRatingAvg(stats.getUserRatingAvg())
                 .expertRatingAvg(stats.getExpertRatingAvg())
                 .expertReviewCount(stats.getExpertReviewCount())
                 .runtime(content.getRuntime())
                 .ageRating(content.getAgeRating())
+                .trailerKey(tmdbData != null ? tmdbData.getTrailerKey() : null)
                 .build();
     }
 
@@ -317,6 +317,23 @@ public class ContentService {
                         .id(c.getId())
                         .title(c.getTitle())
                         .posterPath(c.getPosterPath())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    // [신규 추가] 영화 제목으로 검색 (LIKE %query% 검색)
+    @Transactional(readOnly = true)
+    public List<ContentSummaryDto> searchContents(String query) {
+        // 검색어가 비어있으면 빈 리스트 반환
+        if (query == null || query.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+        return contentRepository.findByTitleContaining(query).stream()
+                .map(c -> ContentSummaryDto.builder()
+                        .id(c.getId())
+                        .title(c.getTitle())
+                        .posterPath(c.getPosterPath())
+                        // 필요하다면 여기서 releaseDate나 overview도 추가 가능
                         .build())
                 .collect(Collectors.toList());
     }
