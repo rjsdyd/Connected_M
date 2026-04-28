@@ -40,6 +40,7 @@ public class SemanticSearchService {
                             .title(cache.getContent().getTitle())
                             .posterPath(cache.getContent().getPosterPath())
                             .similaritySource(score)
+                            .overview(cache.getContent().getOverview())
                             .build();
                 })
                 // 6. 유사도 높은 순(내림차순) 정렬

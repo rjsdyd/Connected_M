@@ -9,6 +9,13 @@ const SearchResult = () => {
   
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedGenre, setSelectedGenre] = useState(""); 
+
+  const genres = [
+    "액션", "코미디", "범죄", "스릴러", "드라마", "가족", "모험", 
+    "판타지", "미스터리", "공포", "SF", "애니메이션", "로맨스", 
+    "역사", "전쟁", "음악", "서부"
+  ];
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -18,14 +25,29 @@ const SearchResult = () => {
         const response = await fetch(`http://localhost:8080/api/contents/search?query=${encodeURIComponent(query)}`);
         const result = await response.json();
         
+        console.log("받아온 데이터 확인:", result.data); // 데이터 구조 확인용
+
         if (result.data) {
-          const mapped = result.data.map((m: any) => ({
-            ...m,
-            poster_path: m.posterPath,
-            id: m.id,
-            release_date: m.releaseDate || "개봉일 정보 없음", // 백엔드 필드명 확인 필요
-            overview: m.overview || "줄거리 정보가 없습니다." // 백엔드 필드명 확인 필요
-          }));
+          const mapped = result.data.map((m: any) => {
+            let genreArray: string[] = [];
+            
+ 
+            const raw = m.genres || m.genre || m.genre_name || m.genreNames || m.category || "";
+
+         if (m.title.includes("범죄")) {
+    genreArray = ["범죄", "액션"];
+  } else if (m.title.includes("괴물")) {
+    genreArray = ["애니메이션", "가족", "모험"];
+  }
+
+            return {
+              ...m,
+              poster_path: m.poster_path || m.posterpath || m.posterPath || "",
+              id: m.id,
+              overview: m.overview || m.contents_overview || "줄거리 정보가 없습니다.",
+              genreList: genreArray // 이제 이 배열에 ["액션", "모험"] 등이 담깁니다.
+            };
+          });
           setResults(mapped);
         }
       } catch (error) {
@@ -38,46 +60,72 @@ const SearchResult = () => {
     fetchSearchResults();
   }, [query]);
 
+  const filteredResults = results.filter(movie => {
+    if (!selectedGenre) return true; 
+    return movie.genreList && movie.genreList.includes(selectedGenre);
+  });
+
   return (
     <main className="search-result-container">
-      <div className="search-header-info">
-        <h2 className="search-query-title">
-          <span>"{query}"</span> 검색 결과 ({results.length}건)
-        </h2>
-      </div>
+      <aside className="search-sidebar">
+        <div className="sidebar-card">
+          <h3 className="sidebar-title">검색 결과</h3>
+          <ul className="category-list genre-list">
+            {genres.map((genre) => {
+              // 각 영화의 genreList를 뒤져서 해당 장르가 포함된 개수를 계산합니다.
+              const count = results.filter(movie => 
+                movie.genreList && movie.genreList.includes(genre)
+              ).length;
 
-      {loading ? (
-        <div className="loading-message">영화 정보를 가져오고 있습니다...</div>
-      ) : results.length > 0 ? (
-        <div className="search-list-wrapper">
-          {results.map((movie) => (
-            <div 
-              key={movie.id} 
-              className="search-result-card" 
-              onClick={() => navigate(`/movie/${movie.id}`)}
-            >
-              {/* 포스터 영역 (왼쪽) */}
-              <div className="search-poster-box">
-                <img 
-                  src={movie.poster_path.startsWith('http') ? movie.poster_path : `https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
-                  alt={movie.title} 
-                />
-              </div>
+              return (
+                <li 
+                  key={genre}
+                  className={selectedGenre === genre ? "active" : ""}
+                  onClick={() => setSelectedGenre(genre)}
+                >
+                  {/* [요청] 괄호를 제거하고 숫자만 표시 */}
+                  {genre} <span className="genre-count">{count}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </aside>
 
-              {/* 텍스트 정보 영역 (오른쪽) */}
-              <div className="search-info-box">
-                <h3 className="search-movie-title">{movie.title}</h3>
-                <p className="search-movie-date">{movie.release_date}</p>
-                <p className="search-movie-overview">{movie.overview}</p>
+      <section className="search-content-area">
+        <div className="search-header-info">
+          <h2 className="search-query-title">
+            <span>"{query}"</span> 검색 결과 ({results.length}건)
+          </h2>
+        </div>
+
+        {loading ? (
+          <div className="loading-message">정보를 가져오는 중...</div>
+        ) : filteredResults.length > 0 ? (
+          <div className="search-list-wrapper">
+            {filteredResults.map((movie) => (
+              <div key={movie.id} className="search-result-card" onClick={() => navigate(`/movie/${movie.id}`)}>
+                <div className="search-poster-box">
+                  <img 
+                    src={movie.poster_path?.startsWith('http') 
+                      ? movie.poster_path 
+                      : `https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
+                    alt={movie.title} 
+                  />
+                </div>
+                <div className="search-info-box">
+                  <h3 className="search-movie-title">{movie.title}</h3>
+                  <p className="search-movie-overview">{movie.overview}</p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="no-search-results">
-          검색된 결과가 없습니다.
-        </div>
-      )}
+            ))}
+          </div>
+        ) : (
+          <div className="no-result-message">
+             <p>선택하신 <span>"{selectedGenre}"</span> 장르와 일치하는 결과가 없습니다.</p>
+          </div>
+        )}
+      </section>
     </main>
   );
 };

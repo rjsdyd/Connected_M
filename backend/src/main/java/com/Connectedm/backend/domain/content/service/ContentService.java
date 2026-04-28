@@ -334,6 +334,7 @@ public class ContentService {
                         .title(c.getTitle())
                         .posterPath(c.getPosterPath())
                         // 필요하다면 여기서 releaseDate나 overview도 추가 가능
+                        .overview(c.getOverview())
                         .build())
                 .collect(Collectors.toList());
     }
