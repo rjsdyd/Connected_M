@@ -320,4 +320,21 @@ public class ContentService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    // [신규 추가] 영화 제목으로 검색 (LIKE %query% 검색)
+    @Transactional(readOnly = true)
+    public List<ContentSummaryDto> searchContents(String query) {
+        // 검색어가 비어있으면 빈 리스트 반환
+        if (query == null || query.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+        return contentRepository.findByTitleContaining(query).stream()
+                .map(c -> ContentSummaryDto.builder()
+                        .id(c.getId())
+                        .title(c.getTitle())
+                        .posterPath(c.getPosterPath())
+                        // 필요하다면 여기서 releaseDate나 overview도 추가 가능
+                        .build())
+                .collect(Collectors.toList());
+    }
 }
