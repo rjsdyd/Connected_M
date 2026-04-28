@@ -75,9 +75,9 @@ public class User {
     @Column(nullable = false)
     private int reportedCount = 0;
 
-    public void increaseReportedCount() {
-        this.reportedCount++;
-    }
+
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
 
     // 1. 위시리스트 관계 복구
     @Builder.Default
@@ -108,5 +108,13 @@ public class User {
                 this.phoneNumber = digits.replaceFirst("(\\d{3})(\\d{3})(\\d{4})", "$1-$2-$3");
             }
         }
+    }
+
+    public void increaseReportedCount() {
+        this.reportedCount++;
+    }
+
+    public void updateLastLoginAt() {
+        this.lastLoginAt = LocalDateTime.now();
     }
 }

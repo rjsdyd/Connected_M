@@ -3,6 +3,7 @@ package com.Connectedm.backend.domain.user.service;
 import com.Connectedm.backend.domain.content.entity.Content;
 import com.Connectedm.backend.domain.user.entity.RecentView;
 import com.Connectedm.backend.domain.user.entity.User;
+import com.Connectedm.backend.domain.user.entity.UserStatus;
 import com.Connectedm.backend.domain.user.repository.RecentViewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,12 @@ public class RecentViewService {
      */
     @Transactional
     public void saveOrUpdateRecentView(User user, Content content) {
+
+        if (user.getStatus() == UserStatus.BANNED) {
+            // 정지된 유저는 기록을 남길 권한이 없습니다. ㅋ
+            // 예외를 던지거나, 조용히 return 시켜서 기록 생성을 막습니다!!
+            return;
+        }
         // 1. 이미 본 적 있는지 리포지토리 확인
         Optional<RecentView> existingView = recentViewRepository.findByUserAndContent(user, content);
 
@@ -37,12 +44,12 @@ public class RecentViewService {
                     .content(content)
                     .build();
             recentViewRepository.save(newView);
+
+            if (user.getRecentViews() != null) {
+                user.getRecentViews().add(newView);
+            }
         }
-
-        // 4. 기록이 너무 많으면 가장 오래된 기록 삭제
-        cleanUpOldRecords(user);
     }
-
     /**
      * 유저별 기록 개수 제한 로직
      */

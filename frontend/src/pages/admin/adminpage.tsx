@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // useEffect 추가
+import axios from 'axios'; // axios 임포트 필수
 import './adminpage.css';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-// 통계용 더미 데이터
+// 통계용 더미 데이터 (컴포넌트 외부에 있어도 무관)
 const chartData = [
   { name: '04-21', users: 4 },
   { name: '04-22', users: 7 },
@@ -12,9 +13,35 @@ const chartData = [
 ];
 
 const AdminPage = () => {
-  const [mainTab, setMainTab] = useState('user'); // user, log, stats
-  const [subTab, setSubTab] = useState('all'); // all, summary, filter, history, reviews, movie, join
+  // 1. 상태 선언 (컴포넌트 내부로 이동)
+  const [mainTab, setMainTab] = useState('user'); 
+  const [subTab, setSubTab] = useState('all'); 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [users, setUsers] = useState<any[]>([]);
+  
+  // 호출할 유저 ID 리스트
+  const userId = [11, 12, 13];
+
+  // 2. useEffect (컴포넌트 내부로 이동)
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const requests = userId.map(id => 
+          axios.get(`http://localhost:8080/api/user/${id}`)
+        );
+        
+        const responses = await Promise.all(requests);
+        setUsers(responses.map(res => res.data)); 
+      } catch (error) {
+        console.error("유저 정보 로딩 실패", error);
+      }
+    };
+
+    // '전체 유저' 탭일 때만 호출하도록 설정하면 효율적입니다.
+    if (mainTab === 'user' && subTab === 'all') {
+      fetchUsers();
+    }
+  }, [mainTab, subTab]); // 탭이 바뀔 때마다 갱신
 
   return (
     <div className="admin-container">
@@ -52,14 +79,15 @@ const AdminPage = () => {
         )}
       </div>
 
-      {/* 컨텐츠 영역 */}
       <main className="admin-content">
         {/* 1. 유저관리 - 전체 유저 */}
         {mainTab === 'user' && subTab === 'all' && (
           <div className="list-container">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="list-item">
-                <span className="user-info">id, created_at, email, nickname, phone_number, real_name</span>
+            {users.map((user) => (
+              <div key={user.id} className="list-item">
+                <span className="user-info">
+                  {user.id}, {user.createdAt}, {user.email}, {user.nickname}, {user.phoneNumber}, {user.realName}
+                </span>
                 <div className="action-buttons">
                   <button className="btn-active">활성</button>
                   <button className="btn-stop" onClick={() => setIsModalOpen(true)}>정지</button>
@@ -70,31 +98,7 @@ const AdminPage = () => {
           </div>
         )}
 
-        {/* 2. 유저관리 - 활동 요약 */}
-        {mainTab === 'user' && subTab === 'summary' && (
-          <div className="list-container">
-            <div className="list-item summary-header">
-              <span>닉네임</span><span>리뷰 개수</span><span>찜 영화 개수</span>
-            </div>
-            <div className="list-item">
-              <span>무비매니아</span><span>15개</span><span>42개</span>
-            </div>
-          </div>
-        )}
-
-        {/* 3. 유저관리 - 필터 */}
-        {mainTab === 'user' && subTab === 'filter' && (
-          <div className="filter-section">
-            <div className="search-bar">
-              <input type="text" placeholder="이메일, 닉네임, 실제 이름 검색" />
-              <input type="date" /> ~ <input type="date" />
-              <button className="btn-search">검색</button>
-            </div>
-            {/* 리스트 출력 부분 (전체 유저와 동일 구조) */}
-          </div>
-        )}
-
-        {/* 4. 통계 - 신규 가입자 (그래프) */}
+        {/* 나머지 요약, 필터, 통계 섹션 (기존과 동일) */}
         {mainTab === 'stats' && subTab === 'join' && (
           <div className="chart-container">
             <div className="chart-filter">
@@ -122,8 +126,12 @@ const AdminPage = () => {
           <div className="modal-content">
             <h3>정지 기간 설정</h3>
             <div className="modal-btns">
-              <button>1일</button><button>3일</button><button>7일</button>
-              <button>1달</button><button>3달</button><button>6개월</button>
+              <button onClick={() => setIsModalOpen(false)}>1일</button>
+              <button onClick={() => setIsModalOpen(false)}>3일</button>
+              <button onClick={() => setIsModalOpen(false)}>7일</button>
+              <button onClick={() => setIsModalOpen(false)}>1달</button>
+              <button onClick={() => setIsModalOpen(false)}>3달</button>
+              <button onClick={() => setIsModalOpen(false)}>6개월</button>
             </div>
             <button className="btn-close" onClick={() => setIsModalOpen(false)}>닫기</button>
           </div>

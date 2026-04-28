@@ -1,16 +1,21 @@
 package com.Connectedm.backend.domain.admin.service;
 
+import com.Connectedm.backend.domain.admin.dto.AdminContentStateResponseDto;
 import com.Connectedm.backend.domain.admin.dto.AdminReviewResponseDto;
 import com.Connectedm.backend.domain.admin.dto.AdminUserResponseDto;
+import com.Connectedm.backend.domain.admin.dto.LoginLogResponseDto;
 import com.Connectedm.backend.domain.content.entity.ReviewStatus;
 import com.Connectedm.backend.domain.content.entity.UserReview;
+import com.Connectedm.backend.domain.content.repository.ContentRepository;
 import com.Connectedm.backend.domain.content.repository.UserReviewRepository;
 import com.Connectedm.backend.domain.content.service.ReviewService;
 import com.Connectedm.backend.domain.user.entity.UserStatus;
+import com.Connectedm.backend.domain.user.repository.LoginLogRepository;
 import com.Connectedm.backend.domain.user.repository.UserRepository;
 import com.Connectedm.backend.domain.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +31,8 @@ public class AdminService {
     private final UserRepository userRepository;
     private final ReviewService reviewService;
     private final UserService userService;
+    private final LoginLogRepository loginLogRepository;
+    private final ContentRepository contentRepository;
 
     // ==========================================================
     // 1. [조회] 명세 대응
@@ -60,6 +67,57 @@ public class AdminService {
                         .nickname(user.getNickname())
                         .reportedCount(user.getReportedCount())
                         .status(user.getStatus())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+
+    /**
+     * [조회] 전체 유저 리스트 조회(최신순)
+     */
+    public List<AdminUserResponseDto> getAllUsers() {
+        return userRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"))
+                .stream()
+                .map(user -> AdminUserResponseDto.builder()
+                        .userId(user.getId())
+                        .email(user.getEmail())
+                        .nickname(user.getNickname())
+                        .role(user.getRole())
+                        .status(user.getStatus())
+                        .reportedCount(user.getReportedCount())
+                        .lastLoginAt(user.getLastLoginAt())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * [조회] 전체 로그인 히스토리 조회
+     */
+    public List<LoginLogResponseDto> getLoginLogs() {
+        return loginLogRepository.findAll(Sort.by(Sort.Direction.DESC))
+                .stream()
+                .map(log -> LoginLogResponseDto.builder()
+                        .logId(log.getId())
+                        .userEmail(log.getUser().getEmail())
+                        .userNickname(log.getUser().getNickname())
+                        .loginAt(log.getLoginAt())
+                        .ipAddress(log.getIpAddress())
+                        .deviceInfo(log.getDeviceInfo())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * [조회] 콘텐츠 통계 조회
+     */
+    public List<AdminContentStateResponseDto> getContentStats() {
+        return contentRepository.findAll(Sort.by(Sort.Direction.DESC, "viewCount"))
+                .stream()
+                .map(content -> AdminContentStateResponseDto.builder()
+                        .contentId(content.getId())
+                        .title(content.getTitle())
+                        .viewCount(content.getViewCount())
+                        .wishCount(content.getWishCount())
                         .build())
                 .collect(Collectors.toList());
     }
