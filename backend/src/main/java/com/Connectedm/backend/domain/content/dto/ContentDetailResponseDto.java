@@ -38,4 +38,7 @@ public class ContentDetailResponseDto {
     private Double userRatingAvg;    // 관람평 평균
     private Double expertRatingAvg;  // 전문가 평점 평균
     private Long expertReviewCount;  // 전문가 리뷰 건수
+
+    // 트레일러 기능
+    private String trailerKey;
 }

@@ -141,4 +141,25 @@ public class TmdbMovieResponseDto {
 
         // Getter (Lombok 이름: getAgeRating)
     }
+
+    // TMDB 트레일러
+    @JsonProperty("videos")
+    private TmdbVideoResponse videos;
+
+    @Setter
+    private String trailerKey;
+
+    @Getter
+    @NoArgsConstructor
+    public static class TmdbVideoResponse {
+        private List<TmdbVideoItem> results;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    public static class TmdbVideoItem {
+        private String key;    // 유튜브 비디오 ID
+        private String site;   // "YouTube" 인지 확인용
+        private String type;   // "Trailer" 인지 확인용
+    }
 }

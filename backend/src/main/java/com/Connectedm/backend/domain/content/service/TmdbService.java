@@ -51,7 +51,7 @@ public class TmdbService {
         String url = UriComponentsBuilder.fromHttpUrl("https://api.themoviedb.org/3/movie/" + tmdbId)
                 .queryParam("api_key", apiKey)
                 .queryParam("language", "ko-KR")
-                .queryParam("append_to_response", "credits,watch/providers,release_dates")
+                .queryParam("append_to_response", "credits,watch/providers,release_dates,videos")
                 .toUriString();
 
         TmdbMovieResponseDto response = restTemplate.getForObject(url, TmdbMovieResponseDto.class);
@@ -71,6 +71,17 @@ public class TmdbService {
                     .orElse("정보없음");
 
             response.setAgeRating(krRating);
+        }
+
+        // 트레일러 키 추출
+        if (response != null && response.getVideos() != null && response.getVideos().getResults() != null) {
+            String trailerKey = response.getVideos().getResults().stream()
+                    .filter(v -> "YouTube".equals(v.getSite()) && "Trailer".equals(v.getType()))
+                    .map(TmdbMovieResponseDto.TmdbVideoItem::getKey)
+                    .findFirst()
+                    .orElse(null);
+
+            response.setTrailerKey(trailerKey);
         }
 
         return response;
