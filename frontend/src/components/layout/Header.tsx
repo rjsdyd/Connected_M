@@ -4,6 +4,8 @@ import logo from '../../assets/img/Project_M_Logo_Dark_R.png';
 import { FaPlus } from "react-icons/fa";
 import './Header.css';
 
+const WATCHA_LOGO = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCI+PHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByeD0iMTIiIGZpbGw9IiMwMDAiLz48cGF0aCBmaWxsPSIjRkYwNTU4IiBkPSJNMTAgMTYuNUgxNi41TDE5LjUgMzBMMjMuNSAxNC41SDI5TDMyLjUgMzBMNDAgNkg0NkwzNyAzNkgyOUwyNiAyMkwyMiAzNkgxM1oiLz48L3N2Zz4=';
+
 interface HeaderProps {
   onOpenLogin: () => void;
 }
@@ -92,7 +94,8 @@ const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
                 <img src="https://image.tmdb.org/t/p/original/97yvRBw1GzX7fXprcF80er19ot.jpg" alt="Disney+" onClick={() => navigate('/ott/disney')} className="ott-logo-btn" title="디즈니+" />
                 <img src="https://image.tmdb.org/t/p/original/qHThQdkJuROK0k5QTCrknaNukWe.jpg" alt="TVING" onClick={() => navigate('/ott/tving')} className="ott-logo-btn" title="티빙" />
                 <img src="https://image.tmdb.org/t/p/original/hPcjSaWfMwEqXaCMu7Fkb529Dkc.jpg" alt="Wavve" onClick={() => navigate('/ott/wavve')} className="ott-logo-btn" title="웨이브" />
-                <img src="https://image.tmdb.org/t/p/original/5gmEivxOGPdq4Afpq1f8ktLtEW1.jpg" alt="Watcha" onClick={() => navigate('/ott/watcha')} className="ott-logo-btn" title="왓챠" />
+                <img src={WATCHA_LOGO} alt="Watcha" onClick={() =>
+                navigate('/ott/watcha')} className="ott-logo-btn" title="왓챠" />
               </div>
             </div>
 

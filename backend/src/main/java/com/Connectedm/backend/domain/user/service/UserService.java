@@ -4,6 +4,7 @@ import com.Connectedm.backend.domain.user.dto.UserLoginRequest;
 import com.Connectedm.backend.domain.user.dto.UserResponse;
 import com.Connectedm.backend.domain.user.dto.UserSignupRequest;
 import com.Connectedm.backend.domain.user.entity.User;
+import com.Connectedm.backend.domain.user.entity.UserRole;
 import com.Connectedm.backend.domain.user.entity.UserStatus;
 import com.Connectedm.backend.domain.user.repository.UserRepository;
 import com.Connectedm.backend.global.error.CustomException;
@@ -50,6 +51,9 @@ public class UserService {
                 .realName(request.getRealName())
                 .phoneNumber(request.getPhoneNumber())
                 .provider(User.AuthProvider.LOCAL)
+                .role(UserRole.ROLE_USER)
+                .status(UserStatus.ACTIVE)
+                .reportedCount(0)
                 .build();
 
         return userRepository.save(user).getId();
