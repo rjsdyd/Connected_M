@@ -338,6 +338,7 @@ const MovieDetail: React.FC = () => {
             </section>
             
             {movie.trailerKey && (
+              // 트레일러
               <section className="detail-section">
                 <h2 className="section-title">메인 예고편</h2>
                 <div className="video-container">
