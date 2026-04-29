@@ -80,6 +80,16 @@ public class UserReviewController {
     }
 
     /**
+     * [내 리뷰 전체 삭제]
+     */
+    @DeleteMapping("/user-reviews/me")
+    @Operation(summary = "내 리뷰 전체 삭제", description = "마이페이지에서 내가 쓴 모든 리뷰를 삭제합니다.")
+    public ApiResponse<String> deleteAllMyReviews(@AuthenticationPrincipal Long userId) {
+        reviewService.deleteAllUserReviews(userId);
+        return ApiResponse.success("모든 리뷰가 삭제되었습니다! ㅋ");
+    }
+
+    /**
      * [POST] 특정 리뷰 신고
      */
     @PostMapping("/contents/reviews/{id}/report")

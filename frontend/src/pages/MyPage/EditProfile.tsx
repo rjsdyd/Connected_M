@@ -84,14 +84,18 @@ const EditProfile = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      if (response.data?.success || response.status === 200) {
+      if (response.data && response.data.success === true) {
         // 로컬 스토리지 정보 동기화
         const updatedUser = { ...storedUser, ...requestData };
         localStorage.setItem('user', JSON.stringify(updatedUser));
         localStorage.setItem('nickname', requestData.nickname);
+
+        window.dispatchEvent(new Event('nicknameUpdate'));
         
         alert("정보 수정이 완료되었습니다.");
         navigate('/mypage', { replace: true }); // 완료 후 마이페이지로 이동
+      } else {
+        alert(response.data?.message || "이미 사용 중인 정보가 있습니다.");
       }
     } catch (error) {
       const err = error as { response?: { data?: { message?: string } } };

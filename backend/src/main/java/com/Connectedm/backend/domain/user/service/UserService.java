@@ -146,6 +146,30 @@ public class UserService {
         return UserResponse.from(user);
     }
 
+    @Transactional
+    public void updateProfile(Long userId, String nickname, String phoneNumber) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 1. 닉네임 중복 체크 (기존 내 닉네임이랑 다를 때만 체크)
+        if (nickname != null && !nickname.equals(user.getNickname())) {
+            if (userRepository.existsByNickname(nickname)) {
+                // 🚀 중복이면 여기서 예외를 던져서 흐름을 끊어버립니다!
+                throw new CustomException(ErrorCode.ALREADY_USED_NICKNAME);
+            }
+            user.setNickname(nickname);
+        }
+
+        // 2. 전화번호 중복 체크 (기존 내 번호랑 다를 때만 체크)
+        if (phoneNumber != null && !phoneNumber.equals(user.getPhoneNumber())) {
+            if (userRepository.existsByPhoneNumber(phoneNumber)) {
+                throw new CustomException(ErrorCode.ALREADY_REGISTERED_PHONE);
+            }
+            user.setPhoneNumber(phoneNumber);
+        }
+    }
+
+
     /**
      *  [관리자용] 유저 상태 변경(BANNED, PENDING)
      */
