@@ -75,7 +75,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/main/**").permitAll()
                         .requestMatchers("/api/admin/**").permitAll()
 
-
                         .anyRequest().authenticated()
                 ) // 👈 여기서 세미콜론(;)을 지웠습니다!
 

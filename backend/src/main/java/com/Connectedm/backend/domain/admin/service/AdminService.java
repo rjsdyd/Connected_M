@@ -15,6 +15,8 @@ import com.Connectedm.backend.domain.user.repository.UserRepository;
 import com.Connectedm.backend.domain.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,24 +75,10 @@ public class AdminService {
 
 
     /**
-     * [조회] 전체 유저 리스트 조회(최신순)
+     * [조회] 전체 유저 리스트 조회(통계 포함 최신순)
      */
-    public List<AdminUserResponseDto> getAllUsers() {
-        return userRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"))
-                .stream()
-                .map(user -> AdminUserResponseDto.builder()
-                        .userId(user.getId())
-                        .email(user.getEmail())
-                        .nickname(user.getNickname())
-                        .realName(user.getRealName())
-                        .phoneNumber(user.getPhoneNumber())
-                        .role(user.getRole())
-                        .status(user.getStatus())
-                        .reportedCount(user.getReportedCount())
-                        .createdAt(user.getCreatedAt())
-                        .lastLoginAt(user.getLastLoginAt())
-                        .build())
-                .collect(Collectors.toList());
+    public Page<AdminUserResponseDto> getAllUsers(Pageable pageable) {
+        return userRepository.findAllUserStats(pageable);
     }
 
     /**
