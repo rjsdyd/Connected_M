@@ -44,23 +44,29 @@ const AdminPage = () => {
   }, []);
 
   // 데이터 로드 및 ID 오름차순 정렬 (API 수정 반영)
-  useEffect(() => {
+ useEffect(() => {
     const fetchUsers = async () => {
       try {
-        // 토큰 가져오기
         const token = localStorage.getItem('token'); 
 
         const response = await axios.get('http://localhost:8080/api/admin/users', {
           headers: {
-            // Authorization 헤더에 JWT 토큰 첨부
             Authorization: `Bearer ${token}`
           }
         });
         
-        const sortedData = response.data.sort((a: any, b: any) => a.userId - b.userId);
-        setUsers(sortedData); 
+        // 👈 [수정 포인트] response.data.content를 가져와야 합니다!! ㅋㅋㅋㅋ
+        const userData = response.data.content; 
+        
+        // 데이터가 배열인지 확인하고 정렬 후 세팅!! ㅋㅋㅋㅋ
+        if (Array.isArray(userData)) {
+          const sortedData = [...userData].sort((a: any, b: any) => a.userId - b.userId);
+          setUsers(sortedData); 
+        } else {
+          console.error("데이터 구조가 Page 형식이 아닙니다 ㅠ", response.data);
+        }
+
       } catch (error: any) {
-        // 권한 에러(403) 또는 인증 에러(401) 발생 시 처리
         if (error.response && (error.response.status === 403 || error.response.status === 401)) {
           alert("관리자 권한이 없거나 인증이 만료되었습니다.");
           window.location.href = "/";
