@@ -35,7 +35,7 @@ const Home = () => {
 
   const handleSearch = () => {
     if (!searchQuery.trim()) return;
-    const updatedHistory = [searchQuery, ...searchHistory.filter(h => h !== searchQuery)].slice(0, 10);
+    const updatedHistory = [searchQuery, ...searchHistory.filter(h => h !== searchQuery)].slice(0,5) ;
     setSearchHistory(updatedHistory);
     localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
     setIsSearchOpen(false);

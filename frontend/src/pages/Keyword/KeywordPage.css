@@ -104,6 +104,13 @@
   gap: 25px;
 }
 
+.page-info {
+  font-size: 15px;
+  color: #868e96;
+  margin-bottom: 5px;
+  
+}
+
 .page-btn {
   background: none;
   border: 1px solid #dee2e6;
@@ -118,10 +125,4 @@
 .page-btn:disabled {
   opacity: 0.3;
   cursor: not-allowed;
-}
-
-.page-info {
-  font-size: 15px;
-  color: #868e96;
-  margin-bottom: 50px;
 }
