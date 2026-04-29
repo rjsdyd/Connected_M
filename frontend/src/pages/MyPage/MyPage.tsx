@@ -3,7 +3,6 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './MyPage.css';
 
-// 1. 인터페이스에 role이 없으면 user.role을 쓸 때 오류가 납니다.
 interface UserInfo {
   id: number;
   email: string;
@@ -17,9 +16,23 @@ const MyPage: React.FC = () => {
   const [user, setUser] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
-
-  // 관리자 여부를 따로 관리 (안전장치)
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
+
+  // 회원탈퇴 핸들러 (프론트엔드 임시 작업)
+  const handleDeleteAccount = () => {
+    if (window.confirm("정말로 탈퇴하시겠습니까? 그동안의 활동 내역이 모두 삭제됩니다.")) {
+      // 로컬 스토리지 데이터 삭제
+      localStorage.removeItem('user');
+      localStorage.removeItem('nickname');
+      localStorage.removeItem('token');
+      
+      alert("회원탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.");
+      
+      // 메인 페이지로 이동 및 새로고침
+      navigate('/');
+      window.location.reload();
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -45,7 +58,6 @@ const MyPage: React.FC = () => {
         const parsedUser = JSON.parse(storedUser);
         const userId = parsedUser.id;
 
-        // 로컬 스토리지 데이터로 먼저 관리자 권한 확인
         if (parsedUser.role === 'ROLE_ADMIN') {
           setIsAdmin(true);
         }
@@ -54,7 +66,6 @@ const MyPage: React.FC = () => {
         const serverUserData = response.data.data;
         setUser(serverUserData);
 
-        // 서버 데이터로 다시 한번 권한 확인
         if (serverUserData.role === 'ROLE_ADMIN') {
           setIsAdmin(true);
         }
@@ -83,19 +94,18 @@ const MyPage: React.FC = () => {
               <p className="user-welcome-msg-mypage">오늘도 Connected M과 함께 즐거운 시간 보내세요.</p>
             </div>
           </div>
-          {/* 관리자 버튼: isAdmin이 true일 때만 노출 (빨간 원 위치) */}
-                {isAdmin && (
-                  <button 
-                    className="btn-admin-action-mypage" 
-                    onClick={() => navigate('/admin')}
-                  >
-                    관리자페이지
-                  </button>
-                )}
+          {isAdmin && (
+            <button 
+              className="btn-admin-action-mypage" 
+              onClick={() => navigate('/admin')}
+            >
+              관리자페이지
+            </button>
+          )}
         </section>
 
         <div className="mypage-content-grid-mypage">
-          {/* 왼쪽 사이드바 (빨간 원 위치) */}
+          {/* 왼쪽 사이드바 */}
           <aside className="content-side-left-mypage">
             <section className="info-card-fixed-mypage">
               <div className="info-header-fixed-mypage">
@@ -115,36 +125,36 @@ const MyPage: React.FC = () => {
                   <span className="info-value-fixed-mypage">{user.phoneNumber || '010-0000-0000'}</span>
                 </div>
                 
-                {/* 정보 수정 버튼 */}
                 <button className="btn-edit-action-mypage" onClick={() => navigate('/edit-profile')}>
                   정보 수정
                 </button>
-
-                
+                <button className="delete-account-link-mypage" onClick={handleDeleteAccount}>
+                  회원탈퇴
+                </button>
+              
               </div>
             </section>
           </aside>
 
           {/* 우측 메뉴 영역 */}
           <div className="content-side-right-mypage">
-            <section className="simple-link-card-mypage" onClick={() => navigate('/recent')}>
+            <section className="simple-link-card-mypage recent-item" onClick={() => navigate('/recent')}>
               <span className="link-title-mypage">최근에 본 목록</span>
               <span className="link-arrow-mypage">❯</span>
             </section>
-            <section className="simple-link-card-mypage" onClick={() => navigate('/wishlist')}>
+            <section className="simple-link-card-mypage wish-item" onClick={() => navigate('/wishlist')}>
               <span className="link-title-mypage">찜 목록</span>
               <span className="link-arrow-mypage">❯</span>
             </section>
-            <section className="simple-link-card-mypage" onClick={() => navigate('/my-reviews')}>
+            <section className="simple-link-card-mypage review-item" onClick={() => navigate('/my-reviews')}>
               <span className="link-title-mypage">내가 작성한 리뷰</span>
               <span className="link-arrow-mypage">❯</span>
             </section>
+            
           </div>
         </div>
 
-        <div className="mypage-footer-mypage">
-          <button className="logout-link-mypage" onClick={handleLogout}>로그아웃</button>
-        </div>
+        
       </div>
     </div>
   );

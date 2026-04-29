@@ -61,7 +61,7 @@
   border: 2px solid var(--main-purple);
   border-radius: 25px;
   padding: 30px;
-  height: 100%;
+  height: 330px;
   display: flex;
   flex-direction: column;
 }
@@ -109,7 +109,7 @@
   flex: 1.2;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 40px;
 }
 
 .simple-link-card-mypage {
@@ -124,18 +124,85 @@
   transition: transform 0.2s;
 }
 
-.simple-link-card-mypage:hover { transform: translateY(-3px); }
-.link-title-mypage { font-size: 17px; font-weight: 700; }
-.link-arrow-mypage { color: var(--main-purple); font-weight: bold; }
+.simple-link-card-mypage:hover { 
+  transform: translateY(-3px); 
+}
+
+
+.link-title-mypage { 
+  font-size: 17px; font-weight: 700; }
+
+.link-arrow-mypage { 
+  color: var(--main-purple); font-weight: bold; }
 
 .mypage-footer-mypage {
   margin-top: 40px;
-  text-align: center;
+  
+  /* 1. 가운데 정렬을 풀고 왼쪽으로 밀기 */
+  margin-left: 240px; 
+  margin-right: 150px;
+  
+  /* 2. '내 정보' 박스(flex: 0.8)의 너비와 비슷하게 맞추기 */
+  /* 전체 1100px 중 0.8 비율만큼의 너비를 할당합니다. */
+  width: 440px; 
+  
+  display: flex;
+  /* 3. 그 440px 안에서 버튼들을 가운데 정렬하면 박스랑 딱 맞아요! */
+  justify-content: center; 
+  align-items: center;
+  gap: 15px;
 }
 
-.logout-link-mypage {
-  background: none; border: none;
+
+.delete-account-link-mypage{
+  background: none;
+  border: none;
   color: var(--text-gray);
   text-decoration: underline;
   cursor: pointer;
+  font-size: 14px;
+  display: block;       /* 한 줄을 다 차지하게 해서 */
+  width: 100%;          /* 부모 박스 끝까지 영역을 잡고 */
+  text-align: right;    /* 글자를 오른쪽 끝으로 밀어줍니다 */
+  margin-top: 10px;     /* 정보 수정 버튼과의 간격 */
+  padding-right: 5px;
 }
+
+.delete-account-link-mypage:hover {
+  color: #ff4d4f; /* 탈퇴 버튼 마우스 올리면 빨간색 */
+}
+
+.footer-separator-mypage {
+  color: var(--border-light);
+  font-size: 12px;
+}
+
+/* 최근에 본 목록: 위는 줄이고(내리고) 아래를 늘리기 */
+.recent-item {
+  height: 90px;        /* 아래로 늘어나도록 높이를 더 키웠습니다 */
+  margin-top: 5px;    /* 플러스 마진을 주면 위쪽 라인이 아래로 내려오며 줄어듭니다 */
+  display: flex;
+  align-items: center; /* 글자는 중앙 유지 */
+  position: relative;
+  z-index: 1;
+}
+.wish-item {
+  height: 95px;        /* 기본보다 약 10~15px 정도만 키운 값입니다. */
+  margin-top: -18px;    /* 위로 살짝 끌어올려 위쪽 확장을 만듭니다. */
+  display: flex;
+  align-items: center; /* 글자는 세로 가운데 고정! */
+  position: relative;
+  z-index: 1;
+}
+
+
+/* '내가 작성한 리뷰' 칸을 위로 늘리기 */
+.review-item {
+  height: 90px;       /* 원하는 만큼 높이를 키우세요 */
+  margin-top: -15px;   /* 마이너스 마진을 주면 박스가 위로 쑥 올라갑니다! */
+  display: flex;
+  align-items: center; /* 글자는 여전히 정중앙에 */
+  position: relative;  /* 레이아웃이 꼬이지 않게 보호 */
+  z-index: 1;          /* 다른 요소보다 살짝 위에 보이게 */
+}
+
