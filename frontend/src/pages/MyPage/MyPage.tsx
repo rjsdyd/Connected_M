@@ -3,18 +3,23 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './MyPage.css';
 
+// 1. 인터페이스에 role이 없으면 user.role을 쓸 때 오류가 납니다.
 interface UserInfo {
   id: number;
   email: string;
   nickname: string;
   realName: string;
   phoneNumber: string;
+  role: string; 
 }
 
 const MyPage: React.FC = () => {
   const [user, setUser] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
+
+  // 관리자 여부를 따로 관리 (안전장치)
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -30,18 +35,32 @@ const MyPage: React.FC = () => {
       try {
         setLoading(true);
         const storedUser = localStorage.getItem('user');
+        
         if (!storedUser) {
           alert("로그인이 필요합니다.");
           navigate('/');
           return;
         }
+
         const parsedUser = JSON.parse(storedUser);
         const userId = parsedUser.id;
-        // 백엔드 API 호출
+
+        // 로컬 스토리지 데이터로 먼저 관리자 권한 확인
+        if (parsedUser.role === 'ROLE_ADMIN') {
+          setIsAdmin(true);
+        }
+        
         const response = await axios.get(`http://localhost:8080/api/user/${userId}`);
-        setUser(response.data.data);
+        const serverUserData = response.data.data;
+        setUser(serverUserData);
+
+        // 서버 데이터로 다시 한번 권한 확인
+        if (serverUserData.role === 'ROLE_ADMIN') {
+          setIsAdmin(true);
+        }
+
       } catch (error) {
-        console.error("유저 정보를 불러오는데 실패했습니다.", error);
+        console.error("유저 정보 로딩 실패:", error);
       } finally {
         setLoading(false);
       }
@@ -49,66 +68,84 @@ const MyPage: React.FC = () => {
     fetchUser();
   }, [navigate]);
 
-  if (loading) return <div className="mypage-loading">데이터를 불러오는 중...</div>;
-  if (!user) return <div className="mypage-error">사용자 정보를 찾을 수 없습니다.</div>;
+  if (loading) return <div className="loading-mypage">로딩 중...</div>;
+  if (!user) return null;
 
   return (
-    <div className="mypage-layout">
-      <main className="mypage-container">
-        {/* 상단 프로필 섹션 (image_11 상단 구조) */}
-        <section className="profile-summary-card">
-          <div className="profile-avatar">{user.nickname.charAt(0)}</div>
-          <div className="profile-text">
-            <h2 className="nickname">{user.nickname} 님</h2>
-            <p className="email">{user.email}</p>
+    <div className="mypage-layout-mypage">
+      <div className="mypage-container-mypage">
+        {/* 상단 프로필 */}
+        <section className="profile-summary-card-mypage">
+          <div className="us-pro-mypage">
+            <div className="profile-avatar-mypage">{user.nickname.charAt(0)}</div>
+            <div className="profile-info-text-mypage">
+              <h1 className="user-nickname-mypage">{user.nickname}님, 안녕하세요!</h1>
+              <p className="user-welcome-msg-mypage">오늘도 Connected M과 함께 즐거운 시간 보내세요.</p>
+            </div>
           </div>
+          {/* 관리자 버튼: isAdmin이 true일 때만 노출 (빨간 원 위치) */}
+                {isAdmin && (
+                  <button 
+                    className="btn-admin-action-mypage" 
+                    onClick={() => navigate('/admin')}
+                  >
+                    관리자페이지
+                  </button>
+                )}
         </section>
 
-        {/* 하단 메인 콘텐츠: 좌측(계정정보) / 우측(메뉴 카드) */}
-        <div className="mypage-main-content">
-          
-          {/* 좌측: 계정정보 카드 */}
-          <aside className="content-side-left">
-            <section className="account-card-fixed">
-              <h3 className="card-title-fixed">계정정보</h3>
-              <div className="info-divider"></div>
-              <div className="info-body-fixed">
-                <div className="info-row-fixed">
-                  <span className="info-label-fixed">이름</span>
-                  <span className="info-value-fixed">{user.realName}</span>
+        <div className="mypage-content-grid-mypage">
+          {/* 왼쪽 사이드바 (빨간 원 위치) */}
+          <aside className="content-side-left-mypage">
+            <section className="info-card-fixed-mypage">
+              <div className="info-header-fixed-mypage">
+                <h2 className="info-title-fixed-mypage">내 정보</h2>
+              </div>
+              <div className="info-body-fixed-mypage">
+                <div className="info-row-fixed-mypage">
+                  <span className="info-label-fixed-mypage">이메일</span>
+                  <span className="info-value-fixed-mypage">{user.email}</span>
                 </div>
-                <div className="info-row-fixed">
-                  <span className="info-label-fixed">전화번호</span>
-                  <span className="info-value-fixed">{user.phoneNumber || '010-7777-7777'}</span>
+                <div className="info-row-fixed-mypage">
+                  <span className="info-label-fixed-mypage">이름</span>
+                  <span className="info-value-fixed-mypage">{user.realName}</span>
                 </div>
-                <button className="btn-edit-action-fixed" onClick={() => navigate('/edit-profile')}>정보 수정</button>
+                <div className="info-row-fixed-mypage">
+                  <span className="info-label-fixed-mypage">전화번호</span>
+                  <span className="info-value-fixed-mypage">{user.phoneNumber || '010-0000-0000'}</span>
+                </div>
+                
+                {/* 정보 수정 버튼 */}
+                <button className="btn-edit-action-mypage" onClick={() => navigate('/edit-profile')}>
+                  정보 수정
+                </button>
+
+                
               </div>
             </section>
           </aside>
 
-          {/* 우측: 세로로 쌓이는 이동 메뉴 카드 (image_11 우측 구조) */}
-          <div className="content-side-right">
-            <section className="simple-link-card" onClick={() => navigate('/recent')}>
-              <span className="link-title">최근에 본 목록</span>
-              <span className="link-arrow">❯</span>
+          {/* 우측 메뉴 영역 */}
+          <div className="content-side-right-mypage">
+            <section className="simple-link-card-mypage" onClick={() => navigate('/recent')}>
+              <span className="link-title-mypage">최근에 본 목록</span>
+              <span className="link-arrow-mypage">❯</span>
             </section>
-
-            <section className="simple-link-card" onClick={() => navigate('/wishlist')}>
-              <span className="link-title">찜 목록</span>
-              <span className="link-arrow">❯</span>
+            <section className="simple-link-card-mypage" onClick={() => navigate('/wishlist')}>
+              <span className="link-title-mypage">찜 목록</span>
+              <span className="link-arrow-mypage">❯</span>
             </section>
-
-            <section className="simple-link-card" onClick={() => navigate('/my-reviews')}>
-              <span className="link-title">내가 작성한 리뷰</span>
-              <span className="link-arrow">❯</span>
+            <section className="simple-link-card-mypage" onClick={() => navigate('/my-reviews')}>
+              <span className="link-title-mypage">내가 작성한 리뷰</span>
+              <span className="link-arrow-mypage">❯</span>
             </section>
           </div>
         </div>
 
-        <div className="mypage-footer">
-          <button className="logout-link" onClick={handleLogout}>로그아웃</button>
+        <div className="mypage-footer-mypage">
+          <button className="logout-link-mypage" onClick={handleLogout}>로그아웃</button>
         </div>
-      </main>
+      </div>
     </div>
   );
 };
