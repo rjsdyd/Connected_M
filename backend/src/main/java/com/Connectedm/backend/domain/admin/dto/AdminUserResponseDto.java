@@ -14,6 +14,7 @@ public class AdminUserResponseDto {
     private String email;
     private String nickname;
     private String realName;
+    private String phoneNumber;
     private UserRole role;
     private UserStatus status;
     private int reportedCount;
