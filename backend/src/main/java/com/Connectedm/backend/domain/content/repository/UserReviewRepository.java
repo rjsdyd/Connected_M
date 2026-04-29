@@ -5,6 +5,8 @@ import com.Connectedm.backend.domain.content.entity.UserReview;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 public interface UserReviewRepository extends JpaRepository<UserReview, Long> {
@@ -22,7 +24,10 @@ public interface UserReviewRepository extends JpaRepository<UserReview, Long> {
     boolean existsByUserIdAndContentId(Long userId, Long contentId);
 
     // 내 리뷰 전체 삭제를 위한 메서드
-    void deleteAllByUserId(Long userId);
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM UserReview ur WHERE ur.user.id = :userId")
+    void deleteAllByUserId(@Param("userId") Long userId);
 
     // 정상 노출 상태인 리뷰만 가져오기
     List<UserReview> findAllByContentIdAndStatus(Long contentId, ReviewStatus status);
