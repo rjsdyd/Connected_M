@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react'; // useEffect 추가
-import axios from 'axios'; // axios 임포트 필수
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import './adminpage.css';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-// 통계용 더미 데이터 (컴포넌트 외부에 있어도 무관)
+// 통계용 더미 데이터
 const chartData = [
   { name: '04-21', users: 4 },
   { name: '04-22', users: 7 },
@@ -13,35 +13,78 @@ const chartData = [
 ];
 
 const AdminPage = () => {
-  // 1. 상태 선언 (컴포넌트 내부로 이동)
   const [mainTab, setMainTab] = useState('user'); 
   const [subTab, setSubTab] = useState('all'); 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null); // 정지용 임시 상태
   const [users, setUsers] = useState<any[]>([]);
-  
-  // 호출할 유저 ID 리스트
-  const userId = [11, 12, 13];
 
-  // 2. useEffect (컴포넌트 내부로 이동)
+  // [권한 체크] 페이지 진입 시 관리자 여부 확인
+  useEffect(() => {
+    const userRole = localStorage.getItem('user'); 
+    if (userRole !== 'ROLE_ADMIN') {
+      alert("관리자 권한이 없습니다.");
+      console.log(userRole);
+      window.location.href = "/"; 
+    }
+  }, []);
+
+  // 데이터 로드 및 ID 오름차순 정렬 (API 수정 반영)
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const requests = userId.map(id => 
-          axios.get(`http://localhost:8080/api/user/${id}`)
-        );
+        // 토큰 가져오기
+        const token = localStorage.getItem('token'); 
+
+        const response = await axios.get('http://localhost:8080/api/admin/users', {
+          headers: {
+            // Authorization 헤더에 JWT 토큰 첨부
+            Authorization: `Bearer ${token}`
+          }
+        });
         
-        const responses = await Promise.all(requests);
-        setUsers(responses.map(res => res.data)); 
-      } catch (error) {
-        console.error("유저 정보 로딩 실패", error);
+        const sortedData = response.data.sort((a: any, b: any) => a.userId - b.userId);
+        setUsers(sortedData); 
+      } catch (error: any) {
+        // 권한 에러(403) 또는 인증 에러(401) 발생 시 처리
+        if (error.response && (error.response.status === 403 || error.response.status === 401)) {
+          alert("관리자 권한이 없거나 인증이 만료되었습니다.");
+          window.location.href = "/";
+        } else {
+          console.error("유저 정보 로딩 실패", error);
+        }
       }
     };
 
-    // '전체 유저' 탭일 때만 호출하도록 설정하면 효율적입니다.
     if (mainTab === 'user' && subTab === 'all') {
       fetchUsers();
     }
-  }, [mainTab, subTab]); // 탭이 바뀔 때마다 갱신
+  }, [mainTab, subTab]);
+
+  // [기능 추가] 정지 처리 로직 (개월 수 선택 후 호출)
+  const handleSuspend = (months: string) => {
+    if (!selectedUser) return;
+    
+    // 화면상 상태 업데이트 (실제 구현시 axios.patch 사용 권장)
+    setUsers(users.map(u => 
+      u.userId === selectedUser.userId ? { ...u, status: 'SUSPENDED' } : u
+    ));
+    
+    alert(`${selectedUser.nickname}님 계정이 ${months} 동안 정지 처리되었습니다.`);
+    setIsModalOpen(false);
+    setSelectedUser(null);
+  };
+
+  // [기능 추가] 탈퇴 처리 로직 (확인창 포함)
+  const handleExit = (user: any) => {
+    const confirmExit = window.confirm(`${user.nickname}(ID: ${user.userId}) 계정을 정말 삭제하시겠습니까?`);
+    
+    if (confirmExit) {
+      // 화면에서 즉시 제거 (실제 구현시 axios.delete 사용 권장)
+      setUsers(users.filter(u => u.userId !== user.userId));
+      alert("계정이 삭제되었습니다.");
+    }
+  };
 
   return (
     <div className="admin-container">
@@ -80,25 +123,57 @@ const AdminPage = () => {
       </div>
 
       <main className="admin-content">
-        {/* 1. 유저관리 - 전체 유저 */}
+        {/* 유저관리 - 전체 유저 테이블 (가독성 개선) */}
         {mainTab === 'user' && subTab === 'all' && (
-          <div className="list-container">
-            {users.map((user) => (
-              <div key={user.id} className="list-item">
-                <span className="user-info">
-                  {user.id}, {user.createdAt}, {user.email}, {user.nickname}, {user.phoneNumber}, {user.realName}
-                </span>
-                <div className="action-buttons">
-                  <button className="btn-active">활성</button>
-                  <button className="btn-stop" onClick={() => setIsModalOpen(true)}>정지</button>
-                  <button className="btn-exit">탈퇴</button>
-                </div>
-              </div>
-            ))}
+          <div className="user-table-container">
+            <table className="user-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>가입일</th>
+                  <th>이메일</th>
+                  <th>닉네임</th>
+                  <th>전화번호</th>
+                  <th>이름</th>
+                  <th>상태</th>
+                  <th>관리</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((user) => (
+                  <tr key={user.userId}>
+                    <td>{user.userId}</td>
+                    <td>{user.createdAt || '-'}</td>
+                    <td>{user.email}</td>
+                    <td>{user.nickname}</td>
+                    <td>{user.phoneNumber || '-'}</td>
+                    <td>{user.realName || '-'}</td>
+                    <td>
+                      <span className={`status-badge ${user.status}`}>
+                        {user.status === 'ACTIVE' ? '정상' : '정지됨'}
+                      </span>
+                    </td>
+                    <td className="action-td">
+                      <button className="btn-table active">활성</button>
+                      <button 
+                        className="btn-table stop" 
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setIsModalOpen(true);
+                        }}
+                      >
+                        정지
+                      </button>
+                      <button className="btn-table exit" onClick={() => handleExit(user)}>탈퇴</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
 
-        {/* 나머지 요약, 필터, 통계 섹션 (기존과 동일) */}
+        {/* 통계 섹션 (기존 코드 유지) */}
         {mainTab === 'stats' && subTab === 'join' && (
           <div className="chart-container">
             <div className="chart-filter">
@@ -120,20 +195,20 @@ const AdminPage = () => {
         )}
       </main>
 
-      {/* 정지 기간 설정 모달 */}
+      {/* 정지 기간 설정 모달 (개월 수 추가) */}
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>정지 기간 설정</h3>
+            <h3>{selectedUser?.nickname}님 정지 기간 설정</h3>
             <div className="modal-btns">
-              <button onClick={() => setIsModalOpen(false)}>1일</button>
-              <button onClick={() => setIsModalOpen(false)}>3일</button>
-              <button onClick={() => setIsModalOpen(false)}>7일</button>
-              <button onClick={() => setIsModalOpen(false)}>1달</button>
-              <button onClick={() => setIsModalOpen(false)}>3달</button>
-              <button onClick={() => setIsModalOpen(false)}>6개월</button>
+              {['1개월', '2개월', '3개월', '4개월', '5개월', '6개월'].map(period => (
+                <button key={period} onClick={() => handleSuspend(period)}>{period}</button>
+              ))}
             </div>
-            <button className="btn-close" onClick={() => setIsModalOpen(false)}>닫기</button>
+            <button className="btn-close" onClick={() => {
+              setIsModalOpen(false);
+              setSelectedUser(null);
+            }}>닫기</button>
           </div>
         </div>
       )}

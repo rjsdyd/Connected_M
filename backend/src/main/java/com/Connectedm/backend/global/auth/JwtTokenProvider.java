@@ -1,18 +1,21 @@
 package com.Connectedm.backend.global.auth;
 
 import com.Connectedm.backend.domain.user.repository.UserRepository;
+import com.Connectedm.backend.domain.user.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -31,7 +34,36 @@ public class JwtTokenProvider {
         this.userRepository = userRepository;
     }
 
-    // 1. 액세스 토큰 생성 (기존 메서드 유지)
+    // 인증 정보 가져오기 (권한 로직 보강) ✨ 핵심 수정 부분
+    public Authentication getAuthentication(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        String subject = claims.getSubject();
+
+        // 1. 토큰의 주체(ID 또는 Email)로 DB에서 유저 정보를 가져옴
+        User user;
+        try {
+            Long userId = Long.parseLong(subject);
+            user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        } catch (NumberFormatException e) {
+            user = userRepository.findByEmail(subject)
+                    .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        }
+
+        // 2. DB에 저장된 ROLE_ADMIN 값을 권한 객체로 생성
+        List<SimpleGrantedAuthority> authorities = Collections.singletonList(
+                new SimpleGrantedAuthority(user.getRole().toString()) // "ROLE_ADMIN"
+        );
+
+        // 3. 인증 객체 생성 시 세 번째 인자로 권한(authorities)을 반드시 전달해야 함
+        return new UsernamePasswordAuthenticationToken(user.getId(), token, authorities);
+    }
+
     public String createAccessToken(Authentication authentication) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + accessTokenExpirationTime);
@@ -44,30 +76,6 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // 2. 인증 정보 가져오기 (에러 방지 로직 보강)
-    public Authentication getAuthentication(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        String subject = claims.getSubject();
-
-        Long userId;
-        try {
-            // 숫자로 변환 시도 (PK인 경우)
-            userId = Long.parseLong(subject);
-        } catch (NumberFormatException e) {
-            // 숫자가 아니면 이메일로 찾기
-            userId = userRepository.findByEmail(subject)
-                    .map(com.Connectedm.backend.domain.user.entity.User::getId)
-                    .orElseThrow(() -> new RuntimeException("사용자 '" + subject + "'를 찾을 수 없습니다."));
-        }
-
-        return new UsernamePasswordAuthenticationToken(userId, token, Collections.emptyList());
-    }
-
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
@@ -76,14 +84,5 @@ public class JwtTokenProvider {
             log.error("JWT 검증 실패");
             return false;
         }
-    }
-
-    public String getPayload(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
     }
 }
