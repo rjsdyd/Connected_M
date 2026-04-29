@@ -21,11 +21,25 @@ const AdminPage = () => {
 
   // [권한 체크] 페이지 진입 시 관리자 여부 확인
   useEffect(() => {
-    const userRole = localStorage.getItem('user'); 
-    if (userRole !== 'ROLE_ADMIN') {
-      alert("관리자 권한이 없습니다.");
-      console.log(userRole);
-      window.location.href = "/"; 
+    const userData = localStorage.getItem('user'); 
+    
+    if (!userData) {
+      window.location.href = "/login";
+      return;
+    }
+
+    try {
+      const user = JSON.parse(userData); // 👈 여기서 객체로 변환
+      console.log("로그인한 유저 정보:", user); // 👈 콘솔에서 role이 찍히는지 꼭 보세요!
+
+      // 만약 role이 아니라 userRole 등으로 저장했다면 그 이름을 써야 합니다.
+      if (user.role !== 'ROLE_ADMIN') {
+        alert("관리자 권한이 없습니다.");
+        window.location.href = "/"; 
+      }
+    } catch (error) {
+      console.error("데이터 파싱 에러:", error);
+      window.location.href = "/login";
     }
   }, []);
 

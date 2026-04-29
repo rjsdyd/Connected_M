@@ -8,9 +8,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth") // 👈 "나 여기로 들어올래!" (인증 관련)
@@ -23,7 +25,16 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserLoginRequest dto) {
         UserResponse userResponse = userService.login(dto);
-        Authentication auth = new UsernamePasswordAuthenticationToken(userResponse.getEmail(), null, Collections.emptyList());
+
+        org.springframework.security.core.authority.SimpleGrantedAuthority authority =
+                new org.springframework.security.core.authority.SimpleGrantedAuthority(userResponse.getRole().name());
+
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                userResponse.getEmail(),
+                null,
+                java.util.Collections.singletonList(authority)
+        );
+
         String token = jwtTokenProvider.createAccessToken(auth);
         return ResponseEntity.ok(ApiResponse.success(new LoginResponse(token, userResponse)));
     }
