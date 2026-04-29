@@ -82,9 +82,12 @@ public class AdminService {
                         .userId(user.getId())
                         .email(user.getEmail())
                         .nickname(user.getNickname())
+                        .realName(user.getRealName())
+                        .phoneNumber(user.getPhoneNumber())
                         .role(user.getRole())
                         .status(user.getStatus())
                         .reportedCount(user.getReportedCount())
+                        .createdAt(user.getCreatedAt())
                         .lastLoginAt(user.getLastLoginAt())
                         .build())
                 .collect(Collectors.toList());
