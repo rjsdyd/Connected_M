@@ -131,3 +131,74 @@
 .admin-header h1 {
   font-size: 30px;
 }
+
+/* 필터 컨트롤 바 전체 컨테이너 */
+.filter-control-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background-color: #ffffff;
+  padding: 15px 25px;
+  border-radius: 15px;
+  border: 2px solid #48129e; /* 메인 보라색 테두리 */
+  margin: 0 20px 20px 20px;  /* 탭 메뉴와 정렬 맞춤 */
+  box-shadow: 0 4px 12px rgba(72, 18, 158, 0.05);
+}
+
+/* 필터 개별 그룹 (라벨 + 입력창) */
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-group label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #48129e;
+  white-space: nowrap;
+}
+
+/* 입력창 및 셀렉트 박스 공통 디자인 */
+.filter-group input[type="date"],
+.filter-group select,
+.search-group input[type="text"] {
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+  border-color: #48129e;
+}
+
+/* 날짜 사이 물결 표시 */
+.date-separator {
+  color: #999;
+  font-weight: bold;
+}
+
+/* 검색창 영역 (오른쪽 끝으로 밀기) */
+.search-group {
+  margin-left: auto; /* 검색창을 오른쪽 정렬 */
+  display: flex;
+  align-items: center;
+  width: 300px;
+}
+
+.search-group input {
+  width: 100%;
+  padding: 10px 15px;
+  border-radius: 20px; /* 검색창은 더 둥글게 */
+  border: 2px solid #eee;
+}
+
+.search-group input:focus {
+  border-color: #48129e;
+  background-color: #f8f5ff;
+}
