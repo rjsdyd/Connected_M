@@ -20,16 +20,24 @@ const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const savedNickname = localStorage.getItem('nickname');
-    
-    if (token && token.trim() !== "") {
-      setIsLoggedIn(true);
-      setNickname(savedNickname || "사용자"); 
-    } else {
-      setIsLoggedIn(false);
-      setNickname(null);
-    }
+    const checkAuth = () => {
+      const token = localStorage.getItem('token');
+      const savedNickname = localStorage.getItem('nickname');
+      
+      if (token && token.trim() !== "") {
+        setIsLoggedIn(true);
+        setNickname(savedNickname || "사용자"); 
+      } else {
+        setIsLoggedIn(false);
+        setNickname(null);
+      }
+    };
+
+    checkAuth();
+    window.addEventListener('nicknameUpdate', checkAuth);
+    return () => {
+      window.removeEventListener('nicknameUpdate', checkAuth);
+    };
   }, []);
 
   const handleLogout = () => {
