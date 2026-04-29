@@ -28,7 +28,7 @@ public class AdminController {
     // [GET] 전체 유저 목록 조회 (최신순)
     @GetMapping("/users")
     public ResponseEntity<Page<AdminUserResponseDto>> getAllUsers(
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = 50, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(adminService.getAllUsers(pageable));
     }
 
