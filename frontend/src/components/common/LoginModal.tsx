@@ -78,9 +78,19 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
       } else {
         console.error("데이터 구조 에러: 닉네임이나 토큰이 없습니다.", loginData);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('로그인 실패:', error);
-      alert('아이디 또는 비밀번호가 틀렸습니다.');
+      
+      // 서버에서 전달한 에러 메시지(ErrorCode.USER_WITHDRAWN의 메시지)가 있는지 확인[cite: 5, 6]
+      const errorMessage = error.response?.data?.message;
+
+      if (errorMessage) {
+        // 서버 메시지가 있으면 그 내용을 그대로 띄움 (예: "해당 계정은 탈퇴한 계정입니다.")
+        alert(errorMessage);
+      } else {
+        // 그 외 알 수 없는 에러일 때만 기본 메시지 출력
+        alert('아이디 또는 비밀번호가 틀렸습니다.');
+      }
     }
   };
 

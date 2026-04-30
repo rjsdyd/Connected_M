@@ -446,18 +446,25 @@ const handleReportSubmit = async () => {
                 {userReviewsSlice.length > 0 ? userReviewsSlice.map((r) => {
                   const isExpanded = expandedReviews.includes(r.id);
                   const isLongText = (r.comment || "").length > 80;
-
+                  // 🌟 이 부분을 추가하세요!
+    // 로컬 스토리지에 저장된 유저 정보를 가져와서 관리자인지 확인합니다.
+    const userData = localStorage.getItem('user');
+    const user = userData ? JSON.parse(userData) : null;
+    const isAdmin = user?.role === 'ROLE_ADMIN'; // 여기서 isAdmin이 정의됩니다!
                   return (
                     <div key={r.id} className="compact-review-row">
                       <div className="compact-reviewer-meta">
                         <span className="compact-reviewer-name">{r.nickname}</span>
                         {renderStars(r.rating)}
                         
-                        <PiSirenFill 
-                        className="report-siren-icon" 
-                        title="신고하기" 
-                        onClick={() => handleOpenReport(r.id, r.nickname, r.comment)}
-                        />
+                        {/* 🔥 수정 포인트: 관리자가 아닐 때만 신고 아이콘을 보여줌 */}
+        {!isAdmin && (
+          <PiSirenFill 
+            className="report-siren-icon" 
+            title="신고하기" 
+            onClick={() => handleOpenReport(r.id, r.nickname, r.comment)}
+          />
+        )}
                       </div>
                       <p className={`compact-comment-text ${isExpanded ? 'expanded' : 'clamped'}`}>
                         {r.comment}
