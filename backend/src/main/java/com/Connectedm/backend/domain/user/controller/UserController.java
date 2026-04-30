@@ -7,13 +7,14 @@ import com.Connectedm.backend.domain.user.repository.UserRepository;
 import com.Connectedm.backend.domain.user.service.MyPageService;
 import com.Connectedm.backend.domain.user.service.UserService;
 import com.Connectedm.backend.global.common.ApiResponse;
+import com.Connectedm.backend.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-@CrossOrigin(origins = "http://localhost:5173") //
-// 3:20 추가
 
 @RestController
 @RequestMapping("/api/user") // 👈 주소를 "/api/user"로 바꿔서 충돌을 피합니다!
@@ -85,11 +86,19 @@ public class UserController {
         boolean exists = userRepository.existsByNickname(nickname);
         return ApiResponse.success(exists);
     }
-    // 회원탈퇴api
-    @CrossOrigin(origins = "http://localhost:5173") // 👈 여기에 직접 한 줄 더 추가해보세요!
-    @PatchMapping("/withdraw/{id}")
-    public ApiResponse<String> withdraw(@PathVariable("id") Long id) {
-        userService.withdraw(id);
-        return ApiResponse.success("회원 탈퇴 처리가 완료되었습니다.");
+
+    // 회원 탈퇴
+    @PatchMapping("/me/withdraw")
+    public ResponseEntity<Void> withdraw(
+            @AuthenticationPrincipal CustomUserDetails userDetails // 👈 현재 로그인한 유저 정보 낚아채기
+    ) {
+        // 1. 시큐리티 세션에서 ID(PK)를 추출합니다
+        Long userId = userDetails.getUserId();
+
+        // 2. 서비스 레이어에 '탈퇴' 명령 하달
+        userService.withdraw(userId);
+
+        // 3. 지독하게 압도적인 성공 응답(204 No Content) 반환!! ㅋㅋㅋㅋ
+        return ResponseEntity.noContent().build();
     }
 }

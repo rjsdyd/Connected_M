@@ -5,6 +5,10 @@ import com.Connectedm.backend.domain.user.entity.User;
 import com.Connectedm.backend.domain.user.entity.User.AuthProvider;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import com.Connectedm.backend.domain.admin.dto.AdminUserResponseDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,4 +53,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByProviderAndProviderId(AuthProvider provider, String providerId);
 
     List<User> findAllByReportedCountGreaterThanOrderByReportedCountDesc(int count);
+
+    // ==========================================================
+    // 4. 어드민 전용 (통계 및 관리용)
+    // ==========================================================
+
+    /**
+     * 유저 목록 조회 시 찜 개수와 리뷰 개수를 서브쿼리로 한 번에 가져오는 쿼리
+     */
+    @Query("SELECT new com.Connectedm.backend.domain.admin.dto.AdminUserResponseDto(" +
+            "u.id, u.email, u.nickname, u.realName, u.phoneNumber, u.role, u.status, u.reportedCount, u.createdAt, u.lastLoginAt, " +
+            "(SELECT COUNT(w) FROM Wishlist w WHERE w.user.id = u.id), " +
+            "(SELECT COUNT(r) FROM UserReview r WHERE r.user.id = u.id)) " + //
+            "FROM User u")
+    Page<AdminUserResponseDto> findAllUserStats(Pageable pageable);
 }

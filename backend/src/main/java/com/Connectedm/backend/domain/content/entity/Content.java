@@ -59,9 +59,11 @@ public class Content {
     private String ageRating;
 
     @Column(name = "view_count", columnDefinition = "INT DEFAULT 0")
+    @Builder.Default
     private Integer viewCount = 0;
 
     @Column(name = "wish_count", columnDefinition = "INT DEFAULT 0")
+    @Builder.Default
     private Integer wishCount = 0;
 
     // 조회수 증가 메서드
@@ -85,6 +87,10 @@ public class Content {
             contentGenre.setContent(this);
         }
     }
+
+    @Builder.Default
+    @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserReview> reviews = new ArrayList<>();
 
     /**
      * 1. TMDB 상세 정보 전용 업데이트 (가장 많이 사용)
@@ -111,5 +117,13 @@ public class Content {
         this.ottLogos = ottLogos;
         this.runtime = runtime;
         this.ageRating = ageRating;
+    }
+
+    // 리뷰 추가를 위한 메서드
+    public void addReview(UserReview review) {
+        this.reviews.add(review);
+        if (review.getContent() != this) {
+            review.setMapping(review.getUser(), this);
+        }
     }
 }

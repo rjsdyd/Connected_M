@@ -16,5 +16,5 @@ def vectorize():
     return jsonify(vector)
 
 if __name__ == '__main__':
-    print("🌐 벡터 서버가 5000번 포트에서 대기 중입니다! ㅋㅋㅋㅋ")
+    print(" 벡터 서버가 5000번 포트에서 대기 중입니다! ㅋㅋㅋㅋ")
     app.run(host='0.0.0.0', port=5000)

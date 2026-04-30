@@ -4,6 +4,7 @@ import com.Connectedm.backend.domain.content.dto.*;
 import com.Connectedm.backend.domain.content.service.ContentService;
 import com.Connectedm.backend.domain.content.service.ReviewService;
 import com.Connectedm.backend.domain.content.service.SemanticSearchService;
+import com.Connectedm.backend.domain.content.service.SearchService;
 import com.Connectedm.backend.global.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ public class ContentController {
     private final ContentService contentService;
     private final ReviewService reviewService;
     private final SemanticSearchService semanticSearchService;
+    private final SearchService searchService;
     private final RestTemplate restTemplate;
 
     /**
@@ -44,7 +46,7 @@ public class ContentController {
                 detail.getRuntime() == null ||
                 detail.getAgeRating() == null ||
                 detail.getAgeRating().equals("정보없음")
-            ) {
+        ) {
             contentService.updateContentWithTmdb(id);
             detail = contentService.getContentDetail(id);
         }
@@ -127,15 +129,19 @@ public class ContentController {
     }
 
     /**
-     * 영화 제목으로 검색 (프론트엔드 /search?query={query} 대응)
+     * 영화 검색 (SearchService를 사용하여 지독하게 압도적인 하이브리드 검색 수행!)
      */
     @GetMapping("/search")
     public ApiResponse<List<ContentSummaryDto>> searchMovies(@RequestParam("query") String query) {
-        // 🚀 로그를 찍어서 검색어가 컨트롤러까지 잘 오는지 확인!
-        System.out.println("DEBUG: 제목 검색 요청 -> " + query);
+        System.out.println("DEBUG: 하이브리드 검색 요청 -> " + query);
+        return ApiResponse.success(searchService.searchHybrid(query));
+    }
 
-        List<ContentSummaryDto> results = contentService.searchContents(query);
-
-        return ApiResponse.success(results);
+    /**
+     * 전체 영화 데이터 조회 🚀
+     */
+    @GetMapping("/all")
+    public ApiResponse<List<ContentSummaryDto>> getAllContents() {
+        return ApiResponse.success(contentService.getAllMovies());
     }
 }

@@ -334,11 +334,101 @@ public class ContentService {
                         .title(c.getTitle())
                         .posterPath(c.getPosterPath())
                         // 필요하다면 여기서 releaseDate나 overview도 추가 가능
-                        .overview(c.getOverview())
+                        .overview((c.getOverview() != null && !c.getOverview().isBlank())
+                                ? c.getOverview()
+                                : (c.getAnalysisCache() != null ? c.getAnalysisCache().getSummary() : "정보가 없습니다."))
                         .genres(c.getContentGenres().stream()
                                 .map(cg -> cg.getGenre().getName())
                                 .collect(Collectors.toList()))
                         .build())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * [신규 추가] AI 시맨틱 검색: 검색어의 의미(Vector)를 분석하여 가장 유사한 영화 추천
+     * 영화 제목이 기억나지 않아도 "폭력", "잔인한", "범죄" 등 키워드나 문장으로 검색 가능
+     */
+    @Transactional(readOnly = true)
+    public List<ContentSummaryDto> searchByAi(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        try {
+            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            String pythonUrl = "http://localhost:5000/vector";
+
+            Map<String, String> requestBody = new HashMap<>();
+            requestBody.put("text", query);
+
+            Map<String, Object> response = restTemplate.postForObject(pythonUrl, requestBody, Map.class);
+            List<Double> vector = (List<Double>) response.get("vector");
+
+            List<Content> contents = contentRepository.findBySemanticSearch(vector.toString(), 15);
+
+            List<Long> contentIds = contents.stream()
+                    .map(Content::getId)
+                    .collect(Collectors.toList());
+
+            Map<Long, com.Connectedm.backend.domain.content.entity.AnalysisCache> cacheMap = analysisCacheRepository.findAllByContentIdIn(contentIds).stream()
+                    .collect(Collectors.toMap(
+                            ac -> ac.getContent().getId(),
+                            ac -> ac,
+                            (v1, v2) -> v1
+                    ));
+
+            Map<Long, List<String>> genreMap = contentGenreRepository.findAllByContentIdIn(contentIds).stream()
+                    .collect(Collectors.groupingBy(
+                            cg -> cg.getContent().getId(),
+                            Collectors.mapping(cg -> cg.getGenre().getName(), Collectors.toList())
+                    ));
+
+            return contents.stream()
+                    .map(c -> {
+                        var cache = cacheMap.get(c.getId());
+                        List<String> movieGenres = genreMap.getOrDefault(c.getId(), Collections.emptyList());
+
+                        return ContentSummaryDto.builder()
+                                .id(c.getId())
+                                .title(c.getTitle())
+                                .posterPath(c.getPosterPath())
+                                .overview((c.getOverview() != null && !c.getOverview().isBlank())
+                                        ? c.getOverview()
+                                        : (cache != null ? cache.getSummary() : "상세 정보 준비 중입니다."))
+                                .genres(movieGenres)
+                                .positiveRatio(cache != null ? cache.getPositiveRatio() : 0.0)
+                                .build();
+                    })
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            System.err.println("❌ [AI 검색 에러] 일반 제목 검색으로 전환합니다: " + e.getMessage());
+            return searchContents(query);
+        }
+    }
+
+    /**
+     * 전체 영화 리스트 조회
+     * KeywordPage에서 211개 영화를 모두 보여주기 위해 사용됩니다.
+     */
+    @Transactional(readOnly = true)
+    public List<ContentSummaryDto> getAllMovies() {
+        // 1. DB에 있는 모든 영화(Content)를 긁어옵니다.
+        return contentRepository.findAll().stream()
+                .map(content -> {
+                    // 2. 각 영화의 AI 분석 점수(positiveRatio)를 챙깁니다.
+                    Double ratio = (content.getAnalysisCache() != null)
+                            ? content.getAnalysisCache().getPositiveRatio()
+                            : 0.0;
+
+                    // 3. 프론트엔드 KeywordPage가 원하는 깔끔한 바구니(DTO)에 담습니다.
+                    return ContentSummaryDto.builder()
+                            .id(content.getId())
+                            .title(content.getTitle())
+                            .posterPath(content.getPosterPath())
+                            .positiveRatio(ratio)
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 }
