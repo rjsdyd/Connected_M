@@ -180,5 +180,6 @@ public class UserService {
 
         // 엔티티에 만든 전용 Setter 이용
         user.setStatus(status);
+        userRepository.saveAndFlush(user);
     }
 }

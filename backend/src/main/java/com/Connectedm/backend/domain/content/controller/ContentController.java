@@ -4,6 +4,7 @@ import com.Connectedm.backend.domain.content.dto.*;
 import com.Connectedm.backend.domain.content.service.ContentService;
 import com.Connectedm.backend.domain.content.service.ReviewService;
 import com.Connectedm.backend.domain.content.service.SemanticSearchService;
+import com.Connectedm.backend.domain.content.service.SearchService;
 import com.Connectedm.backend.global.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ public class ContentController {
     private final ContentService contentService;
     private final ReviewService reviewService;
     private final SemanticSearchService semanticSearchService;
+    private final SearchService searchService;
     private final RestTemplate restTemplate;
 
     /**
@@ -127,38 +129,11 @@ public class ContentController {
     }
 
     /**
-     * 영화 검색 (프론트엔드 수정 없이 AI 검색 적용!)
+     * 영화 검색 (SearchService를 사용하여 지독하게 압도적인 하이브리드 검색 수행!)
      */
     @GetMapping("/search")
     public ApiResponse<List<ContentSummaryDto>> searchMovies(@RequestParam("query") String query) {
         System.out.println("DEBUG: 하이브리드 검색 요청 -> " + query);
-
-        // 1. [기존 방식] 제목에 "범죄도시"가 들어가는지 먼저 찾습니다. (정확도 우선)
-        List<ContentSummaryDto> titleResults = contentService.searchContents(query);
-
-        // 2. [AI 방식] 검색어의 의미로 유사한 영화를 찾습니다. (추천/시맨틱 우선)
-        String pythonUrl = "http://localhost:5000/vectorize";
-        double[] vector = restTemplate.postForObject(pythonUrl, Map.of("text", query), double[].class);
-
-        ContentSearchRequest searchRequest = new ContentSearchRequest();
-        searchRequest.setQuery(query);
-        searchRequest.setQueryVector(vector);
-        List<ContentSearchResponse> aiResults = semanticSearchService.searchBySemantic(searchRequest);
-
-        // 3. 두 결과를 합칩니다. (제목 검색 결과를 맨 위로!)
-        List<ContentSummaryDto> finalResults = new java.util.ArrayList<>(titleResults);
-
-        aiResults.forEach(res -> {
-            // 중복 제거 (제목 검색으로 이미 찾은 영화는 제외)
-            if (finalResults.stream().noneMatch(existing -> existing.getId().equals(res.getContentId()))) {
-                finalResults.add(ContentSummaryDto.builder()
-                        .id(res.getContentId())
-                        .title(res.getTitle())
-                        .posterPath(res.getPosterPath())
-                        .build());
-            }
-        });
-
-        return ApiResponse.success(finalResults);
+        return ApiResponse.success(searchService.searchHybrid(query));
     }
 }
