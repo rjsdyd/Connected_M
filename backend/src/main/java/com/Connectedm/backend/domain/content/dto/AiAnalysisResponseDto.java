@@ -21,4 +21,6 @@ public class AiAnalysisResponseDto {
 
     @JsonProperty("positive_ratio")
     private Integer positiveRatio;
+
+    private String posterPath;
 }

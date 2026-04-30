@@ -10,7 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-@Component // 💡 스프링이 이 클래스를 자동으로 찾아 실행하게 합니다.
+//@Component // 💡 스프링이 이 클래스를 자동으로 찾아 실행하게 합니다.
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 

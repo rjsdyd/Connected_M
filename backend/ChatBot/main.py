@@ -1,111 +1,106 @@
 import os
 from typing import List
 
-# 1. 라이브러리 임포트
-from google import genai  # ✅ 수정: 'import google as genai' 대신 이렇게!
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from dotenv import load_dotenv
 from pydantic import BaseModel
 
-# 데이터베이스 임포트
+# 우리가 만든 파일들 임포트
 import models, database, chatbot_logic
-
-# 2. 환경 설정
-load_dotenv()
 
 app = FastAPI()
 
-# CORS 설정 (현업 스타일로 깔끔하게 정리)
-origins = [
-    "http://localhost:5173", "http://127.0.0.1:5173",
-    "http://localhost:3000", "http://127.0.0.1:3000",
-    "http://localhost:8080", "http://127.0.0.1:8080",
-]
-
+# 1. CORS 설정 (프론트엔드 연결을 위해 필수!)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],  # 테스트 단계에선 모두 허용!
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# --- 데이터 규격(Schema) ---
+
+# --- 데이터 규격 (Pydantic 모델) ---
+
+class SessionRequest(BaseModel):
+    user_id: int
+
+
 class ChatRequest(BaseModel):
     user_id: int
     session_id: int
     prompt: str
 
-class SessionRequest(BaseModel):
-    user_id: int
 
 # --- API 엔드포인트 ---
 
 @app.get("/")
 async def root():
-    return {"message": "Connected M AI 서버가 정상 작동 중입니다."}
+    return {"message": "Connected M AI 서버가 정상 작동 중입니다. 🚀"}
 
+
+# 세션 생성 엔드포인트 (채팅방 만들기)
 @app.post("/api/chat/session")
 async def create_session(request: SessionRequest, db: Session = Depends(database.get_db)):
     try:
+        # 새로운 채팅 세션 생성
         new_session = models.ChatSession(
             user_id=request.user_id,
-            session_title="새로운 대화"
+            session_title="새로운 대화"  # 나중에 AI가 요약해서 업데이트하게 만들 수도 있어요!
         )
         db.add(new_session)
         db.commit()
         db.refresh(new_session)
+
+        print(f"✨ 새로운 세션 생성됨! ID: {new_session.id}")
         return {"session_id": new_session.id}
+
     except Exception as e:
         db.rollback()
+        print(f"❌ 세션 생성 에러: {e}")
         raise HTTPException(status_code=500, detail=f"세션 생성 실패: {str(e)}")
 
+
+# 채팅 진행 엔드포인트
 @app.post("/api/chat")
 async def chat(request: ChatRequest, db: Session = Depends(database.get_db)):
     try:
-        # 1. 영화 검색 (검색어 추출 로직 강화)
-        keyword = request.prompt.split()[0][:10] if request.prompt.strip() else ""
-        movies = db.query(models.Content).filter(
-            (models.Content.title.contains(keyword)) |
-            (models.Content.overview.contains(keyword))
-        ).limit(3).all()
+        # 1. DB에서 분석된 영화 데이터 209개 싹 가져오기
+        all_analysis = db.query(models.AnalysisCache).join(models.Content).all()
 
-        # 만약 검색 결과가 없으면 기본 추천 영화 3개를 던져줌
-        if not movies:
-            movies = db.query(models.Content).limit(3).all()
-
-        # 2. 이전 대화 내역 포맷팅
+        # 2. 이전 대화 내역 10개 불러오기
         history_logs = db.query(models.ChatMessage) \
             .filter(models.ChatMessage.session_id == request.session_id) \
-            .order_by(models.ChatMessage.created_at.desc()) \
-            .limit(5).all()
+            .order_by(models.ChatMessage.created_at.asc()) \
+            .limit(10).all()
 
-        # Gemini SDK 형식에 맞춘 히스토리 구성
-        chat_history = [
-            {"role": "user" if log.role == "user" else "model", "parts": [{"text": log.message}]}
-            for log in reversed(history_logs)
-        ]
+        # 제미나이 규격(user / model)에 맞게 변환
+        chat_history = []
+        for log in history_logs:
+            role = "user" if log.role == "user" else "model"
+            chat_history.append({"role": role, "parts": [{"text": log.message}]})
 
-        # 3. 챗봇 로직 호출
-        ai_answer = await chatbot_logic.get_gemini_response(movies, request.prompt, chat_history)
+        # 3. 챗봇 로직 실행 (벡터 유사도 검색 + 제미나이 답변)
+        ai_answer = await chatbot_logic.get_gemini_response(all_analysis, request.prompt, chat_history)
 
-        # 4. 결과 저장 (assistant로 저장하되 히스토리 부를 때 model로 변환)
-        db.add_all([
-            models.ChatMessage(role="user", message=request.prompt, session_id=request.session_id),
-            models.ChatMessage(role="assistant", message=ai_answer, session_id=request.session_id)
-        ])
+        # 4. 이번 대화(유저 질문 + AI 답변)를 DB에 저장
+        user_msg = models.ChatMessage(role="user", message=request.prompt, session_id=request.session_id)
+        ai_msg = models.ChatMessage(role="assistant", message=ai_answer, session_id=request.session_id)
+
+        db.add_all([user_msg, ai_msg])
         db.commit()
 
         return {"answer": ai_answer}
 
     except Exception as e:
         db.rollback()
-        print(f"❌ Chat Error: {e}")
-        raise HTTPException(status_code=500, detail="서버 내부 오류가 발생했습니다.")
+        print(f"❌ 채팅 에러: {e}")
+        raise HTTPException(status_code=500, detail="챗봇이 대화 중에 길을 잃었어요... 다시 시도해 주세요!")
 
+
+# 서버 실행
 if __name__ == "__main__":
     import uvicorn
-    # 외부 접속 허용을 위해 0.0.0.0으로 설정하신 점 아주 좋습니다!
+
     uvicorn.run(app, host="0.0.0.0", port=8888)

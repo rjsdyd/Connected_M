@@ -47,4 +47,14 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
     // 영화 제목으로 검색 (LIKE %query% 효과)
     List<Content> findByTitleContaining(String title);
 
+    /**
+     * [신규 추가] AI 벡터 유사도 기반 검색 (Native Query)
+     * 사용자가 입력한 검색어의 벡터와 가장 거리가 가까운 영화를 순서대로 가져옵니다.
+     */
+    @Query(value = "SELECT c.* FROM content c " +
+            "JOIN analysis_cache ac ON c.id = ac.content_id " +
+            "ORDER BY (ac.embedding_vector <=> CAST(:searchVector AS BINARY)) ASC " +
+            "LIMIT :limit", nativeQuery = true)
+    List<Content> findBySemanticSearch(@Param("searchVector") String searchVector, @Param("limit") int limit);
+
 }

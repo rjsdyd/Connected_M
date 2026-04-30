@@ -341,4 +341,44 @@ public class ContentService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    /**
+     * [신규 추가] AI 시맨틱 검색: 검색어의 의미(Vector)를 분석하여 가장 유사한 영화 추천
+     * 영화 제목이 기억나지 않아도 "폭력", "잔인한", "범죄" 등 키워드나 문장으로 검색 가능
+     */
+    @Transactional(readOnly = true)
+    public List<ContentSummaryDto> searchByAi(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        try {
+            // 1. 파이썬 AI 서버(vector_server.py)에 검색어를 보내 벡터값(숫자 배열)을 받아옵니다.
+            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            String pythonUrl = "http://localhost:5000/vector"; // 아까 확인한 파이썬 서버 주소
+
+            Map<String, String> requestBody = new HashMap<>();
+            requestBody.put("text", query);
+
+            // 파이썬 서버 응답 예시: {"vector": [0.123, -0.456, ...]}
+            Map<String, Object> response = restTemplate.postForObject(pythonUrl, requestBody, Map.class);
+            List<Double> vector = (List<Double>) response.get("vector");
+
+            // 2. 받아온 벡터를 문자열 형태로 변환하여 리포지토리의 시맨틱 검색 기능을 호출합니다.
+            // (주의: ContentRepository에 findBySemanticSearch 메서드가 추가되어 있어야 합니다.)
+            return contentRepository.findBySemanticSearch(vector.toString(), 15).stream()
+                    .map(c -> ContentSummaryDto.builder()
+                            .id(c.getId())
+                            .title(c.getTitle())
+                            .posterPath(c.getPosterPath())
+                            .positiveRatio(c.getAnalysisCache() != null ? c.getAnalysisCache().getPositiveRatio() : 0.0)
+                            .build())
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            // AI 서버 장애나 에러 발생 시, 서비스 중단을 막기 위해 기존 제목 검색으로 대체합니다.
+            System.err.println("❌ [AI 검색 에러] 일반 제목 검색으로 전환합니다: " + e.getMessage());
+            return searchContents(query);
+        }
+    }
 }

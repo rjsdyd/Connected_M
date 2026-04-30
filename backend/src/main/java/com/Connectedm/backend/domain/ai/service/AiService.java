@@ -64,13 +64,18 @@ public class AiService {
 
     /**
      * DTO 변환 헬퍼 메서드 (중복 코드 방지)
+     * AnalysisCache 엔티티에서 연관된 Content 엔티티를 참조하여 포스터 정보를 가져옵니다.
      */
     private AiAnalysisResponseDto convertToDto(AnalysisCache cache) {
+        // Content 엔티티가 존재할 경우 포스터 URL을 가져오고, 없으면 null 처리
+        String posterUrl = (cache.getContent() != null) ? cache.getContent().getPosterPath() : null;
+
         return AiAnalysisResponseDto.builder()
                 .contentId(cache.getContent() != null ? cache.getContent().getId() : null)
                 .keywords(parseKeywords(cache))
                 .summary(cache.getSummary())
                 .positiveRatio((int) cache.getPositiveRatio())
+                .posterPath(posterUrl) // <-- 빌더에 포스터 URL 추가
                 .build();
     }
 
