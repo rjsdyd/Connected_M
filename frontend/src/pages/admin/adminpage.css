@@ -1,122 +1,4 @@
-.user-table-container {
-  width: 100%;
-  overflow-x: auto;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.user-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-.user-table th {
-  background: #f8f9fa;
-  padding: 12px 15px;
-  border-bottom: 2px solid #dee2e6;
-  color: #495057;
-  font-weight: 600;
-}
-
-.user-table td {
-  padding: 12px 15px;
-  border-bottom: 1px solid #eee;
-  font-size: 14px;
-  vertical-align: middle;
-}
-
-/* 데이터 강조 */
-.txt-id { font-weight: bold; color: #6c5ce7; }
-.txt-email { color: #0984e3; }
-
-/* 테이블용 버튼 스타일 */
-.btn-table {
-  padding: 6px 10px;
-  margin-right: 5px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.btn-table.active { background: #e3fcef; color: #00b894; border: 1px solid #55efc4; }
-.btn-table.stop { background: #fff4e6; color: #d6336c; border: 1px solid #fab005; }
-.btn-table.exit { background: #fff5f5; color: #fa5252; border: 1px solid #ffa8a8; }
-
-/* 상태 배지 스타일 */
-.status-badge {
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: bold;
-}
-.status-badge.ACTIVE {
-  background-color: #e3fcef;
-  color: #00b894;
-}
-.status-badge.SUSPENDED {
-  background-color: #ffe8e8;
-  color: #ff7675;
-}
-
-/* 테이블 레이아웃 보강 */
-.user-table-container {
-  margin-top: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden;
-}
-.user-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.user-table th, .user-table td {
-  padding: 12px;
-  text-align: center;
-  border-bottom: 1px solid #eee;
-}
-.user-table th {
-  background-color: #f4f4f4;
-}
-
-/* 탭 그룹 공통 레이아웃 */
-.tab-group {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-  padding-left: 20px; /* 이미지처럼 왼쪽 여백 부여 */
-}
-
-/* 탭 버튼 기본 스타일 (이미지의 보라색 테두리 및 둥근 모서리 반영) */
-.tab-group button {
-  padding: 8px 24px;
-  border: 2px solid #48129e; /* 진한 보라색 테두리 */
-  border-radius: 12px;       /* 둥근 테두리 */
-  background-color: #fff;
-  color: #000;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 16px;
-}
-
-/* 활성화된 탭 스타일 (연보라색 배경) */
-.tab-group button.active {
-  background-color: #dcd0ff; /* 연보라색 배경 */
-  color: #000;
-}
-
-/* 메인 탭과 서브 탭 사이의 간격 조정 */
-.main-tabs {
-  margin-top: 20px;
-}
-
-.sub-tabs button {
-  padding: 5px 20px;
-  font-size: 14px;
-}
+/* adminpage.css */
 
 .admin-container {
   margin-top: 150px;
@@ -132,7 +14,41 @@
   font-size: 30px;
 }
 
-/* 필터 컨트롤 바 전체 컨테이너 */
+/* 탭 그룹 공통 레이아웃 */
+.tab-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding-left: 20px;
+}
+
+.tab-group button {
+  padding: 8px 24px;
+  border: 2px solid #48129e;
+  border-radius: 12px;
+  background-color: #fff;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 16px;
+}
+
+.tab-group button.active {
+  background-color: #dcd0ff;
+  color: #000;
+}
+
+.main-tabs {
+  margin-top: 20px;
+}
+
+.sub-tabs button {
+  padding: 5px 20px;
+  font-size: 14px;
+}
+
+/* 필터 컨트롤 바 */
 .filter-control-bar {
   display: flex;
   align-items: center;
@@ -140,12 +56,11 @@
   background-color: #ffffff;
   padding: 15px 25px;
   border-radius: 15px;
-  border: 2px solid #48129e; /* 메인 보라색 테두리 */
-  margin: 0 20px 20px 20px;  /* 탭 메뉴와 정렬 맞춤 */
+  border: 2px solid #48129e;
+  margin: 0 20px 20px 20px;
   box-shadow: 0 4px 12px rgba(72, 18, 158, 0.05);
 }
 
-/* 필터 개별 그룹 (라벨 + 입력창) */
 .filter-group {
   display: flex;
   align-items: center;
@@ -159,7 +74,6 @@
   white-space: nowrap;
 }
 
-/* 입력창 및 셀렉트 박스 공통 디자인 */
 .filter-group input[type="date"],
 .filter-group select,
 .search-group input[type="text"] {
@@ -169,23 +83,15 @@
   font-size: 14px;
   color: #333;
   outline: none;
-  transition: border-color 0.2s;
 }
 
-.filter-group input:focus,
-.filter-group select:focus {
-  border-color: #48129e;
-}
-
-/* 날짜 사이 물결 표시 */
 .date-separator {
   color: #999;
   font-weight: bold;
 }
 
-/* 검색창 영역 (오른쪽 끝으로 밀기) */
 .search-group {
-  margin-left: auto; /* 검색창을 오른쪽 정렬 */
+  margin-left: auto;
   display: flex;
   align-items: center;
   width: 300px;
@@ -194,11 +100,142 @@
 .search-group input {
   width: 100%;
   padding: 10px 15px;
-  border-radius: 20px; /* 검색창은 더 둥글게 */
+  border-radius: 20px;
   border: 2px solid #eee;
 }
 
-.search-group input:focus {
-  border-color: #48129e;
-  background-color: #f8f5ff;
+/* 유저 테이블 */
+.user-table-container {
+  width: calc(100% - 40px);
+  margin: 20px;
+  overflow-x: auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  border: 1px solid #ddd;
+  overflow: hidden;
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.user-table th {
+  background: #f8f9fa;
+  padding: 12px 15px;
+  border-bottom: 2px solid #dee2e6;
+  color: #495057;
+  font-weight: 600;
+  text-align: center;
+}
+
+.user-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  text-align: center;
+}
+
+.txt-id { font-weight: bold; color: #6c5ce7; }
+.txt-email { color: #0984e3; }
+
+.btn-table {
+  padding: 6px 10px;
+  margin-right: 5px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  font-size: 12px;
+  background-color: #fff; /* 기본 배경 */
+}
+
+/* 활성 버튼: 깨끗한 초록색 계열 */
+.btn-table.active-btn { 
+  background: #f0fff4; 
+  color: #2f855a; 
+  border: 1px solid #c6f6d5; 
+}
+.btn-table.stop-btn { 
+  background: #fff4e6; 
+  color: #d6336c; 
+  border: 1px solid #fab005; 
+}
+.btn-table.exit-btn { 
+  background: #fff5f5; 
+  color: #fa5252; 
+  border: 1px solid #ffa8a8; 
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+}
+.status-badge.ACTIVE { background-color: #e3fcef; color: #00b894; }
+.status-badge.SUSPENDED { background-color: #ffe8e8; color: #ff7675; }
+
+/* 차트 및 미구현 화면 */
+.chart-container {
+  background: #fff;
+  border-radius: 15px;
+  border: 1px solid #eee;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  margin: 20px;
+}
+
+.empty-view {
+  width: 100%;
+  height: 500px;
+  background-color: #ffffff; /* 흰색 화면 */
+}
+
+/* 모달 */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex; justify-content: center; align-items: center; z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  width: 400px;
+  text-align: center;
+}
+
+.modal-btns {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4개씩 한 줄에 배치 */
+  gap: 8px;
+  margin: 20px 0;
+}
+.modal-btns button {
+  padding: 10px 5px;
+  border: 1px solid #48129e;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #fff;
+  font-weight: bold;
+  font-size: 13px;
+  transition: background 0.2s;
+}
+
+.modal-btns button:hover {
+  background: #f0ebff;
+}
+
+
+/* 3. 모달 닫기 버튼 */
+.btn-close {
+  margin-top: 10px;
+  padding: 10px 20px;
+  border: none;
+  background: #eee;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
 }
