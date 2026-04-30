@@ -65,6 +65,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         User userEntity = userRepository.findByProviderAndProviderId(finalProvider, providerId)
                 .or(() -> userRepository.findByEmail(finalEmail))
                 .map(entity -> {
+                    // ✨ [핵심 추가] 정지된 유저인지 체크
+                    if (entity.getStatus() == UserStatus.BANNED) {
+                        // 이 예외는 SecurityConfig에 설정된 FailureHandler나 인증 과정에서 처리됩니다.
+                        throw new OAuth2AuthenticationException("BANNED_USER");
+                    }
+
                     // 기존 유저 업데이트 로직
                     if (entity.getNickname() == null || entity.getNickname().isEmpty()) {
                         entity.setNickname(socialName != null && !userRepository.existsByNickname(socialName) ? socialName : "tmp_" + UUID.randomUUID().toString().substring(0,8));
@@ -77,7 +83,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     return userRepository.save(entity);
                 })
                 .orElseGet(() -> {
-                    // 신규 유저 생성 로직
+                    // 신규 가입은 당연히 ACTIVE로 생성[cite: 4]
                     return userRepository.save(User.builder()
                             .email(finalEmail)
                             .nickname(generateUniqueNickname(socialName, finalProvider))
@@ -85,9 +91,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                             .password(passwordEncoder.encode(UUID.randomUUID().toString()))
                             .provider(finalProvider)
                             .providerId(providerId)
-                            .role(UserRole.ROLE_USER) // 기본값 설정
-                            .status(UserStatus.ACTIVE) // DB 구조에 맞춰 추가
-                            .reportedCount(0)          // DB 구조에 맞춰 추가
+                            .role(UserRole.ROLE_USER)
+                            .status(UserStatus.ACTIVE)
+                            .reportedCount(0)
                             .build());
                 });
 

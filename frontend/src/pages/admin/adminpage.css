@@ -147,34 +147,51 @@
   border: 1px solid #ddd;
   cursor: pointer;
   font-size: 12px;
-  background-color: #fff; /* 기본 배경 */
+  background-color: #fff;
 }
 
-/* 활성 버튼: 깨끗한 초록색 계열 */
+/* 관리 버튼들 */
 .btn-table.active-btn { 
   background: #f0fff4; 
   color: #2f855a; 
   border: 1px solid #c6f6d5; 
 }
 .btn-table.stop-btn { 
-  background: #fff4e6; 
-  color: #d6336c; 
-  border: 1px solid #fab005; 
+  background: #fff5f5; 
+  color: #e53e3e; 
+  border: 1px solid #feb2b2; 
 }
 .btn-table.exit-btn { 
-  background: #fff5f5; 
-  color: #fa5252; 
-  border: 1px solid #ffa8a8; 
+  background: #f7fafc; 
+  color: #4a5568; 
+  border: 1px solid #e2e8f0; 
 }
 
+/* 상태 뱃지 ✨ BANNED 추가 및 스타일 개선 */
 .status-badge {
-  padding: 4px 8px;
-  border-radius: 12px;
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
   font-size: 12px;
-  font-weight: bold;
+  font-weight: 800;
+  text-align: center;
+  min-width: 60px;
 }
-.status-badge.ACTIVE { background-color: #e3fcef; color: #00b894; }
-.status-badge.SUSPENDED { background-color: #ffe8e8; color: #ff7675; }
+
+/* 정상 상태 */
+.status-badge.ACTIVE { 
+  background-color: #e6fffa; 
+  color: #319795; 
+  border: 1px solid #b2f5ea;
+}
+
+/* 정지 상태 (서버 ENUM 값 BANNED 대응) */
+.status-badge.BANNED,
+.status-badge.SUSPENDED { 
+  background-color: #fff5f5; 
+  color: #e53e3e; 
+  border: 1px solid #feb2b2;
+}
 
 /* 차트 및 미구현 화면 */
 .chart-container {
@@ -188,7 +205,7 @@
 .empty-view {
   width: 100%;
   height: 500px;
-  background-color: #ffffff; /* 흰색 화면 */
+  background-color: #ffffff;
 }
 
 /* 모달 */
@@ -209,7 +226,7 @@
 
 .modal-btns {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4개씩 한 줄에 배치 */
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   margin: 20px 0;
 }
@@ -228,8 +245,6 @@
   background: #f0ebff;
 }
 
-
-/* 3. 모달 닫기 버튼 */
 .btn-close {
   margin-top: 10px;
   padding: 10px 20px;

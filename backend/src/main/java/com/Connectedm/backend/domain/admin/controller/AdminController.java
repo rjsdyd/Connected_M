@@ -17,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin") // 슬래시(/) 추가로 경로 안정성 확보 ㅋ
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
 public class AdminController {
 
     private final AdminService adminService;

@@ -18,15 +18,14 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        // 1. DB에서 이메일로 유저 찾기
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("해당 이메일의 유저를 찾을 수 없습니다 : " + email));
+                .orElseThrow(() -> new UsernameNotFoundException("유저 없음"));
 
-        // 정지된 유저 로그인 금지
+        // ✨ 정지 상태 체크 추가
         if (user.getStatus() == UserStatus.BANNED) {
-            throw new DisabledException("정지된 계정입니다.");
+            throw new DisabledException("계정이 정지되었습니다.");
         }
-        // 2. 찾은 User 엔티티를 CustomUserDetails에 담아서 리턴
+
         return new CustomUserDetails(user);
     }
 }
