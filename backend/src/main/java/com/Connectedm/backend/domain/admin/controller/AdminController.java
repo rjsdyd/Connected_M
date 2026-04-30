@@ -5,6 +5,10 @@ import com.Connectedm.backend.domain.admin.service.AdminService;
 import com.Connectedm.backend.domain.content.entity.ReviewStatus;
 import com.Connectedm.backend.domain.user.entity.UserStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,8 +27,9 @@ public class AdminController {
 
     // [GET] 전체 유저 목록 조회 (최신순)
     @GetMapping("/users")
-    public ResponseEntity<List<AdminUserResponseDto>> getAllUsers() {
-        return ResponseEntity.ok(adminService.getAllUsers());
+    public ResponseEntity<Page<AdminUserResponseDto>> getAllUsers(
+            @PageableDefault(size = 50, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(adminService.getAllUsers(pageable));
     }
 
     // [GET] 상습 신고 유저 조회 ㅋ (기존 명세 경로 수정: /reported)
