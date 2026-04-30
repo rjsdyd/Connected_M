@@ -98,7 +98,7 @@ public class SecurityConfig {
         // 허용할 프론트엔드 주소 (React 기본 포트 3000, Vite 5173 모두 포함)
         config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173"));
         // 허용할 HTTP 메서드
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT","PATCH", "DELETE", "OPTIONS")); //패치추가
         // 허용할 헤더
         config.setAllowedHeaders(List.of("*"));
         // 쿠키 및 인증 정보(Credentials) 허용
