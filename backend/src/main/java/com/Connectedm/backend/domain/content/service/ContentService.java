@@ -334,7 +334,9 @@ public class ContentService {
                         .title(c.getTitle())
                         .posterPath(c.getPosterPath())
                         // 필요하다면 여기서 releaseDate나 overview도 추가 가능
-                        .overview(c.getOverview())
+                        .overview((c.getOverview() != null && !c.getOverview().isBlank())
+                                ? c.getOverview()
+                                : (c.getAnalysisCache() != null ? c.getAnalysisCache().getSummary() : "정보가 없습니다."))
                         .genres(c.getContentGenres().stream()
                                 .map(cg -> cg.getGenre().getName())
                                 .collect(Collectors.toList()))
@@ -353,30 +355,53 @@ public class ContentService {
         }
 
         try {
-            // 1. 파이썬 AI 서버(vector_server.py)에 검색어를 보내 벡터값(숫자 배열)을 받아옵니다.
             org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
-            String pythonUrl = "http://localhost:5000/vector"; // 아까 확인한 파이썬 서버 주소
+            String pythonUrl = "http://localhost:5000/vector";
 
             Map<String, String> requestBody = new HashMap<>();
             requestBody.put("text", query);
 
-            // 파이썬 서버 응답 예시: {"vector": [0.123, -0.456, ...]}
             Map<String, Object> response = restTemplate.postForObject(pythonUrl, requestBody, Map.class);
             List<Double> vector = (List<Double>) response.get("vector");
 
-            // 2. 받아온 벡터를 문자열 형태로 변환하여 리포지토리의 시맨틱 검색 기능을 호출합니다.
-            // (주의: ContentRepository에 findBySemanticSearch 메서드가 추가되어 있어야 합니다.)
-            return contentRepository.findBySemanticSearch(vector.toString(), 15).stream()
-                    .map(c -> ContentSummaryDto.builder()
-                            .id(c.getId())
-                            .title(c.getTitle())
-                            .posterPath(c.getPosterPath())
-                            .positiveRatio(c.getAnalysisCache() != null ? c.getAnalysisCache().getPositiveRatio() : 0.0)
-                            .build())
+            List<Content> contents = contentRepository.findBySemanticSearch(vector.toString(), 15);
+
+            List<Long> contentIds = contents.stream()
+                    .map(Content::getId)
+                    .collect(Collectors.toList());
+
+            Map<Long, com.Connectedm.backend.domain.content.entity.AnalysisCache> cacheMap = analysisCacheRepository.findAllByContentIdIn(contentIds).stream()
+                    .collect(Collectors.toMap(
+                            ac -> ac.getContent().getId(),
+                            ac -> ac,
+                            (v1, v2) -> v1
+                    ));
+
+            Map<Long, List<String>> genreMap = contentGenreRepository.findAllByContentIdIn(contentIds).stream()
+                    .collect(Collectors.groupingBy(
+                            cg -> cg.getContent().getId(),
+                            Collectors.mapping(cg -> cg.getGenre().getName(), Collectors.toList())
+                    ));
+
+            return contents.stream()
+                    .map(c -> {
+                        var cache = cacheMap.get(c.getId());
+                        List<String> movieGenres = genreMap.getOrDefault(c.getId(), Collections.emptyList());
+
+                        return ContentSummaryDto.builder()
+                                .id(c.getId())
+                                .title(c.getTitle())
+                                .posterPath(c.getPosterPath())
+                                .overview((c.getOverview() != null && !c.getOverview().isBlank())
+                                        ? c.getOverview()
+                                        : (cache != null ? cache.getSummary() : "상세 정보 준비 중입니다."))
+                                .genres(movieGenres)
+                                .positiveRatio(cache != null ? cache.getPositiveRatio() : 0.0)
+                                .build();
+                    })
                     .collect(Collectors.toList());
 
         } catch (Exception e) {
-            // AI 서버 장애나 에러 발생 시, 서비스 중단을 막기 위해 기존 제목 검색으로 대체합니다.
             System.err.println("❌ [AI 검색 에러] 일반 제목 검색으로 전환합니다: " + e.getMessage());
             return searchContents(query);
         }

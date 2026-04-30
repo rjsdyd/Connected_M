@@ -68,7 +68,7 @@ def perform_analysis(content_id):
         결과물 필수 항목:
         1. summary: 줄거리의 핵심을 짚어 100자 내외의 한국어 문장으로 요약.
         2. positive_ratio: 줄거리의 분위기를 고려한 예상 긍정 지수 (0~100 사이 숫자만).
-        3. top_keywords: 영화를 상징하는 핵심 단어 3개를 쉼표로 구분한 문자열.
+        3. top_keywords: 영화를 상징하는 핵심 단어, 장르(사극, SF, 우주 등), 분위기를 포함하여 10개를 쉼표로 구분한 문자열.
 
         줄거리 내용:
         {all_comments}

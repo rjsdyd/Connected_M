@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 @Getter
 @Builder
@@ -15,4 +16,6 @@ public class ContentSearchResponse {
     private String posterPath;
     private double similaritySource;
     private String overview;
+    private List<String> genres;
+    private Double positiveRatio;
 }
