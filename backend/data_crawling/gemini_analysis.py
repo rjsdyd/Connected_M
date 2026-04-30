@@ -121,16 +121,21 @@ if __name__ == "__main__":
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # 분석 대기 상태인 항목 조회
-    cursor.execute("SELECT content_id FROM analysis_cache WHERE summary = '분석 대기 중'")
-    pending_movies = cursor.fetchall()
+    # 🚀 [지독한 타겟팅] 키워드가 10개 미만인 데이터만 싹 골라옵니다.
+    query = """
+        SELECT content_id FROM analysis_cache 
+        WHERE (LENGTH(top_keywords) - LENGTH(REPLACE(top_keywords, ',', ''))) < 9
+        OR summary = '분석 대기 중'
+    """
+    cursor.execute(query)
+    target_movies = cursor.fetchall()
 
-    print(f"작업 시작: 분석 대상 {len(pending_movies)}건")
+    print(f"🎯 재분석 타겟: {len(target_movies)}건 발견! 요리를 시작합니다.")
 
-    for movie in pending_movies:
+    for movie in target_movies:
         perform_analysis(movie['content_id'])
-        time.sleep(1) # API 레이트 제한 고려
+        time.sleep(1)
 
-    print("전체 작업이 종료되었습니다.")
+    print("🏁 3개짜리 찌꺼기들까지 모두 10개로 업그레이드 완료!")
     cursor.close()
     conn.close()
