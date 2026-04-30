@@ -5,20 +5,21 @@ import mysql.connector
 from google import genai
 from dotenv import load_dotenv
 
-# 1. 환경 변수 로드
+# 환경 변수 로드
 load_dotenv()
 
-# 2. 제미나이 설정 (새로운 SDK 스타일)
-# .env의 GEMINI_API_KEY를 읽어오도록 설정
+# 제미나이 클라이언트 설정
 api_key = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=api_key)
 
-# 사용할 모델 설정
-MODEL_NAME = "gemini-2.5-flash"
-
+# 모델 설정 (사용자 지정 모델명 유지)
+MODEL_NAME = "gemini-3-flash-preview"
 
 def get_db_connection():
-    """MariaDB 연결 설정"""
+    """
+    MariaDB 연결을 설정합니다.
+    기본 포트는 3310으로 설정되어 있습니다.
+    """
     return mysql.connector.connect(
         host=os.getenv("DB_HOST"),
         port=int(os.getenv("DB_PORT", 3310)),
@@ -29,63 +30,63 @@ def get_db_connection():
         collation='utf8mb4_general_ci'
     )
 
-
 def perform_analysis(content_id):
-    """전문가+유저 리뷰 혹은 줄거리를 가져와 제미나이 분석 후 DB에 캐싱"""
+    """
+    영화 줄거리를 가져와 제미나이 분석 후 데이터베이스에 저장합니다.
+    """
     conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        print(f"🚀 [영화 ID: {content_id}] 분석 시작...", flush=True)
+        print(f"Content ID {content_id}: 분석 프로세스 시작")
 
-        # 기존 리뷰 쿼리는 주석 처리로 남겨둡니다.
-        """
-        query = """
-        #    SELECT comment FROM expert_review WHERE content_id = %s
-        #    UNION ALL
-        #    SELECT comment FROM user_review WHERE content_id = %s
-        """
-        """
-
-        # 줄거리(overview)를 가져오는 새로운 쿼리 (들여쓰기 칼정렬 ㅋ)
+        # 영화 줄거리 데이터 조회
         query = "SELECT overview FROM content WHERE id = %s"
         cursor.execute(query, (content_id,))
         row = cursor.fetchone()
 
-        # 데이터가 비어있는지 확인
         if not row or not row['overview']:
-            print(f"⚠️ 영화 ID {content_id}에 대한 줄거리가 없습니다.")
+            print(f"데이터 누락: 영화 ID {content_id}의 줄거리가 존재하지 않습니다.")
             return
 
-        # 제미나이에게 보낼 텍스트를 줄거리로 설정
-        all_comments = row['overview']
+        overview_text = row['overview']
 
-        # (2) 제미나이 호출 (JSON 모드 사용)
+        # 제미나이 프롬프트 구성 (키워드 10개 추출 및 장르/분위기 반영)
         prompt = f"""
-        당신은 영화 분석 전문가입니다. 아래 제공된 영화의 줄거리(Overview)를 분석하세요.
+        당신은 영화 마케팅 및 콘텐츠 분석 전문가입니다. 
+        제공된 영화 줄거리(Overview)를 분석하여 사용자가 영화의 특징을 한눈에 파악할 수 있는 데이터를 생성하세요.
 
-        결과물 필수 항목:
-        1. summary: 줄거리의 핵심을 짚어 100자 내외의 한국어 문장으로 요약.
-        2. positive_ratio: 줄거리의 분위기를 고려한 예상 긍정 지수 (0~100 사이 숫자만).
-        3. top_keywords: 영화를 상징하는 핵심 단어 3개를 쉼표로 구분한 문자열.
+        분석 지침:
+        1. summary: 줄거리의 핵심 갈등과 설정을 포함하여 100자 내외의 한국어 문장으로 요약하십시오.
+        2. positive_ratio: 줄거리에서 느껴지는 희망, 즐거움 등 긍정적 요소를 수치화하십시오 (0~100 정수).
+        3. top_keywords: 다음 요소를 포함하여 정확히 10개의 핵심 키워드를 선정하십시오.
+           - 영화의 장르적 특징
+           - 전반적인 분위기 및 톤 (예: 긴장감 넘치는, 몽환적인)
+           - 줄거리 내 핵심 소재 및 주제어
+           - 키워드는 쉼표(,)로 구분된 하나의 문자열로 반환하십시오.
 
-        줄거리 내용:
-        {all_comments}
+        분석 대상 줄거리:
+        {overview_text}
         """
 
+        # AI 모델 호출
         response = client.models.generate_content(
             model=MODEL_NAME,
             contents=prompt,
             config={
-                'response_mime_type': 'application/json'  # JSON 강제 설정
+                'response_mime_type': 'application/json'
             }
         )
 
-        # (3) 응답 데이터 파싱
-        data = json.loads(response.text)
+        # 응답 데이터 파싱
+        try:
+            data = json.loads(response.text)
+        except json.JSONDecodeError as e:
+            print(f"파싱 에러: AI 응답이 유효한 JSON 형식이 아닙니다. ({e})")
+            return
 
-        # (4) DB 저장 (Upsert 로직)
+        # 결과 업데이트 (Upsert)
         save_query = """
             INSERT INTO analysis_cache (id, positive_ratio, summary, top_keywords, search_keywords, content_id)
             VALUES (%s, %s, %s, %s, %s, %s)
@@ -98,41 +99,38 @@ def perform_analysis(content_id):
         """
 
         cursor.execute(save_query, (
-            content_id,  # id 컬럼에 들어갈 값
+            content_id,
             data['positive_ratio'],
             data['summary'],
             data['top_keywords'],
-            data['top_keywords'],  # search_keywords에도 똑같이 채워줌
-            content_id  # content_id 컬럼에 들어갈 값
+            data['top_keywords'],
+            content_id
         ))
 
         conn.commit()
-        print(f"✅ 분석 완료! (긍정 지수: {data['positive_ratio']}%)", flush=True)
+        print(f"분석 완료: ID {content_id} (긍정 지수: {data['positive_ratio']}%)")
 
     except Exception as e:
-        print(f"❌ 에러 발생: {e}")
+        print(f"시스템 에러 발생 (ID {content_id}): {e}")
     finally:
         if conn and conn.is_connected():
             cursor.close()
             conn.close()
 
-
 if __name__ == "__main__":
-    # 1. DB를 열어서 '분석 대기 중'인 영화 ID를 싹 다 가져옵니다. ㅋ
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # db_filler.py가 넣어둔 '분석 대기 중'인 영화들만 골라냅니다.
+    # 분석 대기 상태인 항목 조회
     cursor.execute("SELECT content_id FROM analysis_cache WHERE summary = '분석 대기 중'")
     pending_movies = cursor.fetchall()
 
-    print(f"🔎 분석 타겟 {len(pending_movies)}건 발견! 작전을 시작합니다. ㅋㅋㅋㅋ")
+    print(f"작업 시작: 분석 대상 {len(pending_movies)}건")
 
-    # 2. 찾은 영화들을 하나씩 명준님의 perform_analysis 함수에 집어넣습니다.
     for movie in pending_movies:
         perform_analysis(movie['content_id'])
-        time.sleep(1)
+        time.sleep(1) # API 레이트 제한 고려
 
-    print("🏁 모든 영화에 대한 제미나이 분석이 끝났습니다!")
+    print("전체 작업이 종료되었습니다.")
     cursor.close()
     conn.close()
