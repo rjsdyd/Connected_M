@@ -2,17 +2,20 @@ package com.Connectedm.backend.global.auth.oauth;
 
 import com.Connectedm.backend.domain.user.entity.User;
 import com.Connectedm.backend.domain.user.entity.User.AuthProvider;
+import com.Connectedm.backend.domain.user.entity.UserRole;
+import com.Connectedm.backend.domain.user.entity.UserStatus;
 import com.Connectedm.backend.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import com.Connectedm.backend.domain.user.entity.UserRole;
-import com.Connectedm.backend.domain.user.entity.UserStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 
+import java.util.Collections;
 import java.util.UUID;
 
 @Service
@@ -59,22 +62,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         final String realName = (socialName != null && !socialName.isEmpty()) ? socialName : "소셜유저";
 
         // 5. [개선된 로직] 지문(Provider+ID)으로 먼저 찾고, 없으면 이메일로 찾기
-        userRepository.findByProviderAndProviderId(finalProvider, providerId)
-                // ✨ 만약 지문으로 못 찾았다면, 이메일로 기존 가입자인지 한 번 더 확인!
+        User userEntity = userRepository.findByProviderAndProviderId(finalProvider, providerId)
                 .or(() -> userRepository.findByEmail(finalEmail))
                 .map(entity -> {
-                    // [기존 유저 업데이트]
+                    // 기존 유저 업데이트 로직
                     if (entity.getNickname() == null || entity.getNickname().isEmpty()) {
-                        if (socialName != null && !socialName.isEmpty() && !userRepository.existsByNickname(socialName)) {
-                            entity.setNickname(socialName);
-                        } else {
-                            entity.setNickname("tmp_social_" + UUID.randomUUID().toString().substring(0, 8));
-                        }
+                        entity.setNickname(socialName != null && !userRepository.existsByNickname(socialName) ? socialName : "tmp_" + UUID.randomUUID().toString().substring(0,8));
                     }
-
                     entity.setRealName(realName);
-
-                    // 2. 만약 기존에 일반 회원이었거나 데이터가 꼬여서 NULL이었다면 정보를 채워줌
                     if (entity.getProvider() == null || entity.getProvider() == AuthProvider.LOCAL) {
                         entity.setProvider(finalProvider);
                         entity.setProviderId(providerId);
@@ -82,29 +77,27 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     return userRepository.save(entity);
                 })
                 .orElseGet(() -> {
-                    String finalNickname;
-                    if (socialName == null || socialName.isEmpty()) {
-                        finalNickname = "tmp_social_" + UUID.randomUUID().toString().substring(0, 8);
-                    } else if (userRepository.existsByNickname(socialName)) {
-                        finalNickname = "tmp_social_" + UUID.randomUUID().toString().substring(0, 8);
-                    } else {
-                        finalNickname = socialName;
-                    }
-
+                    // 신규 유저 생성 로직
                     return userRepository.save(User.builder()
                             .email(finalEmail)
-                            .nickname(finalNickname)
+                            .nickname(generateUniqueNickname(socialName, finalProvider))
                             .realName(realName)
                             .password(passwordEncoder.encode(UUID.randomUUID().toString()))
-                            .phoneNumber(null)
                             .provider(finalProvider)
                             .providerId(providerId)
-                            .role(UserRole.ROLE_USER)
-                            .status(UserStatus.ACTIVE)
+                            .role(UserRole.ROLE_USER) // 기본값 설정
+                            .status(UserStatus.ACTIVE) // DB 구조에 맞춰 추가
+                            .reportedCount(0)          // DB 구조에 맞춰 추가
                             .build());
                 });
 
-        return oAuth2User;
+        // ✨ [핵심 수정] DB에서 가져온 실제 권한(ROLE_ADMIN 등)을 시큐리티 객체에 주입합니다.
+        return new DefaultOAuth2User(
+                Collections.singleton(new SimpleGrantedAuthority(userEntity.getRole().name())),
+                oAuth2User.getAttributes(),
+                userRequest.getClientRegistration().getProviderDetails()
+                        .getUserInfoEndpoint().getUserNameAttributeName()
+        );
     }
 
     private String generateUniqueNickname(String baseNickname, AuthProvider provider) {

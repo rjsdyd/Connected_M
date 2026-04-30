@@ -1,5 +1,4 @@
 package com.Connectedm.backend.global.utils;
-
 import java.util.Arrays;
 
 public class VectorUtils {
