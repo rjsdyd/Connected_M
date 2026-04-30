@@ -79,6 +79,12 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getContentStats());
     }
 
+    // [GET] 신고된 리뷰 상세 내역 조회 (신고자 리스트 포함)
+    @GetMapping("/reviews/reported/{id}")
+    public ResponseEntity<AdminReviewReportResponseDto> getReportedReviewDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(adminService.getReviewReportDetails(id));
+    }
+
     // ==========================================================
     // 3. 보안 및 시스템 로그 (System Logs)
     // ==========================================================

@@ -52,6 +52,7 @@ public class User {
 
     // UserReview와 관계 연결
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<UserReview> reviews = new ArrayList<>();
 
     @Builder.Default
@@ -69,10 +70,12 @@ public class User {
     // role 컬럼 추가
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private UserRole role = UserRole.ROLE_USER; // 기본값은 일반 사용자
 
     // 누적 신고 횟수
     @Column(nullable = false)
+    @Builder.Default
     private int reportedCount = 0;
 
 
@@ -91,6 +94,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private UserStatus status = UserStatus.ACTIVE;
 
     // DB 저장되기 직전에 번호 형식 바꿔주는 로직

@@ -1,9 +1,6 @@
 package com.Connectedm.backend.domain.admin.service;
 
-import com.Connectedm.backend.domain.admin.dto.AdminContentStateResponseDto;
-import com.Connectedm.backend.domain.admin.dto.AdminReviewResponseDto;
-import com.Connectedm.backend.domain.admin.dto.AdminUserResponseDto;
-import com.Connectedm.backend.domain.admin.dto.LoginLogResponseDto;
+import com.Connectedm.backend.domain.admin.dto.*;
 import com.Connectedm.backend.domain.content.entity.ReviewStatus;
 import com.Connectedm.backend.domain.content.entity.UserReview;
 import com.Connectedm.backend.domain.content.repository.ContentRepository;
@@ -11,6 +8,7 @@ import com.Connectedm.backend.domain.content.repository.UserReviewRepository;
 import com.Connectedm.backend.domain.content.service.ReviewService;
 import com.Connectedm.backend.domain.user.entity.UserStatus;
 import com.Connectedm.backend.domain.user.repository.LoginLogRepository;
+import com.Connectedm.backend.domain.user.repository.ReviewReportRepository;
 import com.Connectedm.backend.domain.user.repository.UserRepository;
 import com.Connectedm.backend.domain.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,6 +33,7 @@ public class AdminService {
     private final UserService userService;
     private final LoginLogRepository loginLogRepository;
     private final ContentRepository contentRepository;
+    private final ReviewReportRepository reviewReportRepository;
 
     // ==========================================================
     // 1. [조회] 명세 대응
@@ -56,6 +55,33 @@ public class AdminService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    /**
+     * [조회] 특정 리뷰의 지독하게 압도적인 신고 상세 내역!! ㅋㅋㅋㅋ
+     */
+    public AdminReviewReportResponseDto getReviewReportDetails(Long reviewId) {
+        UserReview review = userReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new EntityNotFoundException("리뷰를 찾을 수 없습니다."));
+
+        List<AdminReviewReportDetailDto> reportDetails = reviewReportRepository.findAllByReviewIdWithReporter(reviewId)
+                .stream()
+                .map(reviewReport -> AdminReviewReportDetailDto.builder()
+                        .reporterNickname(reviewReport.getReporter().getNickname())
+                        .reason(reviewReport.getReason().getDescription())
+                        .detailReason(reviewReport.getDetailReason())
+                        .reportedAt(reviewReport.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
+
+        return AdminReviewReportResponseDto.builder()
+                .reviewId(review.getId())
+                .movieTitle(review.getContent().getTitle())
+                .writerNickname(review.getUser().getNickname())
+                .reviewComment(review.getComment())
+                .reportDetails(reportDetails)
+                .build();
+    }
+
 
     /**
      * [조회] 상습 신고 유저 목록(신고 많은 순)
@@ -141,5 +167,6 @@ public class AdminService {
     public void updateUserStatus(Long userId, UserStatus status) {
         userService.updateUserStatus(userId,status);
     }
+
 
 }
