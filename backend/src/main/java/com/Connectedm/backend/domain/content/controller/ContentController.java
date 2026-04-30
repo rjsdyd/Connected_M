@@ -46,7 +46,7 @@ public class ContentController {
                 detail.getRuntime() == null ||
                 detail.getAgeRating() == null ||
                 detail.getAgeRating().equals("정보없음")
-            ) {
+        ) {
             contentService.updateContentWithTmdb(id);
             detail = contentService.getContentDetail(id);
         }
@@ -135,5 +135,13 @@ public class ContentController {
     public ApiResponse<List<ContentSummaryDto>> searchMovies(@RequestParam("query") String query) {
         System.out.println("DEBUG: 하이브리드 검색 요청 -> " + query);
         return ApiResponse.success(searchService.searchHybrid(query));
+    }
+
+    /**
+     * 전체 영화 데이터 조회 🚀
+     */
+    @GetMapping("/all")
+    public ApiResponse<List<ContentSummaryDto>> getAllContents() {
+        return ApiResponse.success(contentService.getAllMovies());
     }
 }

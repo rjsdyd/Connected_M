@@ -406,4 +406,29 @@ public class ContentService {
             return searchContents(query);
         }
     }
+
+    /**
+     * 전체 영화 리스트 조회
+     * KeywordPage에서 211개 영화를 모두 보여주기 위해 사용됩니다.
+     */
+    @Transactional(readOnly = true)
+    public List<ContentSummaryDto> getAllMovies() {
+        // 1. DB에 있는 모든 영화(Content)를 긁어옵니다.
+        return contentRepository.findAll().stream()
+                .map(content -> {
+                    // 2. 각 영화의 AI 분석 점수(positiveRatio)를 챙깁니다.
+                    Double ratio = (content.getAnalysisCache() != null)
+                            ? content.getAnalysisCache().getPositiveRatio()
+                            : 0.0;
+
+                    // 3. 프론트엔드 KeywordPage가 원하는 깔끔한 바구니(DTO)에 담습니다.
+                    return ContentSummaryDto.builder()
+                            .id(content.getId())
+                            .title(content.getTitle())
+                            .posterPath(content.getPosterPath())
+                            .positiveRatio(ratio)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
 }
