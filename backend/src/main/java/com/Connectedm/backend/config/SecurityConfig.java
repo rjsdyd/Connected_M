@@ -2,6 +2,7 @@ package com.Connectedm.backend.config;
 
 import java.util.List;
 
+import com.Connectedm.backend.domain.user.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,6 +31,7 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserRepository userRepository;
 
 
 
@@ -82,9 +84,13 @@ public class SecurityConfig {
                 .oauth2Login(oauth -> oauth
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler(oAuth2SuccessHandler)
+                        .failureHandler((request, response, exception) -> {
+                            // 프론트엔드 주소/oauth2/redirect?error=BANNED_USER 형식으로 리다이렉트
+                            response.sendRedirect("http://localhost:5173/oauth2/redirect?error=BANNED_USER");
+                        })
                 )
                 // ✨ 핵심: JWT 필터를 UsernamePasswordAuthenticationFilter보다 먼저 실행하게 설정
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userRepository), // ✨ userRepository 전달
                         org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -98,7 +104,7 @@ public class SecurityConfig {
         // 허용할 프론트엔드 주소 (React 기본 포트 3000, Vite 5173 모두 포함)
         config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173"));
         // 허용할 HTTP 메서드
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         // 허용할 헤더
         config.setAllowedHeaders(List.of("*"));
         // 쿠키 및 인증 정보(Credentials) 허용

@@ -6,8 +6,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 const AdminPage = () => {
   const [mainTab, setMainTab] = useState('user'); 
   const [subTab, setSubTab] = useState('filter'); 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
   const [users, setUsers] = useState<any[]>([]);
 
   const [startDate, setStartDate] = useState('');
@@ -16,8 +14,6 @@ const AdminPage = () => {
   const [statusFilter, setStatusFilter] = useState('ALL');
   
   const [summarySortTarget, setSummarySortTarget] = useState<'review' | 'wish'>('review');
-
-  // 통계 전용 월 선택 상태
   const [selectedMonth, setSelectedMonth] = useState('ALL');
 
   useEffect(() => {
@@ -46,24 +42,27 @@ const AdminPage = () => {
     init();
   }, []);
 
-  const handleStatusChange = async (userId: number, newStatus: string, periodText?: string) => {
+  const handleStatusChange = async (userId: number, newStatus: string) => {
+    // 서버 UserStatus ENUM 값에 맞춰 매핑
+    const serverStatus = newStatus === 'SUSPENDED' ? 'BANNED' : 'ACTIVE';
+    const confirmMsg = newStatus === 'ACTIVE' ? "계정을 활성화하시겠습니까?" : "해당 유저를 정지 처리하시겠습니까?";
+    
+    if (!window.confirm(confirmMsg)) return;
+
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:8080/api/admin/users/${userId}/status`, 
-        { status: newStatus },
+      // @PatchMapping("/users/{id}/status") + @RequestParam UserStatus status 대응
+      await axios.patch(`http://localhost:8080/api/admin/users/${userId}/status?status=${serverStatus}`, 
+        {}, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setUsers(prev => prev.map(u => u.userId === userId ? { ...u, status: newStatus } : u));
-      
-      if (newStatus === 'ACTIVE') {
-        alert("계정이 활성화되었습니다.");
-      } else {
-        alert(`${periodText} 동안 정지 처리되었습니다.`);
-        setIsModalOpen(false);
-      }
+      // 로컬 상태 업데이트 (화면에 즉시 반영)
+      setUsers(prev => prev.map(u => u.userId === userId ? { ...u, status: serverStatus } : u));
+      alert(serverStatus === 'ACTIVE' ? "계정이 활성화되었습니다." : "정지 처리되었습니다.");
     } catch (error) {
-      alert("상태 변경에 실패했습니다.");
+      console.error("상태 변경 실패:", error);
+      alert("상태 변경에 실패했습니다. 서버의 CORS 설정이나 로그를 확인하세요.");
     }
   };
 
@@ -82,23 +81,19 @@ const AdminPage = () => {
     }
   };
 
-  // 통계용 데이터 처리: '전체'일 때는 월별, '특정 월'일 때는 일별로 표시
   const processedChartData = useMemo(() => {
     const counts: { [key: string]: number } = {};
-    
     users.forEach(user => {
       if (user.createdAt) {
-        const fullDate = user.createdAt.split('T')[0]; // "2026-02-15"
-        const month = fullDate.split('-')[1]; // "02"
+        const fullDate = user.createdAt.split('T')[0];
+        const month = fullDate.split('-')[1];
 
         if (selectedMonth === 'ALL') {
-          // 전체 조회 시: "02월", "03월" 단위로 합산
           const label = `${month}월`;
           counts[label] = (counts[label] || 0) + 1;
         } else {
-          // 특정 월 선택 시: 해당 월의 "MM-DD" 단위로 합산
           if (month === selectedMonth) {
-            const label = fullDate.substring(5); // "02-15"
+            const label = fullDate.substring(5);
             counts[label] = (counts[label] || 0) + 1;
           }
         }
@@ -117,7 +112,12 @@ const AdminPage = () => {
 
     if (startDate && userDate < startDate) return false;
     if (endDate && userDate > endDate) return false;
-    if (statusFilter !== 'ALL' && user.status !== statusFilter) return false;
+    
+    // 서버에서 오는 상태값이 BANNED일 수 있으므로 유연하게 체크
+    if (statusFilter !== 'ALL') {
+        if (statusFilter === 'ACTIVE' && user.status !== 'ACTIVE') return false;
+        if (statusFilter === 'SUSPENDED' && user.status !== 'BANNED' && user.status !== 'SUSPENDED') return false;
+    }
 
     const term = searchTerm.toLowerCase();
     return (
@@ -200,7 +200,7 @@ const AdminPage = () => {
                       </td>
                       <td className="action-cell">
                         <button className="btn-table active-btn" onClick={() => handleStatusChange(user.userId, 'ACTIVE')}>활성</button>
-                        <button className="btn-table stop-btn" onClick={() => { setSelectedUser(user); setIsModalOpen(true); }}>정지</button>
+                        <button className="btn-table stop-btn" onClick={() => handleStatusChange(user.userId, 'SUSPENDED')}>정지</button>
                         <button className="btn-table exit-btn" onClick={() => handleExit(user)}>탈퇴</button>
                       </td>
                     </tr>
@@ -216,10 +216,7 @@ const AdminPage = () => {
             <div className="filter-control-bar">
               <div className="filter-group">
                 <label>조회 범위</label>
-                <select 
-                  value={selectedMonth} 
-                  onChange={(e) => setSelectedMonth(e.target.value)}
-                >
+                <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
                   <option value="ALL">전체 기간 (월별 합계)</option>
                   {['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'].map(m => (
                     <option key={m} value={m}>{m}월 (일별 상세)</option>
@@ -246,10 +243,7 @@ const AdminPage = () => {
             <div className="filter-control-bar">
               <div className="filter-group">
                 <label>정렬 기준</label>
-                <select 
-                  value={summarySortTarget} 
-                  onChange={(e) => setSummarySortTarget(e.target.value as 'review' | 'wish')}
-                >
+                <select value={summarySortTarget} onChange={(e) => setSummarySortTarget(e.target.value as 'review' | 'wish')}>
                   <option value="review">리뷰 작성 많은 순</option>
                   <option value="wish">찜한 영화 많은 순</option>
                 </select>
@@ -259,37 +253,21 @@ const AdminPage = () => {
               <table className="user-table">
                 <thead>
                   <tr>
-                    <th>순위</th>
-                    <th>닉네임</th>
-                    <th>작성 리뷰 수</th>
-                    <th>찜한 영화 수</th>
+                    <th>순위</th><th>닉네임</th><th>작성 리뷰 수</th><th>찜한 영화 수</th>
                   </tr>
                 </thead>
                 <tbody>
                   {[...users]
                     .sort((a, b) => {
-                      if (summarySortTarget === 'review') {
-                        return (b.reviewCount || 0) - (a.reviewCount || 0);
-                      } else {
-                        return (b.wishCount || 0) - (a.wishCount || 0);
-                      }
+                      if (summarySortTarget === 'review') return (b.reviewCount || 0) - (a.reviewCount || 0);
+                      return (b.wishCount || 0) - (a.wishCount || 0);
                     })
                     .map((user, index) => (
                       <tr key={user.userId}>
                         <td>{index + 1}</td>
                         <td>{user.nickname}</td>
-                        <td style={{ 
-                          fontWeight: summarySortTarget === 'review' ? 'bold' : 'normal', 
-                          color: summarySortTarget === 'review' ? '#48129e' : '#333' 
-                        }}>
-                          {user.reviewCount || 0}개
-                        </td>
-                        <td style={{ 
-                          fontWeight: summarySortTarget === 'wish' ? 'bold' : 'normal', 
-                          color: summarySortTarget === 'wish' ? '#6c5ce7' : '#333' 
-                        }}>
-                          {user.wishCount || 0}개
-                        </td>
+                        <td style={{ fontWeight: summarySortTarget === 'review' ? 'bold' : 'normal' }}>{user.reviewCount || 0}개</td>
+                        <td style={{ fontWeight: summarySortTarget === 'wish' ? 'bold' : 'normal' }}>{user.wishCount || 0}개</td>
                       </tr>
                     ))}
                 </tbody>
@@ -300,20 +278,6 @@ const AdminPage = () => {
 
         {subTab === 'reviews' && <div className="empty-view"></div>}
       </main>
-
-      {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3>{selectedUser?.nickname}님 정지 기간 설정</h3>
-            <div className="modal-btns">
-              {['1일', '3일', '5일', '7일', '1개월', '3개월', '5개월', '1년', '2년', '3년'].map(p => (
-                <button key={p} onClick={() => handleStatusChange(selectedUser.userId, 'SUSPENDED', p)}>{p}</button>
-              ))}
-            </div>
-            <button className="btn-close" onClick={() => setIsModalOpen(false)}>취소</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

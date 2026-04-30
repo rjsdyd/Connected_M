@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import axios from 'axios'; // ✨ axios 임포트 추가
 import './App.css';
-
 
 // 컴포넌트 & 페이지 임포트
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Chatbot from './components/chatbot/Chatbot';
 import LoginModal from './components/common/LoginModal';
-import { useAuthCheck } from './hooks/useAuthCheck'; // ✨ URL 파라미터를 가로채는 훅
+import { useAuthCheck } from './hooks/useAuthCheck';
 
 // 페이지들
 import Home from './pages/Home/Home';
@@ -19,7 +19,7 @@ import Terms from './pages/Terms/Terms';
 import Privacy from './pages/Privacy/Privacy';
 import OAuth2RedirectHandler from './pages/Auth/OAuth2RedirectHandler';
 import ExtraInfo from './pages/Auth/ExtraInfo';
-import ResetPassword from './pages/Auth/ResetPassword'; // 비밀번호 재설정 링크 처리 페이지
+import ResetPassword from './pages/Auth/ResetPassword';
 import EditProfile from './pages/MyPage/EditProfile';
 import WishlistPage from './pages/MyPage/WishlistPage';
 import MyReviewsPage from './pages/MyPage/MyReviewsPage';
@@ -30,11 +30,30 @@ import SearchResult from './pages/SearchResult/SearchResult';
 import KeywordPage from './pages/Keyword/KeywordPage';
 import AdminPage from './pages/admin/adminpage';
 
+// ==========================================================
+// ✨ Axios 전역 인터셉터 설정 (실시간 정지 감지기)
+// ==========================================================
+axios.interceptors.response.use(
+  (response) => response, // 응답이 성공적이면 그대로 반환
+  (error) => {
+    // 서버 JwtAuthenticationFilter에서 보낸 403 에러 및 메시지 확인
+    if (error.response && error.response.status === 403) {
+      if (error.response.data.message === "계정이 정지되었습니다.") {
+        alert("운영 원칙 위반으로 계정이 정지되었습니다. 즉시 로그아웃됩니다.");
+        
+        // 로컬 정보 삭제 및 메인 페이지로 강제 이동
+        localStorage.clear(); 
+        window.location.href = "/"; 
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 const AppContent = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   
-  // ✨ 이제 부모인 <App>이 BrowserRouter를 감싸고 있어서 이 훅이 정상 작동합니다!
+  // ✨ 소셜 로그인 URL 파라미터 감지 (BANNED_USER 체크 포함)
   useAuthCheck();
 
   return (
@@ -47,7 +66,7 @@ const AppContent = () => {
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/extra-info" element={<ExtraInfo />} />
-          <Route path="/reset-password" element={<ResetPassword />} /> {/* 이메일 토큰링크로 들어올 때 사용할 라우트 */}
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
           <Route path="/mypage" element={<MyPage />} />
           <Route path="/movie/:id" element={<MovieDetail />} />
@@ -74,7 +93,6 @@ const AppContent = () => {
   );
 };
 
-// 최상단에서 한 번만 감싸줍니다.
 const App = () => (
   <BrowserRouter>
     <AppContent />
