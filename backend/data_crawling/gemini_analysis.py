@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import mysql.connector
 from google import genai
 from dotenv import load_dotenv
@@ -23,45 +24,53 @@ def get_db_connection():
         port=int(os.getenv("DB_PORT", 3310)),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME")
+        database=os.getenv("DB_NAME"),
+        charset='utf8mb4',
+        collation='utf8mb4_general_ci'
     )
 
 
 def perform_analysis(content_id):
-    """전문가+유저 리뷰를 가져와 제미나이 분석 후 DB에 캐싱"""
+    """전문가+유저 리뷰 혹은 줄거리를 가져와 제미나이 분석 후 DB에 캐싱"""
     conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        print(f"🚀 [영화 ID: {content_id}] 분석 시작...")
+        print(f"🚀 [영화 ID: {content_id}] 분석 시작...", flush=True)
 
-        # (1) 리뷰 데이터 가져오기
-        query = """
-            SELECT comment FROM expert_review WHERE content_id = %s
-            UNION ALL
-            SELECT comment FROM user_review WHERE content_id = %s
+        # 기존 리뷰 쿼리는 주석 처리로 남겨둡니다.
         """
-        cursor.execute(query, (content_id, content_id))
-        rows = cursor.fetchall()
+        query = """
+        #    SELECT comment FROM expert_review WHERE content_id = %s
+        #    UNION ALL
+        #    SELECT comment FROM user_review WHERE content_id = %s
+        """
+        """
 
-        if not rows:
-            print(f"⚠️ 영화 ID {content_id}에 대한 리뷰가 없습니다.")
+        # 줄거리(overview)를 가져오는 새로운 쿼리 (들여쓰기 칼정렬 ㅋ)
+        query = "SELECT overview FROM content WHERE id = %s"
+        cursor.execute(query, (content_id,))
+        row = cursor.fetchone()
+
+        # 데이터가 비어있는지 확인
+        if not row or not row['overview']:
+            print(f"⚠️ 영화 ID {content_id}에 대한 줄거리가 없습니다.")
             return
 
-        all_comments = "\n".join([row['comment'] for row in rows])
+        # 제미나이에게 보낼 텍스트를 줄거리로 설정
+        all_comments = row['overview']
 
         # (2) 제미나이 호출 (JSON 모드 사용)
-        # response_mime_type을 설정하면 AI가 마크다운(```json) 없이 순수 JSON만 줍니다.
         prompt = f"""
-        당신은 영화 분석 전문가입니다. 아래 제공된 영화 리뷰들을 분석하세요.
+        당신은 영화 분석 전문가입니다. 아래 제공된 영화의 줄거리(Overview)를 분석하세요.
 
         결과물 필수 항목:
-        1. summary: 전체 리뷰를 요약한 100자 내외의 한국어 문장.
-        2. positive_ratio: 0~100 사이의 긍정 지수 (숫자만).
-        3. top_keywords: 가장 중요한 키워드 3개를 쉼표로 구분한 문자열.
+        1. summary: 줄거리의 핵심을 짚어 100자 내외의 한국어 문장으로 요약.
+        2. positive_ratio: 줄거리의 분위기를 고려한 예상 긍정 지수 (0~100 사이 숫자만).
+        3. top_keywords: 영화를 상징하는 핵심 단어 3개를 쉼표로 구분한 문자열.
 
-        리뷰 내용:
+        줄거리 내용:
         {all_comments}
         """
 
@@ -74,28 +83,31 @@ def perform_analysis(content_id):
         )
 
         # (3) 응답 데이터 파싱
-        # 신규 SDK는 response.text에 바로 JSON 문자열이 담깁니다.
         data = json.loads(response.text)
 
         # (4) DB 저장 (Upsert 로직)
         save_query = """
-            INSERT INTO analysis_cache (positive_ratio, summary, top_keywords, content_id)
-            VALUES (%s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE 
+            INSERT INTO analysis_cache (id, positive_ratio, summary, top_keywords, search_keywords, content_id)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
                 positive_ratio = VALUES(positive_ratio),
                 summary = VALUES(summary),
-                top_keywords = VALUES(top_keywords)
+                top_keywords = VALUES(top_keywords),
+                search_keywords = VALUES(search_keywords),
+                content_id = VALUES(content_id)
         """
 
         cursor.execute(save_query, (
+            content_id,  # id 컬럼에 들어갈 값
             data['positive_ratio'],
             data['summary'],
             data['top_keywords'],
-            content_id
+            data['top_keywords'],  # search_keywords에도 똑같이 채워줌
+            content_id  # content_id 컬럼에 들어갈 값
         ))
 
         conn.commit()
-        print(f"✅ 분석 완료! (긍정 지수: {data['positive_ratio']}%)")
+        print(f"✅ 분석 완료! (긍정 지수: {data['positive_ratio']}%)", flush=True)
 
     except Exception as e:
         print(f"❌ 에러 발생: {e}")
@@ -106,5 +118,21 @@ def perform_analysis(content_id):
 
 
 if __name__ == "__main__":
-    # 테스트 실행
-    perform_analysis(1)
+    # 1. DB를 열어서 '분석 대기 중'인 영화 ID를 싹 다 가져옵니다. ㅋ
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # db_filler.py가 넣어둔 '분석 대기 중'인 영화들만 골라냅니다.
+    cursor.execute("SELECT content_id FROM analysis_cache WHERE summary = '분석 대기 중'")
+    pending_movies = cursor.fetchall()
+
+    print(f"🔎 분석 타겟 {len(pending_movies)}건 발견! 작전을 시작합니다. ㅋㅋㅋㅋ")
+
+    # 2. 찾은 영화들을 하나씩 명준님의 perform_analysis 함수에 집어넣습니다.
+    for movie in pending_movies:
+        perform_analysis(movie['content_id'])
+        time.sleep(1)
+
+    print("🏁 모든 영화에 대한 제미나이 분석이 끝났습니다!")
+    cursor.close()
+    conn.close()
