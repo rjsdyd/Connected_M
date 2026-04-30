@@ -135,7 +135,7 @@ const KeywordPage: React.FC = () => {
             );
           })
         ) : (
-          <div className="no-result">해당 장르의 분석 데이터가 아직 없습니다! ㅋㅋㅋㅋ</div>
+          <div className="no-result">해당 장르의 분석 데이터가 아직 없습니다!</div>
         )}
       </div>
 

@@ -7,7 +7,10 @@ import com.Connectedm.backend.domain.user.repository.UserRepository;
 import com.Connectedm.backend.domain.user.service.MyPageService;
 import com.Connectedm.backend.domain.user.service.UserService;
 import com.Connectedm.backend.global.common.ApiResponse;
+import com.Connectedm.backend.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
