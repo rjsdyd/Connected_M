@@ -18,10 +18,20 @@ const MyPage: React.FC = () => {
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
-  // 회원탈퇴 핸들러 (프론트엔드 임시 작업)
-  const handleDeleteAccount = () => {
-    if (window.confirm("정말로 탈퇴하시겠습니까? 그동안의 활동 내역이 모두 삭제됩니다.")) {
-      // 로컬 스토리지 데이터 삭제
+  /* ──────────────────────────────────────────────────────────
+     1. 회원탈퇴 모달 상태 관리 (열렸는지 닫혔는지)
+  ────────────────────────────────────────────────────────── */
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  /* ──────────────────────────────────────────────────────────
+     2. 실제 회원탈퇴 처리 함수 (모달 내 '확인' 버튼 클릭 시)
+  ────────────────────────────────────────────────────────── */
+    const confirmDeleteAccount = async (): Promise<void> => {
+    try {
+      // 백엔드에 탈퇴 요청을 보내서 DB의 status를 바꿉니다.
+      await axios.patch(`http://localhost:8080/api/user/withdraw/${user?.id}`);
+
+      // 내 브라우저의 로그인 정보 삭제
       localStorage.removeItem('user');
       localStorage.removeItem('nickname');
       localStorage.removeItem('token');
@@ -31,7 +41,17 @@ const MyPage: React.FC = () => {
       // 메인 페이지로 이동 및 새로고침
       navigate('/');
       window.location.reload();
+    } catch (error) {
+      console.error("탈퇴 실패:", error);
+      alert("처리 중 오류가 발생했습니다.");
     }
+  };
+
+  /* ──────────────────────────────────────────────────────────
+     3. 기존 handleDeleteAccount는 모달을 여는 역할만 수행
+  ────────────────────────────────────────────────────────── */
+  const handleDeleteAccount = () => {
+    setIsModalOpen(true); // 모달창 열기
   };
 
   const handleLogout = () => {
@@ -85,7 +105,7 @@ const MyPage: React.FC = () => {
   return (
     <div className="mypage-layout-mypage">
       <div className="mypage-container-mypage">
-        {/* 상단 프로필 */}
+        {/* 상단 프로필 영역 */}
         <section className="profile-summary-card-mypage">
           <div className="us-pro-mypage">
             <div className="profile-avatar-mypage">{user.nickname.charAt(0)}</div>
@@ -95,17 +115,14 @@ const MyPage: React.FC = () => {
             </div>
           </div>
           {isAdmin && (
-            <button 
-              className="btn-admin-action-mypage" 
-              onClick={() => navigate('/admin')}
-            >
+            <button className="btn-admin-action-mypage" onClick={() => navigate('/admin')}>
               관리자페이지
             </button>
           )}
         </section>
 
         <div className="mypage-content-grid-mypage">
-          {/* 왼쪽 사이드바 */}
+          {/* 왼쪽 정보 카드 */}
           <aside className="content-side-left-mypage">
             <section className="info-card-fixed-mypage">
               <div className="info-header-fixed-mypage">
@@ -131,12 +148,11 @@ const MyPage: React.FC = () => {
                 <button className="delete-account-link-mypage" onClick={handleDeleteAccount}>
                   회원탈퇴
                 </button>
-              
               </div>
             </section>
           </aside>
 
-          {/* 우측 메뉴 영역 */}
+          {/* 오른쪽 메뉴 링크 */}
           <div className="content-side-right-mypage">
             <section className="simple-link-card-mypage recent-item" onClick={() => navigate('/recent')}>
               <span className="link-title-mypage">최근에 본 목록</span>
@@ -150,12 +166,30 @@ const MyPage: React.FC = () => {
               <span className="link-title-mypage">내가 작성한 리뷰</span>
               <span className="link-arrow-mypage">❯</span>
             </section>
-            
           </div>
         </div>
-
-        
       </div>
+
+      {/* ──────────────────────────────────────────────────────────
+          4. 회원탈퇴 확인 모달 창 UI
+      ────────────────────────────────────────────────────────── */}
+      {isModalOpen && (
+        <div className="modal-overlay-mypage">
+          <div className="modal-content-mypage">
+            <div className="modal-header-mypage">
+              <span className="modal-warning-icon-mypage">⚠️</span>
+              정말 탈퇴하시겠습니까?
+            </div>
+            <p className="modal-body-mypage">
+              탈퇴 시 모든 데이터 및 개인정보가 <strong>영구 삭제</strong>되며 복구되지 않습니다.
+            </p>
+            <div className="modal-footer-mypage">
+              <button className="btn-confirm-mypage" onClick={confirmDeleteAccount}>확인</button>
+              <button className="btn-cancel-mypage" onClick={() => setIsModalOpen(false)}>취소</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

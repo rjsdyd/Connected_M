@@ -4,6 +4,7 @@ import { FaStar, FaRegStar, FaStarHalfAlt, FaBookmark, FaRegBookmark, FaChevronL
 import './MovieDetail.css';
 import { useAuth } from '../../hooks/useAuth';
 import axios from 'axios';
+import { PiSirenFill } from "react-icons/pi";
 
 interface ExpertReviewData {
   id: number;
@@ -60,7 +61,7 @@ const MovieDetail: React.FC = () => {
     if (name.length === 2) return name[0] + "*";
     return name[0] + "*".repeat(name.length - 2) + name.slice(-1);
   };
-
+  
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<MovieDetailData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -68,6 +69,54 @@ const MovieDetail: React.FC = () => {
   const { isLoggedIn, userNickname } = useAuth();
   const [hasReviewed, setHasReviewed] = useState<boolean>(false);
   const [isWishlisted, setIsWishlisted] = useState<boolean>(false); 
+  //추가
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [selectedReviewId, setSelectedReviewId] = useState<number | null>(null);
+  const [reportReason, setReportReason] = useState<string>('');
+  const reportOptions = [
+    { value: 'SPAM', label: '스팸/홍보' },
+    { value: 'INAPPROPRIATE_CONTENT', label: '부적절한 내용' },
+    { value: 'ABUSIVE_LANGUAGE', label: '욕설 비하발언' },
+    { value: 'SPOILER', label: '스포일러 포함' },
+    { value: 'OTHER', label: '기타 사유' },
+  ];
+  //1. 선택된 리뷰의 상세 정보를 담을 상태 추가
+  const [selectedReviewData, setSelectedReviewData] = useState<{
+  nickname: string;
+  comment: string;
+} | null>(null);
+
+// 2. 신고 아이콘 클릭 시 호출되는 함수 수정
+const handleOpenReport = (reviewId: number, targetNickname: string, targetComment: string) => {
+  setSelectedReviewId(reviewId);
+  setSelectedReviewData({ nickname: targetNickname, comment: targetComment }); // 상세 정보 저장
+  setIsReportModalOpen(true);
+};
+
+  // 3. 제출 함수 수정 (백엔드로 전송)
+const handleReportSubmit = async () => {
+  if (!reportReason) { alert("사유를 선택해주세요."); return; }
+
+  const reportData = {
+    reviewId: selectedReviewId,
+    targetNickname: selectedReviewData?.nickname, // 신고당한 유저 닉네임
+    reason: reportReason,                         // 신고 사유
+    reviewText: selectedReviewData?.comment,      // 신고당한 리뷰 텍스트
+    reporterNickname: userNickname                // 신고한 유저 닉네임
+  };
+
+  try {
+    const token = localStorage.getItem('token');
+    await axios.post('http://localhost:8080/api/reports', reportData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    alert("신고가 정상적으로 접수되었습니다.");
+    setIsReportModalOpen(false);
+    setReportReason('');
+  } catch (error) {
+    alert("신고 접수 중 오류가 발생했습니다.");
+  }
+};
 
   const [hasLoggedRecentView, setHasLoggedRecentView] = useState<boolean>(false);
 
@@ -369,6 +418,8 @@ const MovieDetail: React.FC = () => {
                     <div className="compact-reviewer-meta">
                       <span className="compact-reviewer-name">{maskName(r.criticName)} <small>| {r.source}</small></span>
                       {renderStars(r.rating)}
+                      
+
                     </div>
                     <p className="compact-comment-text">"{r.comment}"</p>
                   </div>
@@ -386,8 +437,10 @@ const MovieDetail: React.FC = () => {
 
             <section className="detail-section">
               <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                관람평 {otherUserReviews.length}건
+                관람평 {otherUserReviews.length}건 
+                
                 <span className="avg-score-badge user">★ {movie.userRatingAvg?.toFixed(1) || "0.0"}</span>
+
               </h2>
               <div className="compact-card-container">
                 {userReviewsSlice.length > 0 ? userReviewsSlice.map((r) => {
@@ -399,6 +452,12 @@ const MovieDetail: React.FC = () => {
                       <div className="compact-reviewer-meta">
                         <span className="compact-reviewer-name">{r.nickname}</span>
                         {renderStars(r.rating)}
+                        
+                        <PiSirenFill 
+                        className="report-siren-icon" 
+                        title="신고하기" 
+                        onClick={() => handleOpenReport(r.id, r.nickname, r.comment)}
+                        />
                       </div>
                       <p className={`compact-comment-text ${isExpanded ? 'expanded' : 'clamped'}`}>
                         {r.comment}
@@ -538,6 +597,44 @@ const MovieDetail: React.FC = () => {
           </div>
         </div>
       </main>
+      {/* 🚀 [신규] 리뷰 신고 모달 */}
+      {/* ★★★ 이 위치에 모달 코드를 넣으세요! ★★★ */}
+      {isReportModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsReportModalOpen(false)}>
+          <div className="report-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>리뷰 신고하기</h3>
+              <button className="close-btn" onClick={() => setIsReportModalOpen(false)}>
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="report-title-row">
+                <p className="report-guide">신고 사유를 선택해주세요.</p>
+              </div>
+              <div className="report-options-grid">
+                {reportOptions.map((opt) => (
+                  <label key={opt.value} className="report-radio-label">
+                    <input 
+                      type="radio" 
+                      name="reportReason" 
+                      value={opt.value} 
+                      onChange={(e) => setReportReason(e.target.value)}
+                    />
+                    <span className="label-text">{opt.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn-cancel" onClick={() => setIsReportModalOpen(false)}>취소</button>
+              <button className="btn-report-submit" onClick={handleReportSubmit}>제출하기</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
