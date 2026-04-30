@@ -119,6 +119,11 @@ public class UserService {
         if (user.getStatus() == UserStatus.BANNED) {
             throw new CustomException(ErrorCode.USER_BANNED);
         }
+        // 3:08  [추가] 탈퇴한 계정인지 확인
+        // 이 로직이 실행되면 탈퇴한 유저가 로그인 시도 시 즉시 에러를 던져 로그인을 막습니다.
+        if (user.getStatus() == UserStatus.WITHDRAWN) {
+            throw new CustomException(ErrorCode.USER_WITHDRAWN);
+        }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new CustomException(ErrorCode.INVALID_PASSWORD);
@@ -180,5 +185,14 @@ public class UserService {
 
         // 엔티티에 만든 전용 Setter 이용
         user.setStatus(status);
+    }
+    // 로그인 탈퇴시에 재로그인을 막는 코드
+    @Transactional
+    public void withdraw(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 상태를 WITHDRAWN으로 변경 (이것이 로그인을 막는 핵심입니다)
+        user.setStatus(UserStatus.WITHDRAWN);
     }
 }

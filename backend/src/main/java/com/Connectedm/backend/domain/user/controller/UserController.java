@@ -12,6 +12,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+@CrossOrigin(origins = "http://localhost:5173") //
+// 3:20 추가
 
 @RestController
 @RequestMapping("/api/user") // 👈 주소를 "/api/user"로 바꿔서 충돌을 피합니다!
@@ -82,5 +84,12 @@ public class UserController {
     public ApiResponse<Boolean> checkNickname(@RequestParam String nickname) {
         boolean exists = userRepository.existsByNickname(nickname);
         return ApiResponse.success(exists);
+    }
+    // 회원탈퇴api
+    @CrossOrigin(origins = "http://localhost:5173") // 👈 여기에 직접 한 줄 더 추가해보세요!
+    @PatchMapping("/withdraw/{id}")
+    public ApiResponse<String> withdraw(@PathVariable("id") Long id) {
+        userService.withdraw(id);
+        return ApiResponse.success("회원 탈퇴 처리가 완료되었습니다.");
     }
 }

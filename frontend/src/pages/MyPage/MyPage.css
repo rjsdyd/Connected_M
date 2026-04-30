@@ -206,3 +206,84 @@
   z-index: 1;          /* 다른 요소보다 살짝 위에 보이게 */
 }
 
+/* ... 기존 스타일 유지 ... */
+
+/* [추가] 회원탈퇴 모달 전체 배경 (어둡게 처리) */
+/* [수정] 모달 전체 배경 (오버레이) */
+.modal-overlay-mypage {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0, 0, 0, 0.4); /* 배경을 조금 더 투명하게 해서 조화롭게 변경 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* [수정] 모달 박스 - 흰색 배경과 보라색 테두리 적용 */
+.modal-content-mypage {
+  
+  background-color: #ffffff; /* 배경을 흰색으로 변경 */
+  color: #000000;            /* 기본 글자색 검정 */
+  padding: 35px;
+  border: 2px solid var(--main-purple); /* 마이페이지 메인 보라색 테두리 추가 */
+  border-radius: 25px;       /* 다른 카드들과 일관된 둥근 모서리 */
+  width: 420px;
+  text-align: center;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1); /* 그림자를 부드럽게 변경 */
+}
+
+/* [수정] 모달 제목 */
+.modal-header-mypage {
+  font-size: 20px;
+  font-weight: 800;
+  color: #000000;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* [수정] 모달 설명 문구 */
+.modal-body-mypage {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #4b4b4b; /* 진한 회색으로 가독성 향상 */
+  margin-bottom: 30px;
+}
+
+/* [수정] 버튼 스타일 - 마이페이지 테마에 맞춤 */
+.modal-footer-mypage {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+/* 확인 버튼 - 보라색 배경 */
+.btn-confirm-mypage {
+  background-color: var(--main-purple);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+/* 취소 버튼 - 연한 회색 배경 */
+.btn-cancel-mypage {
+  background-color: #e5e7eb;
+  color: #4b5563;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-confirm-mypage:hover { background-color: #3b0066; }
+.btn-cancel-mypage:hover { background-color: #d1d5db; }
