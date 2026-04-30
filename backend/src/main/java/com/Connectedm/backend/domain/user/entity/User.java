@@ -90,7 +90,7 @@ public class User {
     private List<RecentView> recentViews = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20) // 4:00  추가햇음
     private UserStatus status = UserStatus.ACTIVE;
 
     // DB 저장되기 직전에 번호 형식 바꿔주는 로직

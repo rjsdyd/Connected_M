@@ -99,7 +99,7 @@ const AdminPage = () => {
       alert("계정이 삭제되었습니다.");
     }
   };
-
+  
   return (
     <div className="admin-container">
       <header className="admin-header">
