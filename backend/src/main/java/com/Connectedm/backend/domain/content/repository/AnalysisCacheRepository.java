@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
+import java.util.List;
 
 public interface AnalysisCacheRepository extends JpaRepository<AnalysisCache, Long> {
 
@@ -15,4 +16,6 @@ public interface AnalysisCacheRepository extends JpaRepository<AnalysisCache, Lo
 
     @EntityGraph(attributePaths = {"content"})
     Optional<AnalysisCache> findByContentId(Long contentId);
+
+    List<AnalysisCache> findAllByContentIdIn(List<Long> contentIds);
 }

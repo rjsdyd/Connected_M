@@ -22,7 +22,7 @@ const SearchResult = () => {
       try {
         const response = await fetch(`http://localhost:8080/api/contents/search?query=${encodeURIComponent(query)}`);
         const result = await response.json();
-        
+        console.log("🚀 백엔드에서 온 데이터:", result);
         if (result.data) {
           const mapped = result.data.map((m: any) => {
             const genreArray = Array.isArray(m.genres) ? m.genres : [];
