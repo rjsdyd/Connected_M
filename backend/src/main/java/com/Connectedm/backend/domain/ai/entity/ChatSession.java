@@ -33,6 +33,7 @@ public class ChatSession {
     private User user;
 
     @OneToMany(mappedBy = "chatSession", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<ChatMessage> messages = new ArrayList<>();
 
     @CreationTimestamp

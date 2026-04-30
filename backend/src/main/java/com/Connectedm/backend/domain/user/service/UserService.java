@@ -13,6 +13,7 @@ import com.Connectedm.backend.global.error.CustomException;
 import com.Connectedm.backend.global.error.ErrorCode;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -185,15 +187,24 @@ public class UserService {
 
         // 엔티티에 만든 전용 Setter 이용
         user.setStatus(status);
+
+        // @transactional 읽기 전용 무시하고 DB저장
         userRepository.saveAndFlush(user);
     }
-    // 로그인 탈퇴시에 재로그인을 막는 코드
+
+    /**
+     * [유저 전용]  자진 탈퇴
+     */
     @Transactional
     public void withdraw(Long userId) {
+        // 1. 내 정보 찾기
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        // 상태를 WITHDRAWN으로 변경 (이것이 로그인을 막는 핵심입니다)
+        // 2. 상태만 'WITHDRAWN'으로
         user.setStatus(UserStatus.WITHDRAWN);
+
+        // 3. (옵션) 나중에 로그아웃 처리나 토큰 만료 로직을 여기서 같이 태우면 완벽합니다!!
+        log.info("탈퇴 완료 ID: {}, 닉네임: {}", user.getId(), user.getNickname());
     }
 }
