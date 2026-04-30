@@ -34,6 +34,10 @@ public class SemanticSearchService {
                     // 4. 코사인 유사도 연산
                     double score = VectorUtils.cosineSimilarity(queryVector, targetVector);
 
+                    if (cache.getSearchKeywords() != null && cache.getSearchKeywords().contains(request.getQuery())) {
+                        score += 10.0;
+                    }
+
                     // 5. Response DTO 빌드(1:1매핑 덕분에 연관 객체 접근 가능)
                     return ContentSearchResponse.builder()
                             .contentId(cache.getContent().getId())
@@ -44,6 +48,7 @@ public class SemanticSearchService {
                             .build();
                 })
                 // 6. 유사도 높은 순(내림차순) 정렬
+                .filter(res -> res.getSimilaritySource() >= 0.3)
                 .sorted((a, b) -> Double.compare(b.getSimilaritySource(), a.getSimilaritySource()))
                 .limit(10) // TOP10만 추출
                 .collect(Collectors.toList());
