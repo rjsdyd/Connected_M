@@ -22,7 +22,8 @@ public class WishlistController {
      */
     @PostMapping("/{contentId}")
     public ResponseEntity<String> toggleWishlist(
-            @AuthenticationPrincipal Long userId, // 현재 로그인한 유저 ID 추출
+            // 🚀 [핵심 수정] CustomUserDetails 객체에서 userId 필드를 추출하도록 expression 추가
+            @AuthenticationPrincipal(expression = "userId") Long userId,
 //            @AuthenticationPrincipal(expression = "id") Long userId,
             @PathVariable Long contentId) {
 
@@ -36,7 +37,7 @@ public class WishlistController {
      */
     @GetMapping
     public ResponseEntity<List<WishlistResponse>> getMyWishlist(
-            @AuthenticationPrincipal Long userId) {
+            @AuthenticationPrincipal(expression = "userId") Long userId) {
 
         List<WishlistResponse> responses = wishlistService.getMyWishlist(userId);
         return ResponseEntity.ok(responses);

@@ -15,7 +15,7 @@ public interface RecentViewRepository extends JpaRepository<RecentView, Long> {
     List<RecentView> findByUserOrderByViewedAtDesc(User user);
 
     // 2. UPSERT 로직을 위해 특정 유저가 특정 콘텐츠를 열람한 적 있는지 확인
-    Optional<RecentView> findByUserAndContent(User user, Content content);
+    Optional<RecentView> findTop1ByUserAndContentOrderByViewedAtDesc(User user, Content content);
 
     // 3. 유저별 기록 개수 제한할 때 필요한 카운트 쿼리
     Long countByUser(User user);

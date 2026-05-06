@@ -81,6 +81,9 @@ public class RecentViewController {
 
         if (principal instanceof User) {
             return ((User) principal).getId();
+        } else if (principal instanceof com.Connectedm.backend.global.security.CustomUserDetails) {
+            // 🚀 [여기만 추가됨!] 새로 바뀐 인증 객체 처리
+            return ((com.Connectedm.backend.global.security.CustomUserDetails) principal).getUserId();
         } else if (principal instanceof String) {
             // 토큰 sub의 "2" 같은 문자열 처리
             return Long.parseLong((String) principal);
