@@ -4,6 +4,8 @@ import com.Connectedm.backend.domain.content.entity.Content;
 import com.Connectedm.backend.domain.user.entity.User;
 import com.Connectedm.backend.domain.user.entity.Wishlist;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;    // 👈 추가 1
+import org.springframework.transaction.annotation.Transactional; // 👈 추가 2
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -11,7 +13,10 @@ import java.util.Optional;
 
 @Repository
 public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
-
+    // 👈 이 부분을 추가해야 UserService의 빨간 줄이 사라집니다!
+    @Modifying
+    @Transactional
+    void deleteByUser(User user);
     // 유저아이디로 찜 갯수 확인
     long countByUserId(Long userId);
 
