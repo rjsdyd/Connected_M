@@ -2,6 +2,7 @@ package com.Connectedm.backend.global.auth;
 
 import com.Connectedm.backend.domain.user.repository.UserRepository;
 import com.Connectedm.backend.domain.user.entity.User;
+import com.Connectedm.backend.global.security.CustomUserDetails;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -57,11 +58,13 @@ public class JwtTokenProvider {
 
         // 2. DB에 저장된 ROLE_ADMIN 값을 권한 객체로 생성
         List<SimpleGrantedAuthority> authorities = Collections.singletonList(
-                new SimpleGrantedAuthority(user.getRole().toString()) // "ROLE_ADMIN"
+                new SimpleGrantedAuthority(user.getRole().toString())
         );
 
+        CustomUserDetails customUserDetails = new CustomUserDetails(user);
+
         // 3. 인증 객체 생성 시 세 번째 인자로 권한(authorities)을 반드시 전달해야 함
-        return new UsernamePasswordAuthenticationToken(user.getId(), token, authorities);
+        return new UsernamePasswordAuthenticationToken(customUserDetails, token, authorities);
     }
 
     public String createAccessToken(Authentication authentication) {

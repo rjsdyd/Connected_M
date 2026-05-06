@@ -56,10 +56,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(org.springframework.web.cors.CorsUtils::isPreFlightRequest).permitAll()
                         .requestMatchers("/", "/error", "/favicon.ico").permitAll()
+                        .requestMatchers("/api/user/me/withdraw").authenticated()
+                        .requestMatchers("/api/user/**", "/api/users/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/users/recent/**").authenticated()
-                                .requestMatchers("/api/user/**", "/api/users/**").permitAll()
                         .requestMatchers("/api/ai/**").permitAll()
                         .requestMatchers("/register").permitAll()
                                 .requestMatchers("/api/members/**").permitAll()

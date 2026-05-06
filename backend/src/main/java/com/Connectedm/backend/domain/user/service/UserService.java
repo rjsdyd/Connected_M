@@ -16,6 +16,7 @@ import com.Connectedm.backend.global.error.ErrorCode;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -155,6 +156,9 @@ public class UserService {
         if (user.getStatus() == UserStatus.BANNED) {
             throw new CustomException(ErrorCode.USER_BANNED);
         }
+        if (user.getStatus() == UserStatus.WITHDRAWN) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
         return UserResponse.from(user);
     }
 
@@ -198,23 +202,24 @@ public class UserService {
     }
 
     /**
-     * [유저 전용]  자진 탈퇴
+     * [유저 전용] 자진 탈퇴 (수정 버전)
      */
     @Transactional
     public void withdraw(Long userId) {
-        // 1. 유저만 딱 한 명 찾습니다.
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        // 2. 상태를 WITHDRAWN으로 바꿉니다. (여기서 우진님이 설정한 length=20이 작동합니다!)
         user.setStatus(UserStatus.WITHDRAWN);
 
-        // 3. 다른 복잡한 조회 없이 바로 DB에 집어넣습니다.
+        // UUID 8자리만 사용하여 전체 길이를 줄입니다 (DB 100자 제한 방어용)
+        String maskedId = java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        user.setEmail("del_" + maskedId + "@deleted.com");
+        user.setPhoneNumber("del_" + maskedId); // 👈 전화번호도 반드시 변조!
+        user.setNickname("탈퇴유저_" + maskedId);
+
+        // 순서 변경: DB 반영 후 인증 정보 삭제 (Auditing 에러 방지)
         userRepository.saveAndFlush(user);
-
-        log.info("회원 탈퇴 완료: {}", user.getNickname());
-
-        // 💡 중요: 여기서 유저 정보를 다시 리턴하지 마세요!
-        // 그냥 여기서 끝내거나 성공 메시지만 보내야 로그 반복이 멈춥니다.
+        SecurityContextHolder.clearContext();
     }
 }
