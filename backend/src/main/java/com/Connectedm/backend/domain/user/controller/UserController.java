@@ -97,4 +97,11 @@ public class UserController {
         userService.withdraw(userDetails.getUserId());
         return ResponseEntity.ok().build();
     }
+
+    @PatchMapping("/{userId}/withdraw")
+    public ResponseEntity<Void> adminWithdrawUser(@PathVariable("userId") Long userId) {
+        // 기존에 이미 잘 짜여진 withdraw 로직을 그대로 활용합니다!
+        userService.withdraw(userId);
+        return ResponseEntity.ok().build();
+    }
 }

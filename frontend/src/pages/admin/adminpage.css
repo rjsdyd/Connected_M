@@ -167,7 +167,7 @@
   border: 1px solid #e2e8f0; 
 }
 
-/* 상태 뱃지 ✨ BANNED 추가 및 스타일 개선 */
+/* 상태 뱃지 공통 스타일 */
 .status-badge {
   display: inline-block;
   padding: 4px 12px;
@@ -178,22 +178,92 @@
   min-width: 60px;
 }
 
-/* 정상 상태 */
+/* [정상] - 민트색[cite: 7] */
 .status-badge.ACTIVE { 
   background-color: #e6fffa; 
   color: #319795; 
   border: 1px solid #b2f5ea;
 }
 
-/* 정지 상태 (서버 ENUM 값 BANNED 대응) */
+/* [정지됨] - 주황색 계열로 변경 */
 .status-badge.BANNED,
 .status-badge.SUSPENDED { 
+  background-color: #fffaf0; 
+  color: #dd6b20; 
+  border: 1px solid #fbd38d;
+}
+
+/* [탈퇴완료] - 기존 정지됨의 빨간색 스타일 적용[cite: 7] */
+.status-badge.WITHDRAWN,
+.status-badge.DELETED { 
   background-color: #fff5f5; 
   color: #e53e3e; 
   border: 1px solid #feb2b2;
 }
 
-/* 차트 및 미구현 화면 */
+/* 신고 목록 카드 스타일 */
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.report-card {
+  background: #fff;
+  border-radius: 15px;
+  border: 2px solid #eee;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.report-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+
+.report-card-header .nickname-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.report-card-header .target-user {
+  color: #e53e3e;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.report-card-header .reporter-user {
+  color: #666;
+  font-size: 12px;
+}
+
+.report-review-text {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.5;
+  min-height: 60px;
+}
+
+.report-reason-badge {
+  align-self: flex-start;
+  background: #48129e;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+/* 차트 및 기타 레이아웃 */
 .chart-container {
   background: #fff;
   border-radius: 15px;
@@ -206,51 +276,14 @@
   width: 100%;
   height: 500px;
   background-color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #999;
+  font-size: 18px;
 }
 
-/* 모달 */
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
-  display: flex; justify-content: center; align-items: center; z-index: 1000;
-}
-
-.modal-content {
-  background: white;
-  padding: 30px;
-  border-radius: 15px;
-  width: 400px;
-  text-align: center;
-}
-
-.modal-btns {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin: 20px 0;
-}
-.modal-btns button {
-  padding: 10px 5px;
-  border: 1px solid #48129e;
-  border-radius: 8px;
-  cursor: pointer;
-  background: #fff;
-  font-weight: bold;
-  font-size: 13px;
-  transition: background 0.2s;
-}
-
-.modal-btns button:hover {
-  background: #f0ebff;
-}
-
-.btn-close {
-  margin-top: 10px;
-  padding: 10px 20px;
-  border: none;
-  background: #eee;
-  border-radius: 8px;
-  cursor: pointer;
-  width: 100%;
+/* 탈퇴된 행 흐리게 처리 (선택 사항) */
+tr.withdrawn-row {
+  opacity: 0.7;
 }

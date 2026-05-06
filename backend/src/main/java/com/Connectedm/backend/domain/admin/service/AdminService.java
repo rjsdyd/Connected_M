@@ -148,4 +148,11 @@ public class AdminService {
         // 리뷰, 위시리스트 등은 자동으로 함께 삭제됩니다.
         userRepository.deleteById(userId);
     }
+
+    @Transactional
+    public void withdrawUser(Long userId) {
+        // AdminService 안에서도 UserService를 주입받아 사용하거나,
+        // 여기서 직접 User의 상태를 변경하는 로직을 구현합니다.[cite: 5]
+        userService.withdraw(userId);
+    }
 }
