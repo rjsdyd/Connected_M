@@ -3,6 +3,9 @@ package com.Connectedm.backend.domain.content.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.Connectedm.backend.domain.user.entity.ReportReason;
+import com.Connectedm.backend.domain.user.entity.ReviewReport;
+import com.Connectedm.backend.domain.user.repository.ReviewReportRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +28,7 @@ public class ReviewService {
     private final Cine21SourceRepository cine21SourceRepository;
     private final ContentRepository contentRepository;
     private final UserRepository userRepository;
+    private final ReviewReportRepository reviewReportRepository;
 
     // ==========================================================
     // 1. 전문가 리뷰 영역 (크롤링 데이터)
@@ -193,15 +197,29 @@ public class ReviewService {
     }
 
     @Transactional
-    public void reportReview(Long reviewId) {
-        // 1. 해당 리뷰 소환
+    public void reportReview(Long userId, Long reviewId, ReviewReportRequestDto dto) {
+        // 1. 중복 신고 방지 (사령관의 꼼꼼함! ㅋ)
+        if (reviewReportRepository.existsByReporterIdAndReviewId(userId, reviewId)) {
+            throw new IllegalStateException("이미 신고한 리뷰입니다! ㅋ");
+        }
+
+        // 2. 대상 소환 (리뷰, 신고자)
         UserReview userReview = userReviewRepository.findById(reviewId)
                 .orElseThrow(() -> new EntityNotFoundException("리뷰가 없습니다."));
+        User reporter = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
-        // 2. 리뷰 신고 카운트
+        // 3. 기록 박제 (ReviewReport 저장)
+        ReviewReport report = ReviewReport.builder()
+                .reporter(reporter)
+                .review(userReview)
+                .reason(ReportReason.valueOf(dto.getReason())) // Enum 변환 ㅋ
+                .detailReason(dto.getDetailReason()) // 필요시 추가 ㅋ
+                .build();
+        reviewReportRepository.save(report);
+
+        // 4. 연쇄 카운트 업 (기존 로직 유지 ㅋ)
         userReview.increaseReportCount();
-
-        // 3. 리뷰 작성자의 누적 신고 카운트
         User writer = userReview.getUser();
         if (writer != null) {
             writer.increaseReportedCount();

@@ -93,9 +93,14 @@ public class UserReviewController {
      * [POST] 특정 리뷰 신고
      */
     @PostMapping("/contents/reviews/{id}/report")
-    public ResponseEntity<Void> reportReview(@PathVariable Long id,
-                                             @RequestBody(required = false)ReviewReportRequestDto requestDto) {
-        reviewService.reportReview(id);
-        return ResponseEntity.ok().build();
+    @Operation(summary = "리뷰 신고", description = "부적절한 리뷰를 신고합니다. 신고 사유와 상세 내용을 포함할 수 있습니다.")
+    public ApiResponse<String> reportReview(
+            @PathVariable("id") Long reviewId,
+            @AuthenticationPrincipal Long userId, // 💡 신고자 ID 소환!
+            @RequestBody ReviewReportRequestDto requestDto) {
+
+        reviewService.reportReview(userId, reviewId, requestDto);
+
+        return ApiResponse.success("신고가 정상적으로 접수되었습니다. "); // 공통 폼 적용
     }
 }
