@@ -43,7 +43,6 @@ const AdminPage = () => {
   }, []);
 
   const handleStatusChange = async (userId: number, newStatus: string) => {
-    // 서버 UserStatus ENUM 값에 맞춰 매핑
     const serverStatus = newStatus === 'SUSPENDED' ? 'BANNED' : 'ACTIVE';
     const confirmMsg = newStatus === 'ACTIVE' ? "계정을 활성화하시겠습니까?" : "해당 유저를 정지 처리하시겠습니까?";
     
@@ -51,13 +50,11 @@ const AdminPage = () => {
 
     try {
       const token = localStorage.getItem('token');
-      // @PatchMapping("/users/{id}/status") + @RequestParam UserStatus status 대응
       await axios.patch(`http://localhost:8080/api/admin/users/${userId}/status?status=${serverStatus}`, 
         {}, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // 로컬 상태 업데이트 (화면에 즉시 반영)
       setUsers(prev => prev.map(u => u.userId === userId ? { ...u, status: serverStatus } : u));
       alert(serverStatus === 'ACTIVE' ? "계정이 활성화되었습니다." : "정지 처리되었습니다.");
     } catch (error) {
@@ -66,17 +63,26 @@ const AdminPage = () => {
     }
   };
 
+  // ✨ 탈퇴 처리 로직 (수정 및 강화된 부분)
   const handleExit = async (user: any) => {
-    if (window.confirm(`${user.nickname}님을 정말 탈퇴 처리하시겠습니까?`)) {
+    if (window.confirm(`${user.nickname}님을 정말 탈퇴 처리하시겠습니까?\n이 작업은 되돌릴 수 없으며 모든 정보가 삭제됩니다.`)) {
       try {
         const token = localStorage.getItem('token');
+        
+        // 서버에 DELETE 요청 전송
         await axios.delete(`http://localhost:8080/api/admin/users/${user.userId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
+
+        // 성공 시 화면에서 해당 유저 제거
         setUsers(prev => prev.filter(u => u.userId !== user.userId));
         alert("성공적으로 탈퇴 처리되었습니다.");
-      } catch (error) {
-        alert("탈퇴 처리에 실패했습니다.");
+      } catch (error: any) {
+        console.error("탈퇴 처리 실패 상세:", error.response || error);
+        
+        // 서버에서 상세 에러 메시지를 보내주는 경우와 그렇지 않은 경우 대응
+        const errorDetail = error.response?.data?.message || "서버 응답 오류";
+        alert(`탈퇴 처리에 실패했습니다. (원인: ${errorDetail})\n\n유저와 연결된 리뷰나 찜 목록 데이터가 남아있는지 확인이 필요할 수 있습니다.`);
       }
     }
   };
@@ -113,7 +119,6 @@ const AdminPage = () => {
     if (startDate && userDate < startDate) return false;
     if (endDate && userDate > endDate) return false;
     
-    // 서버에서 오는 상태값이 BANNED일 수 있으므로 유연하게 체크
     if (statusFilter !== 'ALL') {
         if (statusFilter === 'ACTIVE' && user.status !== 'ACTIVE') return false;
         if (statusFilter === 'SUSPENDED' && user.status !== 'BANNED' && user.status !== 'SUSPENDED') return false;
@@ -165,6 +170,7 @@ const AdminPage = () => {
                 <span className="date-separator">~</span>
                 <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
               </div>
+              
               <div className="filter-group">
                 <label>상태</label>
                 <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
@@ -173,6 +179,7 @@ const AdminPage = () => {
                   <option value="SUSPENDED">정지됨</option>
                 </select>
               </div>
+
               <div className="filter-group search-group">
                 <input type="text" placeholder="ID, 이메일, 이름, 닉네임 검색..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
               </div>
@@ -224,7 +231,7 @@ const AdminPage = () => {
                 </select>
               </div>
             </div>
-            <div className="chart-container" style={{ width: '100%', height: 450, padding: '20px' }}>
+            <div className="chart-container" style={{ width: '98%', height: 450, padding: '20px' }}>
               <ResponsiveContainer>
                 <BarChart data={processedChartData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />

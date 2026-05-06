@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/admin") // 슬래시(/) 추가로 경로 안정성 확보 ㅋ
+@RequestMapping("/api/admin")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173")
 public class AdminController {
@@ -33,7 +33,7 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getAllUsers(pageable));
     }
 
-    // [GET] 상습 신고 유저 조회 ㅋ (기존 명세 경로 수정: /reported)
+    // [GET] 상습 신고 유저 조회
     @GetMapping("/users/reported")
     public ResponseEntity<List<AdminUserResponseDto>> getReportedUsers() {
         return ResponseEntity.ok(adminService.getReportedUsers());
@@ -48,18 +48,23 @@ public class AdminController {
         return ResponseEntity.ok().build();
     }
 
+    // ✨ [DELETE] 유저 영구 탈퇴 처리 (추가된 부분)
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        adminService.deleteUser(id);
+        return ResponseEntity.ok().build();
+    }
+
     // ==========================================================
     // 2. 리뷰 및 콘텐츠 관리 (Review & Stats)
     // ==========================================================
 
-    // [GET] 신고된 리뷰 목록 조회
     @GetMapping("/reviews/reported")
     public ResponseEntity<List<AdminReviewResponseDto>> getReportedReviews() {
         return ResponseEntity.ok(adminService.getReportedReviews());
     }
 
-    // [PATCH] 리뷰 상태 변경 (NORMAL <-> HIDDEN)
-    @PatchMapping("/reviews/{id}/status") // 복수형 /reviews로 통일 ㅋ
+    @PatchMapping("/reviews/{id}/status")
     public ResponseEntity<Void> updateReviewStatus(
             @PathVariable Long id,
             @RequestParam ReviewStatus status) {
@@ -67,20 +72,17 @@ public class AdminController {
         return ResponseEntity.ok().build();
     }
 
-    // [DELETE] 리뷰 영구 삭제
     @DeleteMapping("/reviews/{id}")
     public ResponseEntity<Void> deleteReview(@PathVariable Long id) {
         adminService.deleteReview(id);
         return ResponseEntity.ok().build();
     }
 
-    // [GET] 콘텐츠 인기 통계 조회 (조회수/찜수 순)
     @GetMapping("/stats/contents")
     public ResponseEntity<List<AdminContentStateResponseDto>> getContentStats() {
         return ResponseEntity.ok(adminService.getContentStats());
     }
 
-    // [GET] 신고된 리뷰 상세 내역 조회 (신고자 리스트 포함)
     @GetMapping("/reviews/reported/{id}")
     public ResponseEntity<AdminReviewReportResponseDto> getReportedReviewDetail(@PathVariable Long id) {
         return ResponseEntity.ok(adminService.getReviewReportDetails(id));
@@ -90,7 +92,6 @@ public class AdminController {
     // 3. 보안 및 시스템 로그 (System Logs)
     // ==========================================================
 
-    // [GET] 전체 로그인 히스토리 조회
     @GetMapping("/logs/login")
     public ResponseEntity<List<LoginLogResponseDto>> getLoginLogs() {
         return ResponseEntity.ok(adminService.getLoginLogs());

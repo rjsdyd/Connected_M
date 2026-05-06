@@ -35,13 +35,8 @@ public class AdminService {
     private final ContentRepository contentRepository;
     private final ReviewReportRepository reviewReportRepository;
 
-    // ==========================================================
-    // 1. [조회] 명세 대응
-    // ==========================================================
+    // ... (기존 조회 메서드들 생략 - 유지됨) ...
 
-    /**
-     * [조회] 신고된 리뷰 목록(신고 많은 순)
-     */
     public List<AdminReviewResponseDto> getReportedReviews() {
         return userReviewRepository.findAllByReportCountGreaterThanOrderByReportCountDesc(0)
                 .stream()
@@ -56,9 +51,6 @@ public class AdminService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * [조회] 특정 리뷰의 지독하게 압도적인 신고 상세 내역!! ㅋㅋㅋㅋ
-     */
     public AdminReviewReportResponseDto getReviewReportDetails(Long reviewId) {
         UserReview review = userReviewRepository.findById(reviewId)
                 .orElseThrow(() -> new EntityNotFoundException("리뷰를 찾을 수 없습니다."));
@@ -82,10 +74,6 @@ public class AdminService {
                 .build();
     }
 
-
-    /**
-     * [조회] 상습 신고 유저 목록(신고 많은 순)
-     */
     public List<AdminUserResponseDto> getReportedUsers() {
         return userRepository.findAllByReportedCountGreaterThanOrderByReportedCountDesc(0)
                 .stream()
@@ -99,17 +87,10 @@ public class AdminService {
                 .collect(Collectors.toList());
     }
 
-
-    /**
-     * [조회] 전체 유저 리스트 조회(통계 포함 최신순)
-     */
     public Page<AdminUserResponseDto> getAllUsers(Pageable pageable) {
         return userRepository.findAllUserStats(pageable);
     }
 
-    /**
-     * [조회] 전체 로그인 히스토리 조회
-     */
     public List<LoginLogResponseDto> getLoginLogs() {
         return loginLogRepository.findAll(Sort.by(Sort.Direction.DESC))
                 .stream()
@@ -124,9 +105,6 @@ public class AdminService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * [조회] 콘텐츠 통계 조회
-     */
     public List<AdminContentStateResponseDto> getContentStats() {
         return contentRepository.findAll(Sort.by(Sort.Direction.DESC, "viewCount"))
                 .stream()
@@ -138,13 +116,11 @@ public class AdminService {
                         .build())
                 .collect(Collectors.toList());
     }
+
     // ==========================================================
     // 2. [변경/처분]
     // ==========================================================
 
-    /**
-     * [PATCH] 리뷰 상태 변경 (NORMAL <-> HIDDEN)
-     */
     @Transactional
     public void updateReviewStatus(Long reviewId, ReviewStatus status) {
         UserReview review = userReviewRepository.findById(reviewId)
@@ -152,21 +128,24 @@ public class AdminService {
         review.changeStatusByAdmin(status);
     }
 
-    /**
-     * [DELETE] 리뷰 삭제
-     */
     @Transactional
     public void deleteReview(Long reviewId) {
         reviewService.deleteUserReview(0L, "ROLE_ADMIN", reviewId);
     }
 
-    /**
-     * [PATCH] 유저 상태 변경(ACTIVE, PENDING, BANNED)
-     */
     @Transactional
     public void updateUserStatus(Long userId, UserStatus status) {
         userService.updateUserStatus(userId,status);
     }
 
-
+    // ✨ [DELETE] 유저 삭제 로직 (추가된 부분)
+    @Transactional
+    public void deleteUser(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new EntityNotFoundException("해당 유저를 찾을 수 없습니다. ID: " + userId);
+        }
+        // User 엔티티의 CascadeType.ALL 설정 덕분에
+        // 리뷰, 위시리스트 등은 자동으로 함께 삭제됩니다.
+        userRepository.deleteById(userId);
+    }
 }
