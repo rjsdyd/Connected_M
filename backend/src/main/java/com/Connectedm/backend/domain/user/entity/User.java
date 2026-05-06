@@ -95,7 +95,7 @@ public class User {
     private List<RecentView> recentViews = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20) // 4:00  추가햇음
     @Builder.Default
     private UserStatus status = UserStatus.ACTIVE;
 
