@@ -7,11 +7,14 @@ const AdminPage = () => {
   const [mainTab, setMainTab] = useState('user'); 
   const [subTab, setSubTab] = useState('filter'); 
   const [users, setUsers] = useState<any[]>([]);
+  const [reportedReviews, setReportedReviews] = useState<any[]>([]); 
 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
+  
+  // ✨ 초기값을 'ACTIVE'(정상)로 설정[cite: 10]
+  const [statusFilter, setStatusFilter] = useState('ACTIVE');
   
   const [summarySortTarget, setSummarySortTarget] = useState<'review' | 'wish'>('review');
   const [selectedMonth, setSelectedMonth] = useState('ALL');
@@ -42,6 +45,23 @@ const AdminPage = () => {
     init();
   }, []);
 
+  useEffect(() => {
+    if (subTab === 'reviews') {
+      const fetchReportedReviews = async () => {
+        try {
+          const token = localStorage.getItem('token');
+          const response = await axios.get('http://localhost:8080/api/admin/reviews/reported', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setReportedReviews(response.data || []);
+        } catch (error) {
+          console.error("신고 목록 조회 실패:", error);
+        }
+      };
+      fetchReportedReviews();
+    }
+  }, [subTab]);
+
   const handleStatusChange = async (userId: number, newStatus: string) => {
     const serverStatus = newStatus === 'SUSPENDED' ? 'BANNED' : 'ACTIVE';
     const confirmMsg = newStatus === 'ACTIVE' ? "계정을 활성화하시겠습니까?" : "해당 유저를 정지 처리하시겠습니까?";
@@ -59,33 +79,56 @@ const AdminPage = () => {
       alert(serverStatus === 'ACTIVE' ? "계정이 활성화되었습니다." : "정지 처리되었습니다.");
     } catch (error) {
       console.error("상태 변경 실패:", error);
-      alert("상태 변경에 실패했습니다. 서버의 CORS 설정이나 로그를 확인하세요.");
+      alert("상태 변경에 실패했습니다.");
     }
   };
 
-  // ✨ 탈퇴 처리 로직 (수정 및 강화된 부분)
   const handleExit = async (user: any) => {
-    if (window.confirm(`${user.nickname}님을 정말 탈퇴 처리하시겠습니까?\n이 작업은 되돌릴 수 없으며 모든 정보가 삭제됩니다.`)) {
+    if (window.confirm(`${user.nickname}님을 정말 탈퇴 처리하시겠습니까?`)) {
       try {
         const token = localStorage.getItem('token');
-        
-        // 서버에 DELETE 요청 전송
-        await axios.delete(`http://localhost:8080/api/admin/users/${user.userId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await axios.patch(`http://localhost:8080/api/user/${user.userId}/withdraw`, 
+          {}, 
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-        // 성공 시 화면에서 해당 유저 제거
-        setUsers(prev => prev.filter(u => u.userId !== user.userId));
+        setUsers(prev => prev.map(u => 
+          u.userId === user.userId 
+            ? { ...u, status: 'WITHDRAWN', nickname: '탈퇴유저_진행됨', email: 'masked@deleted.com' } 
+            : u
+        ));
+        
         alert("성공적으로 탈퇴 처리되었습니다.");
       } catch (error: any) {
-        console.error("탈퇴 처리 실패 상세:", error.response || error);
-        
-        // 서버에서 상세 에러 메시지를 보내주는 경우와 그렇지 않은 경우 대응
-        const errorDetail = error.response?.data?.message || "서버 응답 오류";
-        alert(`탈퇴 처리에 실패했습니다. (원인: ${errorDetail})\n\n유저와 연결된 리뷰나 찜 목록 데이터가 남아있는지 확인이 필요할 수 있습니다.`);
+        console.error("탈퇴 처리 실패:", error);
+        alert("탈퇴 처리에 실패했습니다.");
       }
     }
   };
+
+  const filteredUsers = users.filter(user => {
+    if (!user.createdAt) return false;
+    const userDate = user.createdAt.split('T')[0];
+
+    if (startDate && userDate < startDate) return false;
+    if (endDate && userDate > endDate) return false;
+    
+    // ✨ 필터링 로직 업데이트[cite: 10]
+    if (statusFilter !== 'ALL') {
+        if (statusFilter === 'ACTIVE' && user.status !== 'ACTIVE') return false;
+        if (statusFilter === 'SUSPENDED' && (user.status !== 'BANNED' && user.status !== 'SUSPENDED')) return false;
+        if (statusFilter === 'WITHDRAWN' && user.status !== 'WITHDRAWN') return false;
+    }
+
+    const term = searchTerm.toLowerCase();
+    return (
+      String(user.userId).includes(term) ||
+      (user.email || "").toLowerCase().includes(term) ||
+      (user.nickname || "").toLowerCase().includes(term) ||
+      (user.realName || "").toLowerCase().includes(term) ||
+      (user.phoneNumber || "").includes(term)
+    );
+  });
 
   const processedChartData = useMemo(() => {
     const counts: { [key: string]: number } = {};
@@ -112,32 +155,10 @@ const AdminPage = () => {
     }));
   }, [users, selectedMonth]);
 
-  const filteredUsers = users.filter(user => {
-    if (!user.createdAt) return false;
-    const userDate = user.createdAt.split('T')[0];
-
-    if (startDate && userDate < startDate) return false;
-    if (endDate && userDate > endDate) return false;
-    
-    if (statusFilter !== 'ALL') {
-        if (statusFilter === 'ACTIVE' && user.status !== 'ACTIVE') return false;
-        if (statusFilter === 'SUSPENDED' && user.status !== 'BANNED' && user.status !== 'SUSPENDED') return false;
-    }
-
-    const term = searchTerm.toLowerCase();
-    return (
-      String(user.userId).includes(term) ||
-      (user.email || "").toLowerCase().includes(term) ||
-      (user.nickname || "").toLowerCase().includes(term) ||
-      (user.realName || "").toLowerCase().includes(term) ||
-      (user.phoneNumber || "").includes(term)
-    );
-  });
-
   return (
     <div className="admin-container">
       <header className="admin-header">
-        <h1>관리자 세션으로 접속되었습니다. 공용 PC의 경우 로그아웃 부탁드립니다.</h1>
+        <h1>관리자 세션으로 접속되었습니다.</h1>
       </header>
 
       <div className="tab-group main-tabs">
@@ -177,6 +198,7 @@ const AdminPage = () => {
                   <option value="ALL">전체</option>
                   <option value="ACTIVE">정상</option>
                   <option value="SUSPENDED">정지됨</option>
+                  <option value="WITHDRAWN">탈퇴완료</option> {/* ✨ 옵션 추가[cite: 10] */}
                 </select>
               </div>
 
@@ -202,7 +224,9 @@ const AdminPage = () => {
                       <td>{user.realName}</td>
                       <td>
                         <span className={`status-badge ${user.status}`}>
-                          {user.status === 'ACTIVE' ? '정상' : '정지됨'}
+                          {user.status === 'ACTIVE' ? '정상' : 
+                            user.status === 'BANNED' ? '정지됨' : 
+                            user.status === 'WITHDRAWN' ? '탈퇴완료' : user.status} 
                         </span>
                       </td>
                       <td className="action-cell">
@@ -216,6 +240,30 @@ const AdminPage = () => {
               </table>
             </div>
           </>
+        )}
+        
+        {mainTab === 'user' && subTab === 'reviews' && (
+          <div className="report-grid">
+            {reportedReviews.length > 0 ? (
+              reportedReviews.map((report) => (
+                <div key={report.id} className="report-card">
+                  <div className="report-card-header">
+                    <div className="nickname-group">
+                      <span className="target-user">신고당한 유저: {report.targetNickname}</span>
+                      <span className="reporter-user">신고자: {report.reporterNickname}</span>
+                    </div>
+                  </div>
+                  <div className="report-review-text">{report.reviewText}</div>
+                  <div className="report-footer">
+                    <span className="report-reason-badge">{report.reason}</span>
+                    <small style={{color: '#999'}}>{report.createdAt?.split('T')[0]}</small>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="empty-view">신고된 내역이 없습니다.</div>
+            )}
+          </div>
         )}
         
         {mainTab === 'stats' && subTab === 'newuser' && (
@@ -251,8 +299,8 @@ const AdminPage = () => {
               <div className="filter-group">
                 <label>정렬 기준</label>
                 <select value={summarySortTarget} onChange={(e) => setSummarySortTarget(e.target.value as 'review' | 'wish')}>
-                  <option value="review">리뷰 작성 많은 순</option>
-                  <option value="wish">찜한 영화 많은 순</option>
+                  <option value="review">리뷰 작성이 많은 순</option>
+                  <option value="wish">찜한 영화가 많은 순</option>
                 </select>
               </div>
             </div>
@@ -282,8 +330,6 @@ const AdminPage = () => {
             </div>
           </>
         )}
-
-        {subTab === 'reviews' && <div className="empty-view"></div>}
       </main>
     </div>
   );

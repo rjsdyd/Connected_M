@@ -4,6 +4,7 @@ import com.Connectedm.backend.domain.admin.dto.*;
 import com.Connectedm.backend.domain.admin.service.AdminService;
 import com.Connectedm.backend.domain.content.entity.ReviewStatus;
 import com.Connectedm.backend.domain.user.entity.UserStatus;
+import com.Connectedm.backend.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
+    private final UserService userService;
 
     // ==========================================================
     // 1. 유저 관리 (User Management)
@@ -54,6 +56,13 @@ public class AdminController {
         adminService.deleteUser(id);
         return ResponseEntity.ok().build();
     }
+
+    @PatchMapping("/{userId}/withdraw")
+    public ResponseEntity<Void> adminWithdrawUser(@PathVariable("userId") Long userId) {
+        adminService.withdrawUser(userId); // 👈 AdminService의 메서드를 호출
+        return ResponseEntity.ok().build();
+    }
+
 
     // ==========================================================
     // 2. 리뷰 및 콘텐츠 관리 (Review & Stats)
@@ -96,4 +105,6 @@ public class AdminController {
     public ResponseEntity<List<LoginLogResponseDto>> getLoginLogs() {
         return ResponseEntity.ok(adminService.getLoginLogs());
     }
+
+
 }
