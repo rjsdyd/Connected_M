@@ -3,10 +3,10 @@ import pymysql
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 
-# 1. 보안 금고(.env) 로드 ㅋㅋㅋㅋ
+# 1. 보안 금고(.env) 로드
 load_dotenv()
 
-# 2. DB 설정 최적화 (금고에서 꺼내오기 ㅋ)
+# 2. DB 설정 최적화 (금고에서 꺼내오기 )
 db_config = {
     'host': os.getenv('DB_HOST', 'localhost'),
     'port': int(os.getenv('DB_PORT', 3310)),
@@ -18,9 +18,9 @@ db_config = {
 }
 
 def fill_database():
-    print("🚀 [통합 작전] MariaDB 데이터 최적화 주입을 시작합니다! ㅋ")
+    print("🚀 [통합 작전] MariaDB 데이터 최적화 주입을 시작합니다! ")
     
-    # AI 모델 로드 (캐싱되어 있으면 빠름 ㅋ)
+    # AI 모델 로드 (캐싱되어 있으면 빠름 )
     model = SentenceTransformer('jhgan/ko-sroberta-multitask')
     
     conn = pymysql.connect(**db_config)
@@ -49,9 +49,9 @@ def fill_database():
                     print(f"✨ ID {row['id']} 키워드 이식 중...")
                     cur.execute("UPDATE analysis_cache SET search_keywords = %s WHERE id = %s", (row['top_keywords'], row['id']))
             
-            # 최종 커밋 (한 번에 '딸깍' ㅋ)
+            # 최종 커밋 (한 번에 '딸깍' )
             conn.commit()
-            print("🏁 [작전 성공] 모든 좌표와 키워드가 지독하게 압도적으로 보급되었습니다!! ㅋㅋㅋㅋ")
+            print("🏁 [작전 성공] 모든 좌표와 키워드가 지독하게 압도적으로 보급되었습니다!!")
 
     except Exception as e:
         print(f"❌ 작전 중 사고 발생: {e}")

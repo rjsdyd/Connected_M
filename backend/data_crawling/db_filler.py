@@ -18,7 +18,7 @@ db_config = {
 }
 
 def fill_database():
-    print("🚀 [통합 작전] MariaDB 데이터 전수 조사 및 최적화 주입을 시작합니다! ㅋ")
+    print("🚀 [통합 작전] MariaDB 데이터 전수 조사 및 최적화 주입을 시작합니다!")
 
     # AI 모델 로드
     model = SentenceTransformer('jhgan/ko-sroberta-multitask')
@@ -35,7 +35,7 @@ def fill_database():
             missing_contents = cur.fetchall()
 
             if missing_contents:
-                print(f"🆕 분석 테이블에 없는 새 영화 {len(missing_contents)}건 발견! 빈 접시 까는 중... ㅋ")
+                print(f"🆕 분석 테이블에 없는 새 영화 {len(missing_contents)}건 발견! 빈 접시 까는 중...")
                 for c in missing_contents:
                     # id 컬럼을 추가하고, content_id와 똑같은 값을 꽂아줍니다!
                     cur.execute("""
@@ -72,7 +72,7 @@ def fill_database():
 
             # 최종 커밋
             conn.commit()
-            print("🏁 [작전 성공] 모든 데이터가 지독하게 압도적으로 보급되었습니다!! ㅋㅋㅋㅋ")
+            print("🏁 [작전 성공] 모든 데이터가 지독하게 압도적으로 보급되었습니다!!")
 
     except Exception as e:
         print(f"❌ 작전 중 사고 발생: {e}")

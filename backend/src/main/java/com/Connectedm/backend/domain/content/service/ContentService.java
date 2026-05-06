@@ -148,11 +148,15 @@ public class ContentService {
         String summary = (content.getAnalysisCache() != null) ? content.getAnalysisCache().getSummary() : "분석 중입니다.";
         Double ratio = (content.getAnalysisCache() != null) ? content.getAnalysisCache().getPositiveRatio() : 0.0;
         List<String> keywords = Collections.emptyList();
+        if (content.getAnalysisCache() != null && content.getAnalysisCache().getTopKeywords() != null) {
+            keywords = java.util.Arrays.stream(content.getAnalysisCache().getTopKeywords().split(","))
+                    .map(String::trim)
+                    .collect(Collectors.toList());
+        }
 
         List<ReviewResponseDto> expertReviews = reviewService.getExpertReviews(id);
         List<UserReviewResponseDto> userReviews = reviewService.getUserReviews(id);
-
-        // 🚀 [추가] 평점 통계 데이터 가져오기! ㅋ
+        List<ContentSummaryDto> recommendations = getSemanticRecommendations(id);
         ReviewStatsResponseDto stats = reviewService.getReviewStats(id);
 
         List<TmdbMovieResponseDto.TmdbCastItem> majorCasts = Collections.emptyList();
@@ -184,6 +188,7 @@ public class ContentService {
                 .runtime(content.getRuntime())
                 .ageRating(content.getAgeRating())
                 .trailerKey(tmdbData != null ? tmdbData.getTrailerKey() : null)
+                .recommendations(recommendations)
                 .build();
     }
 
@@ -430,5 +435,52 @@ public class ContentService {
                             .build();
                 })
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 파이썬 FastAPI 서버에 벡터 매칭을 요청하여 진짜 유사한 영화 딱 3개를 가져옵니다.
+     */
+    @Transactional(readOnly = true)
+    public List<ContentSummaryDto> getSemanticRecommendations(Long contentId) {
+        try {
+            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            String pythonUrl = "http://localhost:5000/recommend";
+
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("content_id", contentId);
+            requestBody.put("limit", 3);
+
+            Map<String, Object> response = restTemplate.postForObject(pythonUrl, requestBody, Map.class);
+            List<Map<String, Object>> recs = (List<Map<String, Object>>) response.get("recommendations");
+
+            List<ContentSummaryDto> result = new java.util.ArrayList<>();
+            for (Map<String, Object> rec : recs) {
+                Long id = Long.valueOf(rec.get("id").toString());
+                contentRepository.findById(id).ifPresent(c -> {
+                    Double ratio = (c.getAnalysisCache() != null) ? c.getAnalysisCache().getPositiveRatio() : 0.0;
+
+                    if (ratio > 1.0) {
+                        ratio = ratio / 100.0;
+                    }
+
+                    result.add(ContentSummaryDto.builder()
+                            .id(c.getId())
+                            .title(c.getTitle())
+                            .posterPath(c.getPosterPath())
+                            .positiveRatio(ratio)
+                            .build());
+                });
+            }
+            return result;
+
+        } catch (Exception e) {
+            System.err.println("❌ [AI 추천 에러] 파이썬 서버 연결 실패. 같은 장르로 3개 대체합니다: " + e.getMessage());
+            Content content = contentRepository.findById(contentId).orElse(null);
+            if (content != null && !content.getContentGenres().isEmpty()) {
+                Long genreId = content.getContentGenres().get(0).getGenre().getId();
+                return getRandomMoviesByGenre(genreId, 3);
+            }
+            return Collections.emptyList();
+        }
     }
 }

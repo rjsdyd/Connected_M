@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaStar, FaRegStar, FaStarHalfAlt, FaBookmark, FaRegBookmark, FaChevronLeft, FaChevronRight, FaEdit, FaTrashAlt, FaCheck, FaTimes } from 'react-icons/fa'; // 🚀 FaTimes 등 아이콘 추가
+import { FaStar, FaRegStar, FaStarHalfAlt, FaBookmark, FaRegBookmark, FaChevronLeft, FaChevronRight, FaEdit, FaTrashAlt, FaCheck, FaTimes } from 'react-icons/fa';
 import './MovieDetail.css';
 import { useAuth } from '../../hooks/useAuth';
 import axios from 'axios';
@@ -52,6 +52,12 @@ interface MovieDetailData {
   expertRatingAvg: number;
   expertReviewCount: number
   trailerKey?: string;
+  recommendations?: {
+    id: number;
+    title: string;
+    posterPath: string;
+    positiveRatio: number;
+  }[];
 }
 
 const MovieDetail: React.FC = () => {
@@ -68,8 +74,9 @@ const MovieDetail: React.FC = () => {
   
   const { isLoggedIn, userNickname } = useAuth();
   const [hasReviewed, setHasReviewed] = useState<boolean>(false);
-  const [isWishlisted, setIsWishlisted] = useState<boolean>(false); 
-  //추가
+  const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
+
+  // 신고 관련 상태
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [selectedReviewId, setSelectedReviewId] = useState<number | null>(null);
   const [reportReason, setReportReason] = useState<string>('');
@@ -80,43 +87,41 @@ const MovieDetail: React.FC = () => {
     { value: 'SPOILER', label: '스포일러 포함' },
     { value: 'OTHER', label: '기타 사유' },
   ];
-  //1. 선택된 리뷰의 상세 정보를 담을 상태 추가
+
   const [selectedReviewData, setSelectedReviewData] = useState<{
-  nickname: string;
-  comment: string;
-} | null>(null);
+    nickname: string;
+    comment: string;
+  } | null>(null);
 
-// 2. 신고 아이콘 클릭 시 호출되는 함수 수정
-const handleOpenReport = (reviewId: number, targetNickname: string, targetComment: string) => {
-  setSelectedReviewId(reviewId);
-  setSelectedReviewData({ nickname: targetNickname, comment: targetComment }); // 상세 정보 저장
-  setIsReportModalOpen(true);
-};
-
-  // 3. 제출 함수 수정 (백엔드로 전송)
-const handleReportSubmit = async () => {
-  if (!reportReason) { alert("사유를 선택해주세요."); return; }
-
-  const reportData = {
-    reviewId: selectedReviewId,
-    targetNickname: selectedReviewData?.nickname, // 신고당한 유저 닉네임
-    reason: reportReason,                         // 신고 사유
-    reviewText: selectedReviewData?.comment,      // 신고당한 리뷰 텍스트
-    reporterNickname: userNickname                // 신고한 유저 닉네임
+  const handleOpenReport = (reviewId: number, targetNickname: string, targetComment: string) => {
+    setSelectedReviewId(reviewId);
+    setSelectedReviewData({ nickname: targetNickname, comment: targetComment }); 
+    setIsReportModalOpen(true);
   };
 
-  try {
-    const token = localStorage.getItem('token');
-    await axios.post('http://localhost:8080/api/reports', reportData, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    alert("신고가 정상적으로 접수되었습니다.");
-    setIsReportModalOpen(false);
-    setReportReason('');
-  } catch (error) {
-    alert("신고 접수 중 오류가 발생했습니다.");
-  }
-};
+  const handleReportSubmit = async () => {
+    if (!reportReason) { alert("사유를 선택해주세요."); return; }
+
+    const reportData = {
+      reviewId: selectedReviewId,
+      targetNickname: selectedReviewData?.nickname, 
+      reason: reportReason,                         
+      reviewText: selectedReviewData?.comment,      
+      reporterNickname: userNickname                
+    };
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post('http://localhost:8080/api/reports', reportData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert("신고가 정상적으로 접수되었습니다.");
+      setIsReportModalOpen(false);
+      setReportReason('');
+    } catch (error) {
+      alert("신고 접수 중 오류가 발생했습니다.");
+    }
+  };
 
   const [hasLoggedRecentView, setHasLoggedRecentView] = useState<boolean>(false);
 
@@ -124,7 +129,6 @@ const handleReportSubmit = async () => {
   const [newRating, setNewRating] = useState(0); 
   const [hoverRating, setHoverRating] = useState<number | null>(null);
 
-  // 🚀 [신규 상태] 상세페이지 내 내 리뷰 수정을 위한 상태
   const [isEditingDetail, setIsEditingDetail] = useState(false);
   const [editDetailComment, setEditDetailComment] = useState("");
   const [editDetailRating, setEditDetailRating] = useState(0);
@@ -245,7 +249,6 @@ const handleReportSubmit = async () => {
     } catch (error) { alert("리뷰 등록 실패!"); }
   };
 
-  // 🚀 [신규] 내 리뷰 수정 저장 핸들러
   const handleDetailUpdate = async (reviewId: number) => {
     if (!editDetailComment.trim()) { alert("내용을 입력해주세요."); return; }
     try {
@@ -260,7 +263,6 @@ const handleReportSubmit = async () => {
     } catch (error) { alert("수정 실패!"); }
   };
 
-  // 🚀 [신규] 내 리뷰 삭제 핸들러
   const handleDetailDelete = async (reviewId: number) => {
     if (!window.confirm("리뷰를 삭제하시겠습니까?")) return;
     try {
@@ -295,8 +297,8 @@ const handleReportSubmit = async () => {
   const safeProviders = movie.providers || [];
   const safeExpertReviews = movie.expertReviews || [];
   const safeUserReviews = movie.userReviews || [];
+  const safeKeywords = movie.topKeywords || [];
 
-  // 🚀 [필터링] 내 리뷰는 따로 빼고, 목록에서는 제외
   const myReview = safeUserReviews.find(r => r.nickname === userNickname);
   const otherUserReviews = safeUserReviews.filter(r => r.nickname !== userNickname);
 
@@ -306,7 +308,7 @@ const handleReportSubmit = async () => {
   const runtimeText = hours > 0 ? `${hours}시간 ${minutes}분` : `${minutes}분`;
 
   const expertReviewsSlice = safeExpertReviews.slice((expertPage - 1) * itemsPerPage, expertPage * itemsPerPage);
-  const userReviewsSlice = otherUserReviews.slice((userPage - 1) * itemsPerPage, userPage * itemsPerPage); // 👈 목록은 남의 리뷰만!
+  const userReviewsSlice = otherUserReviews.slice((userPage - 1) * itemsPerPage, userPage * itemsPerPage); 
   const totalExpertPages = Math.ceil(safeExpertReviews.length / itemsPerPage);
   const totalUserPages = Math.ceil(otherUserReviews.length / itemsPerPage);
 
@@ -321,6 +323,11 @@ const handleReportSubmit = async () => {
           <div className="banner-content">
             <div className="poster-area">
               <img src={`https://image.tmdb.org/t/p/w500${movie.posterPath}`} alt={movie.title} className="main-poster" />
+              <div className="detail-keyword-row">
+                {safeKeywords.map((tag, index) => (
+                  <span key={index} className="detail-tag"># {tag}</span>
+                ))}
+              </div>
             </div>
             <div className="info-area">
               <div className="meta-info-row">
@@ -387,7 +394,6 @@ const handleReportSubmit = async () => {
             </section>
             
             {movie.trailerKey && (
-              // 트레일러
               <section className="detail-section">
                 <h2 className="section-title">메인 예고편</h2>
                 <div className="video-container">
@@ -400,6 +406,25 @@ const handleReportSubmit = async () => {
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                   ></iframe>
+                </div>
+              </section>
+            )}
+
+            {movie.recommendations && movie.recommendations.length > 0 && (
+              <section className="detail-section compact-recommendation-section">
+                <h2 className="section-title">
+                  이 작품과 결이 비슷한 영화
+                  <span className="ai-highlight-tag">AI 매칭</span>
+                </h2>
+                <div className="rec-three-grid">
+                  {movie.recommendations.slice(0, 3).map((rec) => (
+                    <div key={rec.id} className="rec-card-compact" onClick={() => window.location.href = `/movie/${rec.id}`}>
+                      <div className="rec-poster-wrapper-compact">
+                        <img src={`https://image.tmdb.org/t/p/w300${rec.posterPath}`} alt={rec.title} />
+                      </div>
+                      <p className="rec-title-compact">{rec.title}</p>
+                    </div>
+                  ))}
                 </div>
               </section>
             )}
@@ -418,8 +443,6 @@ const handleReportSubmit = async () => {
                     <div className="compact-reviewer-meta">
                       <span className="compact-reviewer-name">{maskName(r.criticName)} <small>| {r.source}</small></span>
                       {renderStars(r.rating)}
-                      
-
                     </div>
                     <p className="compact-comment-text">"{r.comment}"</p>
                   </div>
@@ -438,9 +461,7 @@ const handleReportSubmit = async () => {
             <section className="detail-section">
               <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 관람평 {otherUserReviews.length}건 
-                
                 <span className="avg-score-badge user">★ {movie.userRatingAvg?.toFixed(1) || "0.0"}</span>
-
               </h2>
               <div className="compact-card-container">
                 {userReviewsSlice.length > 0 ? userReviewsSlice.map((r) => {
@@ -493,7 +514,6 @@ const handleReportSubmit = async () => {
               {!isLoggedIn ? (
                 <div className="already-reviewed-msg">로그인이 필요합니다.</div>
               ) : hasReviewed && myReview ? (
-                // 🚀 [신규] 이미 작성한 경우: 내 리뷰 카드 + 수정 UI
                 <div className="my-detail-review-card">
                   <div className="card-header-row">
                     <span className="my-label">내가 남긴 리뷰 </span>
@@ -519,7 +539,6 @@ const handleReportSubmit = async () => {
                   {isEditingDetail ? (
                     <div className="write-form-container" style={{padding: 0, marginTop: '10px'}}>
                       <div className="interactive-rating-stars-wrapper" onMouseLeave={() => setDetailHoverRating(null)}>
-                        {/* 0점 조절용 투명 영역 */}
                         <div 
                           className="rating-zero-zone"
                           style={{ width: '20px', minHeight: '30px', cursor: 'pointer' }}
@@ -550,7 +569,6 @@ const handleReportSubmit = async () => {
                         maxLength={200} 
                         autoFocus
                       />
-
                       <div className="char-count" style={{ textAlign: 'right', fontSize: '12px', color: '#888', marginTop: '5px' }}>
                         {editDetailComment.length} / 200
                       </div>
@@ -565,7 +583,6 @@ const handleReportSubmit = async () => {
               ) : (
                 <div className="write-form-container">
                   <div className="interactive-rating-stars-wrapper" onMouseLeave={() => setHoverRating(null)}>
-                    {/* 0점 조절용 투명 영역 */}
                     <div 
                       className="rating-zero-zone"
                       style={{ width: '20px', minHeight: '30px', cursor: 'pointer' }}
@@ -604,8 +621,7 @@ const handleReportSubmit = async () => {
           </div>
         </div>
       </main>
-      {/* 🚀 [신규] 리뷰 신고 모달 */}
-      {/* ★★★ 이 위치에 모달 코드를 넣으세요! ★★★ */}
+      
       {isReportModalOpen && (
         <div className="modal-overlay" onClick={() => setIsReportModalOpen(false)}>
           <div className="report-modal" onClick={(e) => e.stopPropagation()}>

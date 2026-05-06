@@ -41,4 +41,7 @@ public class ContentDetailResponseDto {
 
     // 트레일러 기능
     private String trailerKey;
+
+    // 시맨틱 추천 영화 리스트 필드
+    private List<ContentSummaryDto> recommendations;
 }
