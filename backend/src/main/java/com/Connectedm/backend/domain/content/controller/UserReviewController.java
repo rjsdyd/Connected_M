@@ -5,6 +5,7 @@ import com.Connectedm.backend.domain.content.dto.ReviewReportRequestDto;
 import com.Connectedm.backend.domain.content.dto.UserReviewRequestDto;
 import com.Connectedm.backend.domain.content.service.ReviewService;
 import com.Connectedm.backend.global.common.ApiResponse;
+import com.Connectedm.backend.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ public class UserReviewController {
     @Operation(summary = "리뷰 작성 ", description = "영화 상세페이지에서 별점과 코멘트를 남깁니다.")
     public ApiResponse<String> saveUserReview(
             @RequestParam Long contentId,
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal(expression = "userId") Long userId, // 🚀 expression 추가
             @RequestBody UserReviewRequestDto dto) {
 
         reviewService.saveUserReview(userId, contentId, dto);
@@ -45,10 +46,10 @@ public class UserReviewController {
     @Operation(summary = "리뷰 수정 ", description = "내가 작성한 리뷰를 수정합니다.")
     public ApiResponse<String> updateUserReview(
             @PathVariable("id") Long reviewId,
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal(expression = "userId") Long userId, // 🚀 expression 추가
             @RequestBody UserReviewRequestDto dto) {
 
-         reviewService.updateUserReview(userId, reviewId, dto);
+        reviewService.updateUserReview(userId, reviewId, dto);
         return ApiResponse.success("리뷰가 수정되었습니다!");
     }
 
@@ -60,7 +61,7 @@ public class UserReviewController {
     @Operation(summary = "리뷰 삭제 ", description = "리뷰를 삭제합니다. ")
     public ApiResponse<String> deleteUserReview(
             @PathVariable("id") Long reviewId,
-            @AuthenticationPrincipal Long userId) {
+            @AuthenticationPrincipal(expression = "userId") Long userId) { // 🚀 expression 추가
 
         String role = "USER";
         reviewService.deleteUserReview(userId, role, reviewId);
@@ -74,7 +75,7 @@ public class UserReviewController {
     @GetMapping("/user-reviews/me")
     @Operation(summary = "내 리뷰 조회 ", description = "마이페이지에서 내가 쓴 리뷰 목록을 가져옵니다.")
     public ApiResponse<List<MyPageReviewResponseDto>> getMyReviews(
-            @AuthenticationPrincipal Long userId) { // 💡 진짜 유저 ID 주입
+            @AuthenticationPrincipal(expression = "userId") Long userId) { // 🚀 expression 추가 (💡 진짜 유저 ID 주입 주석 보존)
 
         return ApiResponse.success(reviewService.getMyReviews(userId));
     }
@@ -84,9 +85,9 @@ public class UserReviewController {
      */
     @DeleteMapping("/user-reviews/me")
     @Operation(summary = "내 리뷰 전체 삭제", description = "마이페이지에서 내가 쓴 모든 리뷰를 삭제합니다.")
-    public ApiResponse<String> deleteAllMyReviews(@AuthenticationPrincipal Long userId) {
+    public ApiResponse<String> deleteAllMyReviews(@AuthenticationPrincipal(expression = "userId") Long userId) { // 🚀 expression 추가
         reviewService.deleteAllUserReviews(userId);
-        return ApiResponse.success("모든 리뷰가 삭제되었습니다! ㅋ");
+        return ApiResponse.success("모든 리뷰가 삭제되었습니다!");
     }
 
     /**
@@ -96,7 +97,7 @@ public class UserReviewController {
     @Operation(summary = "리뷰 신고", description = "부적절한 리뷰를 신고합니다. 신고 사유와 상세 내용을 포함할 수 있습니다.")
     public ApiResponse<String> reportReview(
             @PathVariable("id") Long reviewId,
-            @AuthenticationPrincipal Long userId, // 💡 신고자 ID 소환!
+            @AuthenticationPrincipal(expression = "userId") Long userId, // 🚀 expression 추가 (💡 신고자 ID 소환! 주석 보존)
             @RequestBody ReviewReportRequestDto requestDto) {
 
         reviewService.reportReview(userId, reviewId, requestDto);

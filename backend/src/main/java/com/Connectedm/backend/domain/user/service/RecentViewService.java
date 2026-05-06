@@ -18,7 +18,7 @@ import java.util.Optional;
 public class RecentViewService {
 
     private final RecentViewRepository recentViewRepository;
-    private final int MAX_RECENT_COUNT = 10;    // 최근 본 영화 갯(수정 가능)
+    private final int MAX_RECENT_COUNT = 10;    // 최근 본 영화 개수 제한
 
     /**
      * 최근 열람 기록 저장 및 업데이트(UPSERT)
@@ -27,12 +27,13 @@ public class RecentViewService {
     public void saveOrUpdateRecentView(User user, Content content) {
 
         if (user.getStatus() == UserStatus.BANNED) {
-            // 정지된 유저는 기록을 남길 권한이 없습니다. ㅋ
-            // 예외를 던지거나, 조용히 return 시켜서 기록 생성을 막습니다!!
+            // 정지된 유저는 기록을 남길 권한이 없습니다.
             return;
         }
-        // 1. 이미 본 적 있는지 리포지토리 확인
-        Optional<RecentView> existingView = recentViewRepository.findByUserAndContent(user, content);
+
+        // 🚀 [지독한 수정 포인트 1] findByUserAndContent 대신 findTop1...을 사용하여 중복 데이터 에러를 방지합니다.
+        // 이미 DB에 중복 데이터가 쌓여 있어도 에러 없이 가장 최근 기록 하나만 가져옵니다.
+        Optional<RecentView> existingView = recentViewRepository.findTop1ByUserAndContentOrderByViewedAtDesc(user, content);
 
         if (existingView.isPresent()) {
             // 2. 있으면 시간만 갱신
@@ -45,18 +46,22 @@ public class RecentViewService {
                     .build();
             recentViewRepository.save(newView);
 
+            // 🚀 [지독한 수정 포인트 2] 기록이 새로 추가될 때만 개수 제한 로직을 호출합니다.
+            cleanUpOldRecords(user);
+
             if (user.getRecentViews() != null) {
                 user.getRecentViews().add(newView);
             }
         }
     }
+
     /**
-     * 유저별 기록 개수 제한 로직
+     * 유저별 기록 개수 제한 로직 (기존 코드 유지 및 확실한 삭제 보장)
      */
     private void cleanUpOldRecords(User user) {
         Long count = recentViewRepository.countByUser(user);
+        // 설정한 최대 개수(10개)를 초과하면 가장 오래된 것을 지웁니다.
         if (count > MAX_RECENT_COUNT) {
-            // ✨ 버그 수정: 전체 초기화를 막기 위해, 가장 오래된 딱 1개만 찾아서 확실하게 삭제합니다.
             recentViewRepository.findFirstByUserOrderByViewedAtAsc(user)
                     .ifPresent(oldest -> recentViewRepository.delete(oldest));
         }
