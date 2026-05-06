@@ -28,8 +28,13 @@ const MyPage: React.FC = () => {
   ────────────────────────────────────────────────────────── */
     const confirmDeleteAccount = async (): Promise<void> => {
     try {
-      // 백엔드에 탈퇴 요청을 보내서 DB의 status를 바꿉니다.
-      await axios.patch(`http://localhost:8080/api/user/withdraw/${user?.id}`);
+     const token = localStorage.getItem('token'); // 👈 로컬 스토리지에서 토큰 가져오기
+
+    await axios.patch(`http://localhost:8080/api/user/me/withdraw`, {}, {
+      headers: {
+        'Authorization': `Bearer ${token}` // 👈 서버 Security가 인식할 수 있게 토큰 전달
+      }
+    });
 
       // 내 브라우저의 로그인 정보 삭제
       localStorage.removeItem('user');

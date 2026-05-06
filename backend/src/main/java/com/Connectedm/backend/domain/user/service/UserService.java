@@ -1,5 +1,6 @@
 package com.Connectedm.backend.domain.user.service;
 
+import com.Connectedm.backend.domain.content.repository.UserReviewRepository;
 import com.Connectedm.backend.domain.user.dto.UserLoginRequest;
 import com.Connectedm.backend.domain.user.dto.UserResponse;
 import com.Connectedm.backend.domain.user.dto.UserSignupRequest;
@@ -9,6 +10,7 @@ import com.Connectedm.backend.domain.user.entity.UserRole;
 import com.Connectedm.backend.domain.user.entity.UserStatus;
 import com.Connectedm.backend.domain.user.repository.LoginLogRepository;
 import com.Connectedm.backend.domain.user.repository.UserRepository;
+import com.Connectedm.backend.domain.user.repository.WishlistRepository;
 import com.Connectedm.backend.global.error.CustomException;
 import com.Connectedm.backend.global.error.ErrorCode;
 import jakarta.persistence.EntityNotFoundException;
@@ -29,6 +31,9 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final MailService mailService;
     private final LoginLogRepository loginLogRepository;
+    private final UserReviewRepository userReviewRepository;
+    private final WishlistRepository wishlistRepository;
+
 
     @Transactional
     public Long signUp(UserSignupRequest request) {
@@ -197,14 +202,19 @@ public class UserService {
      */
     @Transactional
     public void withdraw(Long userId) {
-        // 1. 내 정보 찾기
+        // 1. 유저만 딱 한 명 찾습니다.
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        // 2. 상태만 'WITHDRAWN'으로
+        // 2. 상태를 WITHDRAWN으로 바꿉니다. (여기서 우진님이 설정한 length=20이 작동합니다!)
         user.setStatus(UserStatus.WITHDRAWN);
 
-        // 3. (옵션) 나중에 로그아웃 처리나 토큰 만료 로직을 여기서 같이 태우면 완벽합니다!!
-        log.info("탈퇴 완료 ID: {}, 닉네임: {}", user.getId(), user.getNickname());
+        // 3. 다른 복잡한 조회 없이 바로 DB에 집어넣습니다.
+        userRepository.saveAndFlush(user);
+
+        log.info("회원 탈퇴 완료: {}", user.getNickname());
+
+        // 💡 중요: 여기서 유저 정보를 다시 리턴하지 마세요!
+        // 그냥 여기서 끝내거나 성공 메시지만 보내야 로그 반복이 멈춥니다.
     }
 }

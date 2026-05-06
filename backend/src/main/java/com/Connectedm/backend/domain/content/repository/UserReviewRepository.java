@@ -2,6 +2,7 @@ package com.Connectedm.backend.domain.content.repository;
 
 import com.Connectedm.backend.domain.content.entity.ReviewStatus;
 import com.Connectedm.backend.domain.content.entity.UserReview;
+import com.Connectedm.backend.domain.user.entity.User; // 👈 이 줄을 꼭 추가해야 합니다!
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,6 +30,10 @@ public interface UserReviewRepository extends JpaRepository<UserReview, Long> {
     @Query("DELETE FROM UserReview ur WHERE ur.user.id = :userId")
     void deleteAllByUserId(@Param("userId") Long userId);
 
+    // 👈 새로 추가할 메서드 (손님이 부르는 이름으로 메뉴 추가!)
+    @Modifying
+    @Transactional
+    void deleteByUser(User user);
     // 정상 노출 상태인 리뷰만 가져오기
     List<UserReview> findAllByContentIdAndStatus(Long contentId, ReviewStatus status);
 
