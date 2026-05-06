@@ -11,11 +11,8 @@ interface LoginModalProps {
 const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
   const navigate = useNavigate();
   
-  // 1. 입력값 상태 관리
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  // 비밀번호 찾기 관련 상태
   const [isFindMode, setIsFindMode] = useState(false); 
   const [realName, setRealName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -45,7 +42,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
     }
   };
 
-  // 로그인 처리 함수 수정본
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -53,8 +49,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
         email,
         password
       });
-
-      console.log("서버 응답 확인:", response.data);
 
       const loginData = response.data.data; 
       const token = loginData.token;
@@ -69,26 +63,17 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
         alert(`${nick}님, 환영합니다!`);
         onClose();
         window.location.reload(); 
-      } else {
-        console.error("데이터 구조 에러: 닉네임이나 토큰이 없습니다.", loginData);
       }
     } catch (error: any) {
-      console.error('로그인 실패 상세:', error);
-
-      // ✨ 서버 에러 응답에 따른 메시지 분기 처리 ✨
       if (error.response) {
         const status = error.response.status;
         const message = error.response.data.message || "";
-
-        // 403 에러가 나거나, 에러 메시지에 'BANNED' 또는 '정지'라는 단어가 있을 경우
         if (status === 403 || message.includes("BANNED") || message.includes("정지")) {
           alert('해당 계정은 정지되었습니다. 관리자에게 문의하세요.');
         } else {
-          // 일반적인 400, 401 에러 (아이디/비번 불일치)
           alert('아이디 또는 비밀번호가 틀렸습니다.');
         }
       } else {
-        // 서버 연결 자체가 안되는 경우
         alert('서버와 연결할 수 없습니다. 관리자에게 문의하세요.');
       }
     }
@@ -128,7 +113,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
         
         {isFindMode ? (
           <form className="login-form" onSubmit={handleFindPassword}>
-            <div className="_modal">
+            <div className="input-group_login_modal">
               <label>이메일</label>
               <input 
                 type="email" 
