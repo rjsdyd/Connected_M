@@ -19,44 +19,63 @@ const MyPage: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   /* ──────────────────────────────────────────────────────────
-     1. 회원탈퇴 모달 상태 관리 (열렸는지 닫혔는지)
+      1. 회원탈퇴 상태 및 모달 관리
   ────────────────────────────────────────────────────────── */
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isWithdrawing, setIsWithdrawing] = useState<boolean>(false);
 
   /* ──────────────────────────────────────────────────────────
-     2. 실제 회원탈퇴 처리 함수 (모달 내 '확인' 버튼 클릭 시)
+      2. 실제 회원탈퇴 처리 함수 (401 방어 로직 추가)
   ────────────────────────────────────────────────────────── */
-    const confirmDeleteAccount = async (): Promise<void> => {
+  const confirmDeleteAccount = async (): Promise<void> => {
+    if (isWithdrawing) return;
+
+    const token = localStorage.getItem('token');
+    
+    // [방어 로직] 토큰이 없으면 요청을 보내지 않고 입구 컷
+    if (!token) {
+      alert("로그인 세션이 만료되었습니다. 다시 로그인해주세요.");
+      navigate('/');
+      return;
+    }
+
     try {
-     const token = localStorage.getItem('token'); // 👈 로컬 스토리지에서 토큰 가져오기
+      setIsWithdrawing(true); 
 
-    await axios.patch(`http://localhost:8080/api/user/me/withdraw`, {}, {
-      headers: {
-        'Authorization': `Bearer ${token}` // 👈 서버 Security가 인식할 수 있게 토큰 전달
-      }
-    });
+      // 401 방지를 위해 헤더를 지독하게 체크하며 전송
+      await axios.patch(`http://localhost:8080/api/user/me/withdraw`, {}, {
+        headers: {
+          'Authorization': `Bearer ${token}` 
+        }
+      });
 
-      // 내 브라우저의 로그인 정보 삭제
       localStorage.removeItem('user');
       localStorage.removeItem('nickname');
       localStorage.removeItem('token');
       
       alert("회원탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.");
       
-      // 메인 페이지로 이동 및 새로고침
       navigate('/');
       window.location.reload();
-    } catch (error) {
+    } catch (error: any) {
       console.error("탈퇴 실패:", error);
-      alert("처리 중 오류가 발생했습니다.");
+      
+      // 401 에러 시 사용자에게 알림
+      if (error.response?.status === 401) {
+        alert("인증에 실패했습니다. 다시 로그인 후 시도해주세요.");
+      } else {
+        alert("처리 중 오류가 발생했습니다.");
+      }
+      
+      setIsWithdrawing(false);
     }
   };
 
   /* ──────────────────────────────────────────────────────────
-     3. 기존 handleDeleteAccount는 모달을 여는 역할만 수행
+      3. 이벤트 핸들러
   ────────────────────────────────────────────────────────── */
   const handleDeleteAccount = () => {
-    setIsModalOpen(true); // 모달창 열기
+    setIsModalOpen(true);
   };
 
   const handleLogout = () => {
@@ -68,8 +87,13 @@ const MyPage: React.FC = () => {
     window.location.reload();
   };
 
+  /* ──────────────────────────────────────────────────────────
+      4. 유저 정보 로딩 로직
+  ────────────────────────────────────────────────────────── */
   useEffect(() => {
     const fetchUser = async () => {
+      if (isWithdrawing) return;
+
       try {
         setLoading(true);
         const storedUser = localStorage.getItem('user');
@@ -91,10 +115,6 @@ const MyPage: React.FC = () => {
         const serverUserData = response.data.data;
         setUser(serverUserData);
 
-        if (serverUserData.role === 'ROLE_ADMIN') {
-          setIsAdmin(true);
-        }
-
       } catch (error) {
         console.error("유저 정보 로딩 실패:", error);
       } finally {
@@ -102,7 +122,7 @@ const MyPage: React.FC = () => {
       }
     };
     fetchUser();
-  }, [navigate]);
+  }, [navigate, isWithdrawing]);
 
   if (loading) return <div className="loading-mypage">로딩 중...</div>;
   if (!user) return null;
@@ -110,7 +130,6 @@ const MyPage: React.FC = () => {
   return (
     <div className="mypage-layout-mypage">
       <div className="mypage-container-mypage">
-        {/* 상단 프로필 영역 */}
         <section className="profile-summary-card-mypage">
           <div className="us-pro-mypage">
             <div className="profile-avatar-mypage">{user.nickname.charAt(0)}</div>
@@ -127,7 +146,6 @@ const MyPage: React.FC = () => {
         </section>
 
         <div className="mypage-content-grid-mypage">
-          {/* 왼쪽 정보 카드 */}
           <aside className="content-side-left-mypage">
             <section className="info-card-fixed-mypage">
               <div className="info-header-fixed-mypage">
@@ -157,7 +175,6 @@ const MyPage: React.FC = () => {
             </section>
           </aside>
 
-          {/* 오른쪽 메뉴 링크 */}
           <div className="content-side-right-mypage">
             <section className="simple-link-card-mypage recent-item" onClick={() => navigate('/recent')}>
               <span className="link-title-mypage">최근에 본 목록</span>
@@ -175,9 +192,6 @@ const MyPage: React.FC = () => {
         </div>
       </div>
 
-      {/* ──────────────────────────────────────────────────────────
-          4. 회원탈퇴 확인 모달 창 UI
-      ────────────────────────────────────────────────────────── */}
       {isModalOpen && (
         <div className="modal-overlay-mypage">
           <div className="modal-content-mypage">
@@ -189,7 +203,13 @@ const MyPage: React.FC = () => {
               탈퇴 시 모든 데이터 및 개인정보가 <strong>영구 삭제</strong>되며 복구되지 않습니다.
             </p>
             <div className="modal-footer-mypage">
-              <button className="btn-confirm-mypage" onClick={confirmDeleteAccount}>확인</button>
+              <button 
+                className="btn-confirm-mypage" 
+                onClick={confirmDeleteAccount}
+                disabled={isWithdrawing}
+              >
+                {isWithdrawing ? "처리 중..." : "확인"}
+              </button>
               <button className="btn-cancel-mypage" onClick={() => setIsModalOpen(false)}>취소</button>
             </div>
           </div>

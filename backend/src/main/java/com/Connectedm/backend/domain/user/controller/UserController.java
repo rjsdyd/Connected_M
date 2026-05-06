@@ -9,6 +9,7 @@ import com.Connectedm.backend.domain.user.service.UserService;
 import com.Connectedm.backend.global.common.ApiResponse;
 import com.Connectedm.backend.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -89,16 +90,11 @@ public class UserController {
 
     // 회원 탈퇴
     @PatchMapping("/me/withdraw")
-    public ResponseEntity<Void> withdraw(
-            @AuthenticationPrincipal CustomUserDetails userDetails // 👈 현재 로그인한 유저 정보 낚아채기
-    ) {
-        // 1. 시큐리티 세션에서 ID(PK)를 추출합니다
-        Long userId = userDetails.getUserId();
-
-        // 2. 서비스 레이어에 '탈퇴' 명령 하달
-        userService.withdraw(userId);
-
-        // 3. 지독하게 압도적인 성공 응답(204 No Content) 반환!! ㅋㅋㅋㅋ
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> withdraw(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 500 대신 401 반환
+        }
+        userService.withdraw(userDetails.getUserId());
+        return ResponseEntity.ok().build();
     }
 }

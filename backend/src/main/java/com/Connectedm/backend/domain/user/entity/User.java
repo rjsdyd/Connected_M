@@ -21,7 +21,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = true, unique = true, length = 100)
+    @Column(nullable = true, unique = true, length = 255)
     private String email;
 
     @Column(nullable = false, length = 255)
@@ -95,7 +95,7 @@ public class User {
     private List<RecentView> recentViews = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20) // 4:00  추가햇음
+    @Column(nullable = false, length = 50) // 4:00  추가햇음
     @Builder.Default
     private UserStatus status = UserStatus.ACTIVE;
 
