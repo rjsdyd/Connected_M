@@ -1,6 +1,6 @@
-import React, { useState } from 'react'; // useState 추가
+import React, { useState } from 'react'; 
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // axios 추가
+import axios from 'axios'; 
 import logo from '../../assets/img/Project_M_Logo.png'
 import './LoginModal.css'
 
@@ -11,11 +11,11 @@ interface LoginModalProps {
 const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
   const navigate = useNavigate();
   
-  // 1. ✨ 입력값 상태 관리
+  // 1. 입력값 상태 관리
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // 비밀번호 찾기
+  // 비밀번호 찾기 관련 상태
   const [isFindMode, setIsFindMode] = useState(false); 
   const [realName, setRealName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -27,29 +27,25 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
     return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`;
   };
 
-  // 1. ✨ 이 함수를 handleSubmit 위에 추가하세요!
   const handleSocialLogin = (provider: 'kakao' | 'google') => {
-    // 8080(백엔드)의 시큐리티가 기다리고 있는 주소로 보냅니다.
     window.location.href = `http://localhost:8080/oauth2/authorization/${provider}`;
   };
 
-  // 2. ✨ 비밀번호 찾기(이메일 발송) 처리 함수 추가
   const handleFindPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // 백엔드 컨트롤러가 @RequestParam을 사용하므로 params에 실어 보냅니다.
       await axios.post('http://localhost:8080/api/auth/password-reset/request', null, {
         params: { email, realName, phoneNumber }
       });
       alert("입력하신 이메일로 인증 링크를 발송했습니다!");
-      setIsFindMode(false); // 성공 시 다시 로그인 모드로 변경
+      setIsFindMode(false);
     } catch (error) {
       console.error('인증 실패:', error);
       alert('일치하는 사용자 정보를 찾을 수 없습니다.');
     }
   };
 
-  // 2. ✨ 로그인 처리 함수
+  // 로그인 처리 함수 수정본
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -60,27 +56,41 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
 
       console.log("서버 응답 확인:", response.data);
 
-      // 📦 백엔드 구조: { success: true, data: { token: "...", user: { nickname: "...", ... } } }
       const loginData = response.data.data; 
       const token = loginData.token;
-      const user = loginData.user; // UserResponse 객체
+      const user = loginData.user; 
       const nick = user.nickname;
 
       if (nick && token) {
-        // 로컬 스토리지 저장
         localStorage.setItem('token', token);
         localStorage.setItem('nickname', nick);
-        localStorage.setItem('user', JSON.stringify(user)); // 유저 객체 통째로 저장
+        localStorage.setItem('user', JSON.stringify(user)); 
         
         alert(`${nick}님, 환영합니다!`);
         onClose();
-        window.location.reload(); // 새로고침해서 MovieDetail에 로그인 상태 반영
+        window.location.reload(); 
       } else {
         console.error("데이터 구조 에러: 닉네임이나 토큰이 없습니다.", loginData);
       }
-    } catch (error) {
-      console.error('로그인 실패:', error);
-      alert('아이디 또는 비밀번호가 틀렸습니다.');
+    } catch (error: any) {
+      console.error('로그인 실패 상세:', error);
+
+      // ✨ 서버 에러 응답에 따른 메시지 분기 처리 ✨
+      if (error.response) {
+        const status = error.response.status;
+        const message = error.response.data.message || "";
+
+        // 403 에러가 나거나, 에러 메시지에 'BANNED' 또는 '정지'라는 단어가 있을 경우
+        if (status === 403 || message.includes("BANNED") || message.includes("정지")) {
+          alert('해당 계정은 정지되었습니다. 관리자에게 문의하세요.');
+        } else {
+          // 일반적인 400, 401 에러 (아이디/비번 불일치)
+          alert('아이디 또는 비밀번호가 틀렸습니다.');
+        }
+      } else {
+        // 서버 연결 자체가 안되는 경우
+        alert('서버와 연결할 수 없습니다. 관리자에게 문의하세요.');
+      }
     }
   };
 
@@ -118,7 +128,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
         
         {isFindMode ? (
           <form className="login-form" onSubmit={handleFindPassword}>
-            <div className="input-group_login">
+            <div className="_modal">
               <label>이메일</label>
               <input 
                 type="email" 
@@ -128,7 +138,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
                 required
               />
             </div>
-            <div className="input-group_login">
+            <div className="input-group_login_modal">
               <label>이름</label>
               <input 
                 type="text" 
@@ -138,7 +148,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
                 required
               />
             </div>
-            <div className="input-group_login">
+            <div className="input-group_login_modal">
               <label>전화번호</label>
               <input 
                 type="text" 
@@ -153,7 +163,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
           </form>
         ) : (
           <form className="login-form" onSubmit={handleSubmit}>
-            <div className="input-group_login">
+            <div className="input-group_login_modal">
               <label>이메일</label>
               <input 
                 type="email" 
@@ -163,7 +173,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
                 required
               />
             </div>
-            <div className="input-group_login">
+            <div className="input-group_login_modal">
               <label>비밀번호</label>
               <input 
                 type="password" 

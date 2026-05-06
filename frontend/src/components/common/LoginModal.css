@@ -78,10 +78,10 @@ input, input::placeholder {
 }
 
 /* ============== input-group ============== */
-.input-group_login { 
+.input-group_login_modal { 
   margin-bottom: 16px; 
 }
-.input-group_login label { 
+.input-group_login_modal label { 
   display: block; 
   font-size: 11px; 
   font-weight: 900; 
@@ -90,7 +90,7 @@ input, input::placeholder {
   margin-left: 10px; 
 }
 
-.input-group_login input { 
+.input-group_login_modal input { 
   width: 100%; 
   padding: 14px 20px; 
   background-color: #f9fafb; 
@@ -101,7 +101,7 @@ input, input::placeholder {
   transition: border 0.2s; 
 }
 
-.input-group_login input:focus { 
+.input-group_login_modal input:focus { 
   border-color: #4b0082; 
   background-color: white; 
 }
