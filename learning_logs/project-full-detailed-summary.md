@@ -1,5 +1,10 @@
 # Connected_M 전체 프로젝트 상세 정리
 
+## 요약
+- React/TypeScript 프론트엔드와 Spring Boot 백엔드, Python AI 챗봇/데이터 모듈이 통합된 영화 추천 서비스입니다.
+- 검색, 상세 정보, 찜/리뷰/최근 본 목록, 소셜 로그인, AI 챗봇 상담 기능을 제공합니다.
+- `App.tsx` 기반 SPA 라우팅과 공통 레이아웃, JWT 인증/토큰 관리, TMDB API 연동이 핵심입니다.
+
 ## 1. 전체 개요
 Connected_M은 React/TypeScript 기반의 프론트엔드와 Spring Boot 기반의 메인 백엔드, 그리고 Python 기반의 AI 챗봇 및 데이터 수집 모듈이 결합된 복합 프로젝트입니다.
 
@@ -47,6 +52,21 @@ App.tsx는 다음 경로를 연결합니다:
 - `/ott/:providerName` → `OttPage`
 - `/keyword` → `KeywordPage`
 - `/admin` → `AdminPage`
+
+### 2.2.1 라우트/컴포넌트 매핑과 파일 관계
+- `App.tsx`는 `Header`, `Footer`, `Chatbot`, `LoginModal`을 포함하여 공통 레이아웃을 구성하고, `Routes`로 페이지 컴포넌트를 연결합니다.
+- `Header.tsx`는 검색 입력과 카테고리/OTT 네비게이션을 관리하며, `navigate()`로 `/search`, `/genre/:genreName`, `/ott/:providerName`, `/mypage` 등으로 이동합니다.
+- `LoginModal.tsx`는 로그인/소셜 로그인/비밀번호 재설정 기능을 제공하며, 인증 성공 시 `localStorage`에 `token`과 `nickname`을 저장하고 `App.tsx`에서 상태를 갱신합니다.
+- `/oauth2/redirect` 경로는 `OAuth2RedirectHandler.tsx`가 처리하며, `useAuthCheck.tsx`에서 쿼리 파라미터를 파싱하고 필요 시 `ExtraInfo.tsx`로 이동합니다.
+- `Home.tsx`는 메인 화면으로, 추천 영화 슬라이더와 장르별 콘텐츠 탭을 렌더링하고 `searchHistory`를 `localStorage`에 저장합니다.
+- `SearchResult.tsx`는 `q` 쿼리 파라미터 기반 검색 결과를 요청하고, 검색 결과 항목 클릭 시 `navigate('/movie/' + id)`로 `MovieDetail`로 연결합니다.
+- `MovieDetail.tsx`는 `/movie/:id` 경로에서 상세 정보를 로드하고, 찜(`WishlistPage` 연결), 리뷰, 최근 본 목록 및 OTT 링크를 관리합니다.
+- `MyPage.tsx`는 하위 페이지(`EditProfile`, `WishlistPage`, `MyReviewsPage`, `RecentPage`)를 렌더링하며, 로그인된 사용자 전용으로 동작합니다.
+- `GenrePage.tsx`와 `OttPage.tsx`는 각각 장르 및 OTT 서비스 필터를 처리하며, `Header`와 `Home`의 네비게이션 흐름과 연결됩니다.
+- `KeywordPage.tsx`는 키워드 기반 탐색을 제공하며 `/keyword` 경로로 이동 시 검색 UI를 표시합니다.
+- `Terms.tsx`, `Privacy.tsx`는 약관/개인정보처리방침 페이지로 별도 라우트만 담당합니다.
+- `AdminPage`는 관리자 전용 UI로 `/admin` 경로에서 접근됩니다.
+- API 호출은 페이지/컴포넌트별로 백엔드 엔드포인트에 매핑되며, `Chatbot.tsx`는 `/api/ai/recommend`, `LoginModal.tsx`는 `/api/auth/login`, `MovieDetail.tsx`는 `/api/contents/*`, `WishlistPage`는 `/api/members/wishlist/*` 등을 호출합니다.
 
 ### 2.3 인증/토큰 처리
 - `src/hooks/useAuth.tsx`
@@ -651,27 +671,115 @@ App.tsx는 다음 경로를 연결합니다:
 ## 4. 프론트엔드 ↔ 백엔드 연결 관계
 
 ### 4.1 인증/로그인
-- 프론트엔드 `Header`, `LoginModal` 등은 로그인 상태를 로컬스토리지로 관리
-- OAuth2 로그인 후 `useAuthCheck`가 리다이렉트 결과를 파싱하여 토큰 저장
-- 백엔드 `domain/auth/AuthController`와 `SecurityConfig`가 소셜 로그인/토큰 검증 처리
+- `frontend/src/components/common/LoginModal.tsx`는 이메일/비밀번호 로그인, 회원가입, 비밀번호 재설정, 소셜 로그인 버튼을 처리합니다.
+- 로그인 요청은 `/api/auth/login`에 `UserLoginRequest` 형태로 POST되어 `backend/src/main/java/com/Connectedm/backend/domain/auth/AuthController.login()`에 도달합니다.
+- `AuthController.login()`은 `UserService.login()`을 호출하여 `UserRepository.findByEmail()`로 사용자 조회, `PasswordEncoder`로 비밀번호 검증, JWT를 생성하고 `LoginResponse`를 반환합니다.
+- 회원가입은 `/api/auth/signup`에 `UserSignupRequest`로 요청되어 `UserService.signUp()`이 `UserRepository.existsByEmail()`/`existsByNickname()`/`existsByPhoneNumber()` 중복 검사를 하고 `User` 엔티티를 저장합니다.
+- 비밀번호 재설정은 `/api/auth/reset-password`에 `PasswordResetRequest`를 전달하고 `UserService.verifyAndSendResetLink()`가 이메일 토큰 생성 및 `MailService` 발송을 수행합니다.
+- 소셜 로그인은 `LoginModal.tsx`의 `handleSocialLogin()`이 `AuthController.oauth2Login()` URL로 리디렉션하고, 콜백은 `/oauth2/redirect`에서 `frontend/src/pages/Auth/OAuth2RedirectHandler.tsx`가 처리합니다.
+- `frontend/src/hooks/useAuthCheck.tsx`는 OAuth2 콜백 쿼리를 파싱하고 `token`, `nickname`, `needInfo` 값을 로컬스토리지에 저장하거나 `/extra-info`로 이동시킵니다.
+- 백엔드 `backend/src/main/java/com/Connectedm/backend/config/SecurityConfig.java`는 JWT 필터와 OAuth2 로그인 설정을 정의하며 `CustomUserDetailsService`에서 DB 사용자 조회를 수행합니다.
 
 ### 4.2 콘텐츠/검색
-- 프론트엔드 검색/영화 상세/장르/OTT/키워드 페이지는 백엔드 `domain/content` API 호출
-- 메인 페이지와 검색 화면은 `ContentService`, `SearchService`, `SemanticSearchService`를 통해 데이터 제공
-- `TmdbService`는 TMDB API를 연동하여 외부 영화 데이터를 확보
+- `frontend/src/pages/Home/Home.tsx`, `GenrePage.tsx`, `OttPage.tsx`, `SearchResult.tsx`, `KeywordPage.tsx`, `MovieDetail/Moviedetail.tsx`는 모두 `backend`의 `domain/content` API를 호출합니다.
+- `Home.tsx`는 `GET /api/contents/random`과 `GET /api/contents/category?genreId=`를 호출하여 `ContentController.getRandomMovies()`와 `ContentController.getCategoryMovies()`를 사용합니다.
+- `SearchResult.tsx`는 검색어 `q`로 `/api/contents/search?query=`를 호출하고 `ContentController.searchMovies()`가 `SearchService.searchHybrid()`를 통해 title 검색 결과와 AI 의미 검색을 통합합니다.
+- 의미 검색이 활성화되면 `ContentController.searchSemantic()`이 `SemanticSearchService.searchBySemantic()`를 호출하여 `AnalysisCacheRepository.findByContentId()`와 `ContentRepository.findBySemanticSearch()`를 사용합니다.
+- `GenrePage.tsx`는 `GET /api/contents/genre/{genreName}` 또는 `GET /api/contents/genre?name=` 형태로 `ContentController.getMoviesByGenreName()`를 사용하여 `GenreRepository.findByName()`과 `ContentGenreRepository.findByGenre()`를 조회합니다.
+- `OttPage.tsx`는 `GET /api/contents/ott/{providerName}`로 `ContentController.getMoviesByOtt()`를 호출하고 `ContentRepository.findByOttLogosContaining()`을 통해 OTT별 영화 리스트를 가져옵니다.
+- `MovieDetail/Moviedetail.tsx`는 `GET /api/contents/{id}`를 호출하여 `ContentController.getContentDetail()`과 `ContentService.getContentDetail()`이 `ContentRepository.findWithCacheById()`, `AnalysisCacheRepository.findByContentId()`, `ExpertReviewRepository.findByContentId()`, `UserReviewRepository.findByContentId()`를 사용합니다.
+- `ContentService.updateContentWithTmdb()`는 필요 시 `TmdbService.getMovieDetail()`을 호출하여 TMDB 외부 데이터를 보강하고 `Content.updateTmdbInfo()`를 저장합니다.
 
-### 4.3 마이페이지
-- 사용자 활동 데이터는 백엔드 `domain/user`에 저장
-- 찜 목록, 최근 본 목록, 내 리뷰, 프로필 수정이 `WishlistController`, `RecentViewController`, `UserController`에서 처리
-- 프론트엔드 `MyPage` 하위 페이지는 해당 API를 소비
+### 4.3 주요 백엔드 엔드포인트 매핑
+- `frontend/src/components/common/LoginModal.tsx`
+  - 로그인: POST `/api/auth/login` → `domain/auth/AuthController.login()` → `UserService.login()` → `UserRepository.findByEmail()` → `LoginResponse`
+  - 회원가입: POST `/api/auth/signup` → `AuthController.signup()` → `UserService.signUp()` → `UserRepository.save()`
+  - 비밀번호 재설정: POST `/api/auth/reset-password` → `AuthController.resetPassword()` → `UserService.verifyAndSendResetLink()` → `MailService.sendResetEmail()`
+  - 소셜 로그인: GET `/api/auth/oauth2/authorize/{provider}` → `AuthController.oauth2Login()`, 콜백 `AuthController.oauth2Callback()` → OAuth2 provider 토큰 처리 및 JWT 발급
+- `frontend/src/pages/Auth/OAuth2RedirectHandler.tsx`
+  - OAuth2 콜백 결과 처리 후 `frontend/src/hooks/useAuthCheck.tsx`가 `token`, `nickname`, `needInfo`를 localStorage에 저장하고 `navigate('/extra-info')` 또는 `/` 이동을 결정합니다.
+- `frontend/src/components/layout/Header.tsx`
+  - 검색어 제출 시 `navigate('/search?q=' + searchTerm)`
+  - 장르 버튼 클릭 시 `navigate('/genre/' + genreName)` → `GenrePage.tsx`
+  - OTT 버튼 클릭 시 `navigate('/ott/' + providerName)` → `OttPage.tsx`
+  - 로그인 버튼/마이페이지 버튼은 `localStorage.token`을 확인하여 모달 표시 또는 `/mypage` 이동
+- `frontend/src/pages/Home/Home.tsx`
+  - 랜덤 추천: `GET /api/contents/random` → `ContentController.getRandomMovies()` → `ContentService.getRandomMovies()` → `ContentRepository.findRandomContents()`
+  - 장르별 섹션: `GET /api/contents/category?genreId=` → `ContentController.getCategoryMovies()` → `ContentRepository.findByGenreId()`
+- `frontend/src/pages/SearchResult/SearchResult.tsx`
+  - 키워드 검색: `GET /api/contents/search?query=` → `ContentController.searchMovies()` → `SearchService.searchHybrid()`
+  - 페이지네이션과 필터링은 프론트엔드에서 `results` 상태를 관리하고 `ContentSearchResponse` DTO 목록을 렌더링
+- `frontend/src/pages/MovieDetail/Moviedetail.tsx`
+  - 상세 페이지: `GET /api/contents/{id}` → `ContentController.getContentDetail()` → `ContentService.getContentDetail()` → `ContentDetailResponseDto`
+  - 찜: POST/DELETE `/api/members/wishlist/{id}` → `WishlistController.toggleWishlist()` → `WishlistService.toggleWishlist()` → `WishlistRepository.findByUserAndContent()` / `save()` / `delete()`
+  - 최근 본: POST `/api/users/recent/{id}` → `RecentViewController.saveOrUpdateRecentView()` → `RecentViewService.saveOrUpdateRecentView()` → `RecentViewRepository.findTop1ByUserAndContentOrderByViewedAtDesc()`
+  - 리뷰: POST/PUT/DELETE `/api/contents/user-reviews` → `UserReviewController` → `ReviewService.saveUserReview()` / `updateUserReview()` / `deleteUserReview()`
+- `frontend/src/components/chatbot/Chatbot.tsx`
+  - 챗봇 요청: POST `/api/ai/recommend` 또는 `/api/ai/chat` → `AiController.chat()` → `AiService.processChat()` → `AiService.callPythonAiServer()` → `ChatBot/main.py`
+  - 서버 응답은 `ChatResponse` 형태로 받아 프론트엔드 `messages` 리스트에 추가
+- `frontend/src/pages/MyPage/MyPage.tsx` 및 하위 페이지
+  - `GET /api/users/mypage` → `UserController.getMyPage()` → `MyPageService.getMyPageInfo()` → `MyPageResponseDto`
+  - 프로필 업데이트: PUT `/api/users/extra-info` → `UserController.updateExtraInfo()` → `UserService.updateProfile()`
+  - 찜 목록 조회: GET `/api/members/wishlist` → `WishlistController.getMyWishlist()` → `WishlistService.getMyWishlist()` → `WishlistResponse`
+  - 최근 본 조회: GET `/api/users/recent` → `RecentViewController.getRecentViews()` → `RecentViewService.getRecentViews()` → `RecentViewResponseDto`
+  - 내 리뷰 조회: GET `/api/contents/user-reviews/my` → `UserReviewController.getMyReviews()` → `ReviewService.getMyReviews()`
+- `frontend/src/pages/admin/adminpage.tsx`
+  - 사용자 목록: GET `/api/admin/users` → `AdminController.getAllUsers()` → `AdminService.getAllUsers()`
+  - 신고 사용자: GET `/api/admin/reported-users` → `AdminController.getReportedUsers()` → `AdminService.getReportedUsers()`
+  - 리뷰 신고 목록: GET `/api/admin/reported-reviews` → `AdminController.getReportedReviews()` → `AdminService.getReportedReviews()`
+  - 상태 변경: PUT `/api/admin/users/status` 또는 `/api/admin/reviews/status` → `AdminController.updateUsersStatus()` / `updateReviewStatus()`
 
-### 4.4 AI 챗봇
-- 백엔드 메인 서버는 `external-api.python-ai-url`로 `ChatBot` AI 서버에 요청
-- `ChatBot/main.py`는 채팅 세션과 메시지를 관리하고 Gemini AI 결과를 반환
+### 4.4 백엔드 도메인 연결
+- 인증 도메인
+  - `backend/src/main/java/com/Connectedm/backend/domain/auth/AuthController.java`는 `/api/auth/**` 경로를 처리합니다.
+  - `AuthController`는 `UserService`, `MailService`, `JwtTokenProvider`를 사용합니다.
+  - `UserService`는 `UserRepository`, `PasswordEncoder`, `MailService`, `JwtTokenProvider`를 함께 호출하여 사용자 생성/인증/토큰 발급/비밀번호 재설정 로직을 완성합니다.
+  - `backend/src/main/java/com/Connectedm/backend/global/security/CustomUserDetailsService.java`는 JWT기반 사용자 인증을 위해 `UserRepository.findByEmail()`을 사용합니다.
+- 사용자 도메인
+  - `backend/src/main/java/com/Connectedm/backend/domain/user/UserController.java`는 마이페이지 정보, 추가 정보 수정, 닉네임 확인, 회원 탈퇴 경로를 제공합니다.
+  - `WishlistController.java`는 `WishlistRepository`와 `WishlistService`를 통해 `User`/`Content` 관계를 관리합니다.
+  - `RecentViewController.java`는 `RecentViewRepository`를 사용하여 최근 본 콘텐츠 저장과 조회를 수행합니다.
+  - `UserService`가 `UserRepository`를 통해 `findByEmail()`/`existsByNickname()`/`findByPasswordResetToken()`을 사용합니다.
+- 콘텐츠 도메인
+  - `ContentController.java`와 `MainController.java`는 `ContentService`와 `TmdbService`를 호출하여 콘텐츠 리스트와 상세 정보를 제공합니다.
+  - `ContentService.getContentDetail()`은 `ContentRepository.findWithCacheById()`로 콘텐츠를 불러오고 `AnalysisCacheRepository.findByContentId()`로 AI 분석 데이터를 결합합니다.
+  - `SearchService.searchHybrid()`는 `ContentRepository.findByTitleContaining()`과 `SemanticSearchService.searchBySemantic()` 결과를 병합합니다.
+  - `SemanticSearchService.searchBySemantic()`은 `AnalysisCacheRepository.findAllByContentIdIn()` 또는 `ContentRepository.findBySemanticSearch()`를 사용하여 의미 유사도 기반 콘텐츠를 필터링합니다.
+  - `TmdbService.getMovieDetail()`은 TMDB API에서 `poster_path`, `watchProviders`, `videos`, `releaseDates`를 받아 `TmdbMovieResponseDto`로 매핑하고 `Content.updateTmdbInfo()`를 호출합니다.
+- 리뷰 도메인
+  - `UserReviewController.java`는 사용자 리뷰 CRUD 요청을 받고 `ReviewService`로 위임합니다.
+  - `ReviewService.saveUserReview()`는 `UserReviewRepository.existsByUserIdAndContentId()`로 중복 리뷰를 검사하고, 새로운 `UserReview`를 저장합니다.
+  - `ReviewService.reportReview()`는 `ReviewReportRepository.existsByReporterIdAndReviewId()`로 신고 중복을 방지하고 `ReviewReport` 엔티티를 생성합니다.
+- AI 도메인
+  - `AiController.java`는 `/api/ai/recommend` 또는 `/api/ai/chat` 요청을 처리합니다.
+  - `AiService.processChat()`은 `ChatSessionRepository`와 `ChatMessageRepository`를 사용하여 `ChatSession`과 `ChatMessage`를 생성/조회합니다.
+  - `AiService.callPythonAiServer()`는 `backend/src/main/resources/application.properties`의 `external-api.python-ai-url`에 POST 요청을 보내 `ChatBot/main.py`의 `/api/chat`을 호출합니다.
+- 관리자 도메인
+  - `AdminController.java`는 `/api/admin/**` 환경을 관리합니다.
+  - `AdminService`는 `UserRepository`, `UserReviewRepository`, `LoginLogRepository`, `ContentRepository`, `ReviewReportRepository`를 사용하여 통계와 신고 관리 기능을 구현합니다.
+- 공통 도메인
+  - `domain/common/StatusValidator.java`와 `global/error`는 요청 검증과 예외 처리 로직을 공유합니다.
 
-### 4.5 관리자 기능
-- `/admin` 페이지는 백엔드 `domain/admin/AdminController`와 연결
-- 관리자용 통계, 리뷰 신고, 사용자 관리 기능 제공
+### 4.5 마이페이지
+- 프론트엔드 `frontend/src/pages/MyPage/MyPage.tsx`는 `UserController.getMyPage()`와 `WishlistController.getMyWishlist()`, `RecentViewController.getRecentViews()`를 호출합니다.
+- `EditProfile.tsx`는 `/api/users/extra-info`로 PUT 요청을 보내 `UserService.updateProfile()`를 실행합니다.
+- `WishlistPage.tsx`와 `RecentPage.tsx`는 각각 `WishlistResponse`와 `RecentViewResponseDto`를 받아 UI로 렌더링합니다.
+- `MyReviewsPage.tsx`는 `UserReviewController.getMyReviews()`로 `MyPageReviewResponseDto` 배열을 받아 리뷰 목록을 표시합니다.
+
+### 4.6 AI 챗봇
+- `frontend/src/components/chatbot/Chatbot.tsx`는 사용자 입력을 `ChatRequest` 형식으로 변환하여 `POST /api/ai/recommend`에 전송합니다.
+- `backend/domain/ai/AiController.chat()`는 `AiService.processChat()`을 호출합니다.
+- `AiService.processChat()`은 세션이 없으면 `getOrCreateSession()`으로 `ChatSession`을 생성하고, `ChatMessage`를 저장한 뒤 `callPythonAiServer()`로 AI 응답을 가져옵니다.
+- Python `backend/ChatBot/main.py`는 `/api/chat/session`에서 세션을 만들고 `/api/chat`에서 Gemini API 기반 답변을 생성합니다.
+- 프론트엔드는 `ChatResponse`를 받아 챗봇 메시지를 `messages` 배열에 추가하고 `Chatbot.tsx`에서 화면에 표시합니다.
+
+### 4.7 관리자 기능
+- `frontend/src/pages/admin/adminpage.tsx`는 관리자 UI를 렌더링하고 `/api/admin/*`를 호출합니다.
+- `AdminController.getAllUsers()`는 `AdminService.getAllUsers()`를 호출하여 사용자 목록과 통계 데이터를 제공합니다.
+- `AdminController.getReportedUsers()`는 `AdminService.getReportedUsers()`로 상습 신고 사용자를 조회합니다.
+- `AdminController.getReportedReviews()`는 `AdminService.getReportedReviews()`로 신고된 리뷰와 신고자 정보를 반환합니다.
+- `AdminController.updateUsersStatus()` 및 `updateReviewStatus()`는 `AdminService.updateUserStatus()` / `updateReviewStatus()`를 통해 사용자 상태 변경과 리뷰 처리 상태를 저장합니다.
+- `AdminService.deleteUser()`는 `UserRepository.deleteById()`를 호출하고, 필요 시 `UserReviewRepository.deleteAllByUserId()`와 `WishlistRepository.deleteByUser()`를 함께 실행합니다.
 
 ## 5. 개발/운영 참고
 - 백엔드 메인 서버는 `application.properties`에 DB 및 OAuth 설정이 집중됨
