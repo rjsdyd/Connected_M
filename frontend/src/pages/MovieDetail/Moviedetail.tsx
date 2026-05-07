@@ -112,7 +112,7 @@ const MovieDetail: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:8080/api/reports', reportData, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/reports`, reportData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert("신고가 정상적으로 접수되었습니다.");
@@ -172,7 +172,7 @@ const MovieDetail: React.FC = () => {
         setLoading(true);
         const token = localStorage.getItem('token'); 
 
-        const response = await fetch(`http://localhost:8080/api/contents/${id}`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/contents/${id}`);
         const result = await response.json();
 
         if (result && result.data) {
@@ -187,7 +187,7 @@ const MovieDetail: React.FC = () => {
             setHasReviewed(data.userReviews?.some((r: any) => r.nickname === userNickname) ?? false);
             
             if (token) {
-              const wishRes = await axios.get('http://localhost:8080/api/members/wishlist', {
+              const wishRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/members/wishlist`, {
                 headers: { Authorization: `Bearer ${token}` }
               });
               const isWished = wishRes.data?.some((w: any) => w.contentId === Number(id)) ?? false;
@@ -197,7 +197,7 @@ const MovieDetail: React.FC = () => {
 
           if (isLoggedIn && token && !hasLoggedRecentView) {
             setHasLoggedRecentView(true);
-            axios.post(`http://localhost:8080/api/users/recent/${id}`, {}, {
+            axios.post(`${import.meta.env.VITE_API_URL}/api/users/recent/${id}`, {}, {
               headers: { Authorization: `Bearer ${token}` }
             })
             .then(() => console.log("최근 본 목록 저장 성공"))
@@ -223,7 +223,7 @@ const MovieDetail: React.FC = () => {
     if (!isLoggedIn) { alert("로그인이 필요합니다."); return; }
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`http://localhost:8080/api/members/wishlist/${id}`, {}, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/members/wishlist/${id}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setIsWishlisted(!isWishlisted);
@@ -237,7 +237,7 @@ const MovieDetail: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token'); 
-      const response = await axios.post(`http://localhost:8080/api/contents/user-reviews?contentId=${id}`, 
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/contents/user-reviews?contentId=${id}`, 
         { rating: newRating.toString(), comment: newComment },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -253,7 +253,7 @@ const MovieDetail: React.FC = () => {
     if (!editDetailComment.trim()) { alert("내용을 입력해주세요."); return; }
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:8080/api/contents/user-reviews/${reviewId}`, 
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/contents/user-reviews/${reviewId}`, 
         { rating: editDetailRating.toString(), comment: editDetailComment },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -267,7 +267,7 @@ const MovieDetail: React.FC = () => {
     if (!window.confirm("리뷰를 삭제하시겠습니까?")) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:8080/api/contents/user-reviews/${reviewId}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/contents/user-reviews/${reviewId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert("리뷰가 삭제되었습니다.");
