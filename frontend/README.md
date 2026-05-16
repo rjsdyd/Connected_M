@@ -56,23 +56,5 @@ npm run build
 - **마이페이지:** 사용자 프로필 및 개인 설정
 - **관리자 페이지:** 데이터 관리 및 통계
 
-![페이지의 전체적인 모습](image.png)
-![헤더](image-1.png)
-![메인이미지 및 검색엔진](image-2.png)
-![컨텐츠 1](image-3.png)
-![컨텐츠 2](image-4.png)
-![OTT및 카테고리 페이지의 모습](image-5.png)
-![키워드 페이지](image-6.png)
-![로그인 모달](image-7.png)
-![비밀번호 찾기 모달](image-8.png)
-![마이페이지의 모습](image-9.png)
-![관리자 페이지](image-10.png)
-![통계 창](image-11.png)
-![활동 요약](image-12.png)
-![최근](image-13.png)
-![찜 목록](image-14.png)
-![작성한 댓글](image-15.png)
-![상세페이지 전체 모습](image-16.png)
-
 ## 추후 학습을 통해 수정할 사항
 - 관리자 페이지에서 신고목록 뜨게 만들기

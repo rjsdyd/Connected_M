@@ -36,9 +36,7 @@ out/
 
 ### VS Code ###
 .vscode/
-
 api-keys.properties
-
 
 ### ChatBot ###
 ChatBot/.venv/

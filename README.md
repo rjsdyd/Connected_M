@@ -112,3 +112,25 @@ npm run dev
 
 ## 📝 라이선스
 본 프로젝트는 교육 및 포트폴리오 목적으로 제작되었습니다. 영화 데이터는 TMDB와 씨네21에서 제공받았습니다.
+
+
+![페이지의 전체적인 모습](./Readmeimg/image.png)
+![헤더](./Readmeimg/image-1.png)
+![메인이미지 및 검색엔진](./Readmeimg/image-2.png)
+![컨텐츠 1](./Readmeimg/image-3.png)
+![컨텐츠 2](./Readmeimg/image-4.png)
+![OTT및 카테고리 페이지의 모습](./Readmeimg/image-5.png)
+![키워드 페이지](./Readmeimg/image-6.png)
+![로그인 모달](./Readmeimg/image-7.png)
+![비밀번호 찾기 모달](./Readmeimg/image-8.png)
+![마이페이지의 모습](./Readmeimg/image-9.png)
+![관리자 페이지](./Readmeimg/image-10.png)
+![통계 창](./Readmeimg/image-11.png)
+![활동 요약](./Readmeimg/image-12.png)
+![최근](./Readmeimg/image-13.png)
+![찜 목록](./Readmeimg/image-14.png)
+![작성한 댓글](./Readmeimg/image-15.png)
+![상세페이지 전체 모습](./Readmeimg/image-16.png)
+
+## 추후 학습을 통해 수정할 사항
+- 관리자 페이지에서 신고목록 뜨게 만들기
