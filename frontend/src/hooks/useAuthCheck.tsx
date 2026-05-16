@@ -6,20 +6,17 @@ export const useAuthCheck = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // oauth2 리다이렉트 경로가 아닐 때는 무시
     if (!location.pathname.includes('/oauth2/redirect')) {
       return; 
     }
 
     const params = new URLSearchParams(location.search);
-    
-    // ✨ 1. 정지 유저 체크 (가장 먼저 수행!)
     const error = params.get("error");
     if (error === "BANNED") {
       alert("운영 원칙 위반으로 해당 계정은 정지되었습니다. 관리자에게 문의하세요.");
-      localStorage.removeItem("token"); // 만약 남아있을지 모를 토큰 제거
-      navigate("/", { replace: true }); // 메인으로 튕겨내기
-      return; // 로직 종료
+      localStorage.removeItem("token");
+      navigate("/", { replace: true });
+      return;
     }
 
     const token = params.get("token") || params.get("accessToken") || params.get("jwt"); 

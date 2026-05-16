@@ -67,7 +67,6 @@ const MovieDetail: React.FC = () => {
     if (name.length === 2) return name[0] + "*";
     return name[0] + "*".repeat(name.length - 2) + name.slice(-1);
   };
-  // [추가] 기타 사유를 직접 입력받기 위한 상태입니다.
   const [etcReason, setEtcReason] = useState<string>('');
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<MovieDetailData | null>(null);
@@ -77,7 +76,6 @@ const MovieDetail: React.FC = () => {
   const [hasReviewed, setHasReviewed] = useState<boolean>(false);
   const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
 
-  // 신고 관련 상태
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [selectedReviewId, setSelectedReviewId] = useState<number | null>(null);
   const [reportReason, setReportReason] = useState<string>('');
@@ -100,24 +98,20 @@ const MovieDetail: React.FC = () => {
     setIsReportModalOpen(true);
   };
 
-const handleReportSubmit = async () => {
+  const handleReportSubmit = async () => {
   if (!reportReason) {
     alert("신고 사유를 선택해주세요.");
     return;
   }
 
-  // 🚩 [핵심] 백엔드 ReviewReportRequestDto의 필드명과 100% 일치시키기
   const reportData = {
-    // 왼쪽은 백엔드 DTO 이름인 'reason', 오른쪽은 우리가 선택한 값(SPAM 등)
     reason: reportReason, 
-    // 왼쪽은 백엔드 DTO 이름인 'detailReason', 오른쪽은 우리가 쓴 글
     detailReason: etcReason || "" 
   };
 
   try {
     const token = localStorage.getItem('token');
-    
-    // 로그상 /api/reports/80 주소는 서버가 잘 받아주고 있습니다.
+  
     await axios.post(`${import.meta.env.VITE_API_URL}/api/reports`, reportData, {
       headers: { 
         Authorization: `Bearer ${token}`,
@@ -136,22 +130,17 @@ const handleReportSubmit = async () => {
 };
 
   const [hasLoggedRecentView, setHasLoggedRecentView] = useState<boolean>(false);
-
   const [newComment, setNewComment] = useState("");
   const [newRating, setNewRating] = useState(0); 
   const [hoverRating, setHoverRating] = useState<number | null>(null);
-
   const [isEditingDetail, setIsEditingDetail] = useState(false);
   const [editDetailComment, setEditDetailComment] = useState("");
   const [editDetailRating, setEditDetailRating] = useState(0);
   const [detailHoverRating, setDetailHoverRating] = useState<number | null>(null);
-
   const [expertPage, setExpertPage] = useState(1);
   const [userPage, setUserPage] = useState(1);
   const itemsPerPage = 3;
-
   const [expandedReviews, setExpandedReviews] = useState<number[]>([]);
-
   const toggleReview = (reviewId: number) => {
     setExpandedReviews(prev => 
       prev.includes(reviewId) 
@@ -371,7 +360,7 @@ const handleReportSubmit = async () => {
                       const fullUrl = cleanLogo.startsWith('http') ? cleanLogo : `https://image.tmdb.org/t/p/original${cleanLogo}`;
                       return (
                         <a key={idx} href={getOttLink(cleanLogo, movie.title)} target="_blank" rel="noopener noreferrer">
-                           <img src={fullUrl} alt="OTT" className="ott-logo-simple" />
+                          <img src={fullUrl} alt="OTT" className="ott-logo-simple" />
                         </a>
                       );
                     })
@@ -479,25 +468,21 @@ const handleReportSubmit = async () => {
                 {userReviewsSlice.length > 0 ? userReviewsSlice.map((r) => {
                   const isExpanded = expandedReviews.includes(r.id);
                   const isLongText = (r.comment || "").length > 80;
-                  // 🌟 이 부분을 추가하세요!
-    // 로컬 스토리지에 저장된 유저 정보를 가져와서 관리자인지 확인합니다.
-    const userData = localStorage.getItem('user');
-    const user = userData ? JSON.parse(userData) : null;
-    const isAdmin = user?.role === 'ROLE_ADMIN'; // 여기서 isAdmin이 정의됩니다!
+                  const userData = localStorage.getItem('user');
+                  const user = userData ? JSON.parse(userData) : null;
+                  const isAdmin = user?.role === 'ROLE_ADMIN';
                   return (
                     <div key={r.id} className="compact-review-row">
                       <div className="compact-reviewer-meta">
                         <span className="compact-reviewer-name">{r.nickname}</span>
                         {renderStars(r.rating)}
-                        
-                        {/* 🔥 수정 포인트: 관리자가 아닐 때만 신고 아이콘을 보여줌 */}
-        {!isAdmin && (
-          <PiSirenFill 
-            className="report-siren-icon" 
-            title="신고하기" 
-            onClick={() => handleOpenReport(r.id, r.nickname, r.comment)}
-          />
-        )}
+                          {!isAdmin && (
+                            <PiSirenFill 
+                              className="report-siren-icon" 
+                              title="신고하기" 
+                              onClick={() => handleOpenReport(r.id, r.nickname, r.comment)}
+                            />
+                          )}
                       </div>
                       <p className={`compact-comment-text ${isExpanded ? 'expanded' : 'clamped'}`}>
                         {r.comment}
@@ -648,9 +633,8 @@ const handleReportSubmit = async () => {
               <div className="report-title-row">
                 <p className="report-guide">신고 사유를 선택해주세요.</p>
               </div>
-             <div className="report-options-grid">
+            <div className="report-options-grid">
   {reportOptions.map((opt) => (
-    /* [포인트] OTHER일 때 항상 'is-expanded' 클래스를 주어 박스 형태를 유지합니다 */
     <div key={opt.value} className={`report-option-wrapper ${opt.value === 'OTHER' ? 'is-expanded' : ''} ${reportReason === opt.value ? 'selected' : ''}`}>
       <label className="report-radio-label">
         <input
@@ -663,8 +647,6 @@ const handleReportSubmit = async () => {
         />
         <span className="label-text">{opt.label}</span>
       </label>
-
-      {/* [수정] 조건문을 빼서 항상 보이게 하되, OTHER 항목 안에만 위치시킵니다 */}
       {opt.value === 'OTHER' && (
         <div className="etc-reason-container">
           <textarea
@@ -678,9 +660,7 @@ const handleReportSubmit = async () => {
     </div>
   ))}
 </div>
-
             </div>
-
             <div className="modal-footer">
               <button className="btn-cancel" onClick={() => setIsReportModalOpen(false)}>취소</button>
               <button className="btn-report-submit" onClick={handleReportSubmit}>제출하기</button>

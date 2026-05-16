@@ -1,9 +1,6 @@
-/* SearchResult.css */
-
 .search-result-container {
   display: flex;
   max-width: 1400px;
-  /* 왼쪽으로 더 이동시키기 위해 왼쪽 마진을 줄임 */
   margin: 120px auto; 
   padding: 0;
   gap: 40px;
@@ -70,7 +67,6 @@
   color: #333;
 }
 
-/* 본문 영역 */
 .search-content-area {
   flex-grow: 1;
 }
@@ -100,8 +96,6 @@
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   transition: transform 0.2s;
 }
-
-
 
 .search-result-card:hover {
   transform: translateY(-2px);
@@ -142,7 +136,6 @@
   overflow: hidden;
 }
 
-/* 페이지네이션 스타일 */
 .pagination-wrapper {
   display: flex;
   justify-content: center;
@@ -161,8 +154,6 @@
   cursor: pointer;
   font-weight: bold;
   transition: 0.2s;
-  
-
 }
 
 .pagination-wrapper button:hover:not(:disabled) {
@@ -185,4 +176,3 @@
   padding: 50px 0;
   text-align: center;
 }
-

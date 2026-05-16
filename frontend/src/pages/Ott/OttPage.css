@@ -1,4 +1,3 @@
-/* 장르 페이지와 거의 동일하지만 폰트/간격 등을 독립적으로 관리하기 위해 분리 */
 .ott-page-container {
   padding-top: 124px; 
   padding-left: 5%;
@@ -9,11 +8,10 @@
   min-height: 100vh;
 }
 
-/* 타이틀에 들어가는 OTT 로고 스타일 */
 .ott-title-logo {
-  height: 40px; /* 옆에 있는 '영화' 글씨 크기에 딱 맞게 조절 */
-  border-radius: 10px; /* 모서리를 살짝 둥글게 */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); /* 살짝 입체감 부여 */
+  height: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
   object-fit: cover;
 }
 
@@ -75,7 +73,6 @@
   transition: box-shadow 0.3s ease;
 }
 
-/* 호버 시 하얀색 은은한 글로우 */
 .ott-movie-card:hover .ott-movie-poster {
   box-shadow: 0 10px 20px rgba(255, 255, 255, 0.2);
 }
@@ -95,7 +92,6 @@
   text-align: center;
 }
 
-/* 1. 헤더 정렬을 baseline에서 center로 강제 변경 (처짐 완벽 방지) */
 .ott-header {
   display: flex !important;
   align-items: center !important; 
@@ -108,7 +104,6 @@
   margin: 0 !important;
 }
 
-/* 2. 로고 크기 및 비율 최적화 */
 .ott-title-logo {
   height: 52px !important; 
   width: 52px !important;
@@ -118,12 +113,11 @@
   object-fit: contain !important;
 }
 
-/* 3. WATCHA 글씨가 로고와 수평이 되도록 높이 보정 */
 .ott-header h2 span {
   font-size: 34px !important; 
   line-height: 1 !important;
   display: flex !important;
   align-items: center !important;
   font-weight: 900 !important;
-  padding-top: 2px !important; /* 미세한 수평 오차 수정 */
+  padding-top: 2px !important;
 }

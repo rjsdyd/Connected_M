@@ -19,7 +19,6 @@ const EditProfile = () => {
     phoneNumber: ''
   });
 
-  // 1. 기존 정보 불러오기
   useEffect(() => {
     const userStr = localStorage.getItem('user');
     if (userStr) {
@@ -35,7 +34,6 @@ const EditProfile = () => {
     }
   }, [navigate]);
 
-  // 2. 전화번호 하이픈 자동 생성 (ExtraInfo.tsx와 동일)
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, '');
     let formattedValue = '';
@@ -49,7 +47,6 @@ const EditProfile = () => {
     setFormData(prev => ({ ...prev, phoneNumber: formattedValue }));
   };
 
-  // 3. 수정 요청 처리
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -85,7 +82,6 @@ const EditProfile = () => {
       });
 
       if (response.data && response.data.success === true) {
-        // 로컬 스토리지 정보 동기화
         const updatedUser = { ...storedUser, ...requestData };
         localStorage.setItem('user', JSON.stringify(updatedUser));
         localStorage.setItem('nickname', requestData.nickname);

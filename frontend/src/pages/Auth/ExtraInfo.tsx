@@ -22,7 +22,6 @@ const ExtraInfo = () => {
     if (storedUser && !isTempEmail) {
       nextForm.email = storedUser.email;
     }
-    // ✨ [수정] 닉네임이 tmp_social_ 로 시작하는 임시 닉네임이 아닐 때만 폼에 미리 채워넣음
     if (storedUser?.nickname && !storedUser.nickname.startsWith('tmp_social_')) {
       nextForm.nickname = storedUser.nickname;
     }
@@ -58,7 +57,6 @@ const ExtraInfo = () => {
     }
   };
 
-  // ✨ [추가] 실시간 전화번호 하이픈 자동 생성 핸들러
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 남기기
     
@@ -77,12 +75,11 @@ const ExtraInfo = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // ✨ [추가] 전화번호 유효성 검사 (010-XXXX-XXXX 형식)
     const phoneRegex = /^01(?:0|1|[6-9])-(?:\d{3,4})-\d{4}$/;
     
     if (!phoneRegex.test(formData.phoneNumber)) {
       alert("올바른 전화번호 형식이 아닙니다.\n번호를 다시 확인해주세요! (예: 010-1234-5678)");
-      return; // ❌ 여기서 중단! 서버에 요청을 보내지 않습니다.
+      return;
     }
 
     try {

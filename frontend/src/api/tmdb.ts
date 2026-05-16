@@ -1,9 +1,7 @@
-// src/api/tmdb.ts
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = import.meta.env.VITE_TMDB_BASE_URL;
 
 export const fetchPopularMovies = async () => {
-  // 주소가 올바르게 합쳐졌는지 확인하기 위해 console.log 추가
   const url = `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=ko-KR&page=1`;
   console.log("요청 주소 확인:", url); 
 

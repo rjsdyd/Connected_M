@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import axios from 'axios'; // ✨ axios 임포트 추가
+import axios from 'axios';
 import './App.css';
 
-// 컴포넌트 & 페이지 임포트
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Chatbot from './components/chatbot/Chatbot';
 import LoginModal from './components/common/LoginModal';
 import { useAuthCheck } from './hooks/useAuthCheck';
-
-// 페이지들
 import Home from './pages/Home/Home';
 import MyPage from './pages/MyPage/MyPage';
 import Register from './pages/Register/Register';
@@ -30,18 +27,12 @@ import SearchResult from './pages/SearchResult/SearchResult';
 import KeywordPage from './pages/Keyword/KeywordPage';
 import AdminPage from './pages/admin/adminpage';
 
-// ==========================================================
-// ✨ Axios 전역 인터셉터 설정 (실시간 정지 감지기)
-// ==========================================================
 axios.interceptors.response.use(
-  (response) => response, // 응답이 성공적이면 그대로 반환
+  (response) => response,
   (error) => {
-    // 서버 JwtAuthenticationFilter에서 보낸 403 에러 및 메시지 확인
     if (error.response && error.response.status === 403) {
       if (error.response.data.message === "계정이 정지되었습니다.") {
         alert("운영 원칙 위반으로 계정이 정지되었습니다. 즉시 로그아웃됩니다.");
-        
-        // 로컬 정보 삭제 및 메인 페이지로 강제 이동
         localStorage.clear(); 
         window.location.href = "/"; 
       }
@@ -52,8 +43,6 @@ axios.interceptors.response.use(
 
 const AppContent = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  
-  // ✨ 소셜 로그인 URL 파라미터 감지 (BANNED_USER 체크 포함)
   useAuthCheck();
 
   return (

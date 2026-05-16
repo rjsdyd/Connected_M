@@ -21,7 +21,6 @@ export const useAuth = () => {
     console.log("useAuth - token not undefined:", token !== "undefined");
     console.log("useAuth - token not null:", token !== "null");
 
-    // 단순 존재 여부뿐만 아니라 'undefined' 문자열이 저장되는 경우까지 방지
     if (token && token !== "undefined" && token !== "null") {
       setIsLoggedIn(true);
       setUserNickname(nickname);

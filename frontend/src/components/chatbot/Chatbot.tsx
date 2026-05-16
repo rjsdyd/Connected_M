@@ -18,9 +18,8 @@ const Chatbot = () => {
   const chatBodyRef = useRef<HTMLDivElement>(null);
   const chatModalRef = useRef<HTMLDivElement>(null);
   const chatButtonRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null); // 입력창 포커스용
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // 바깥 클릭 시 닫기
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -35,44 +34,36 @@ const Chatbot = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isChatOpen]);
 
-  // 메시지 전송
-  const handleSendMessage = async () => { // async 키워드 추가
+  const handleSendMessage = async () => {
     if (!chatInput.trim()) return;
     
-    const userMessageText = chatInput; // 현재 입력된 메시지 텍스트 저장
+    const userMessageText = chatInput;
     const newUserMsg: ChatMessage = { id: Date.now(), type: 'user', text: userMessageText };
     
     setMessages(prev => [...prev, newUserMsg]);
     setChatInput('');
     
-    // 메시지 전송 후 다시 포커스
     setTimeout(() => inputRef.current?.focus(), 0);
 
     try {
-      // 로컬 스토리지에서 JWT 토큰 가져오기
-      //const token = localStorage.getItem('accessToken');
       const token = localStorage.getItem('token')?.replace(/^['"]|['"]$/g, '');
-
-      // 백엔드 API로 사용자의 질문(prompt) 전송
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/ai/recommend`, { // 명세에 맞는 엔드포인트 사용
-        prompt: userMessageText // DTO 형식에 맞춰 prompt 필드에 메시지 전송
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/ai/recommend`, {
+        prompt: userMessageText
       }, {
         headers: {
-          // 헤더에 인증 토큰 추가
           'Authorization': token ? `Bearer ${token}` : ''
         }
       });
 
-      // 백엔드에서 응답이 오면 봇 메시지로 추가
       setMessages(prev => [...prev, { 
         id: Date.now(), 
         type: 'bot', 
-        text: response.data.reply // ChatResponse DTO의 reply 필드 사용
+        text: response.data.reply
       }]);
     } catch (error) {
       console.error('Chatbot API Error:', error);
       setMessages(prev => [...prev, { 
-        id: Date.now(), // 누락된 id 속성 추가
+        id: Date.now(),
         type: 'bot', 
         text: '서버와 연결할 수 없습니다. 백엔드가 켜져 있는지 확인해주세요. 😢' 
       }]);
@@ -80,25 +71,23 @@ const Chatbot = () => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // 한글 입력 시 엔터 두 번 입력 방지 (isComposing)
     if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
       handleSendMessage();
     }
   };
 
-  // 자동 스크롤
   useEffect(() => {
     if (chatBodyRef.current) {
       chatBodyRef.current.scrollTo({
         top: chatBodyRef.current.scrollHeight,
-        behavior: 'smooth' // 부드러운 스크롤 추가
+        behavior: 'smooth'
       });
     }
   }, [messages]);
 
   return (
     <>
-      {/* 챗봇 토글 버튼 */}
+      {}
       <div 
         className="chatbot-toggle" 
         ref={chatButtonRef} 
@@ -109,7 +98,7 @@ const Chatbot = () => {
         </svg>
       </div>
 
-      {/* 챗봇 모달 */}
+      {}
       {isChatOpen && (
         <div className="chatbot-modal" ref={chatModalRef}>
           <div className="chat-header">

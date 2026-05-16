@@ -123,7 +123,7 @@ const Home = () => {
   const onTouchEnd = () => { if (touchStart === null || touchEnd === null) return; const distance = touchStart - touchEnd; if (distance > minSwipeDistance) moveSlider(1); else if (distance < -minSwipeDistance) moveSlider(-1); setTouchStart(null); setTouchEnd(null); };
 
   const removeHistory = (e: React.MouseEvent, textToRemove: string) => {
-  e.stopPropagation(); // 중요: 부모의 클릭(검색 이동) 이벤트가 실행되지 않게 막음
+  e.stopPropagation();
   const updatedHistory = searchHistory.filter(item => item !== textToRemove);
   setSearchHistory(updatedHistory);
   localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));

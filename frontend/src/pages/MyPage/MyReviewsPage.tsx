@@ -253,7 +253,6 @@ const MyReviewsPage: React.FC = () => {
                       
                       {isEditing ? (
                         <div className="interactive-stars-row" onMouseLeave={() => setEditHoverRating(null)}>
-                          {/* 0점 조절용 투명 영역 */}
                           <div 
                             className="rating-zero-zone"
                             onMouseEnter={() => setEditHoverRating(0)}

@@ -26,8 +26,6 @@ const Footer: React.FC = () => {
   return (
     <footer className="footer-wrapper">
       <div className="footer-container">
-        
-        {/* 1. 왼쪽 섹션: 팀 로고 + 아래 협력사 로고 */}
         <div className="footer-left-section">
           <div className="footer-logo" onClick={() => navigateTo('/')}>
             <img src="/image/팀 로고.png" alt="Team Logo" />
@@ -48,14 +46,12 @@ const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* 2. 중앙 텍스트 정보 */}
         <div className="footer-center">
           <p className="main-text">이 사이트는 TMDB와 씨네21 데이터를 기반으로 하여 제작되었습니다.</p>
           <p className="sub-text">이윤을 추구하지 않는 비영리 프로젝트로써 <span className="brand-name">Connected_M</span>은 무료입니다.</p>
           <p className="copyright" onClick={() => setIsModalOpen(true)}>© 2026 Connected_M ⓘ</p>
         </div>
 
-        {/* 3. 오른쪽 섹션: 팀원 아이콘 + 내비게이션 */}
         <div className="footer-right">
           <div className="team-icons">
             {teamMembers.map((member) => (
@@ -78,7 +74,6 @@ const Footer: React.FC = () => {
         </div>
       </div>
 
-      {/* 모달 */}
       {isModalOpen && (
         <div className="modal-overlay-footer" onClick={() => setIsModalOpen(false)}>
           <div className="modal-content-footer" onClick={(e) => e.stopPropagation()}>

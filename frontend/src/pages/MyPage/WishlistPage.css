@@ -156,7 +156,6 @@
   color: #666;
 }
 
-/* 3개 배치를 위해 그리드 살짝 조정 (기존 속성 유지하면서 열만 고정) */
 .wishlist-items-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr) !important;

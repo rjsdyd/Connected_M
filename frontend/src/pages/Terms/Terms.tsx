@@ -1,13 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Terms.css'; // ✨ CSS 파일을 연결해줍니다!
+import './Terms.css';
 
 const Terms: React.FC = () => {
   const navigate = useNavigate();
 
   return (
     <div className="terms-container">
-      {/* 닫기 버튼 */}
       <button 
         className="close-button"
         onClick={() => navigate('/')} 

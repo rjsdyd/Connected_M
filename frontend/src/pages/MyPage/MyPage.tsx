@@ -17,22 +17,12 @@ const MyPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
-
-  /* ──────────────────────────────────────────────────────────
-      1. 회원탈퇴 상태 및 모달 관리
-  ────────────────────────────────────────────────────────── */
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isWithdrawing, setIsWithdrawing] = useState<boolean>(false);
-
-  /* ──────────────────────────────────────────────────────────
-      2. 실제 회원탈퇴 처리 함수 (401 방어 로직 추가)
-  ────────────────────────────────────────────────────────── */
   const confirmDeleteAccount = async (): Promise<void> => {
     if (isWithdrawing) return;
 
     const token = localStorage.getItem('token');
-    
-    // [방어 로직] 토큰이 없으면 요청을 보내지 않고 입구 컷
     if (!token) {
       alert("로그인 세션이 만료되었습니다. 다시 로그인해주세요.");
       navigate('/');
@@ -41,8 +31,6 @@ const MyPage: React.FC = () => {
 
     try {
       setIsWithdrawing(true); 
-
-      // 401 방지를 위해 헤더를 지독하게 체크하며 전송
       await axios.patch(`${import.meta.env.VITE_API_URL}/api/user/me/withdraw`, {}, {
         headers: {
           'Authorization': `Bearer ${token}` 
@@ -70,10 +58,6 @@ const MyPage: React.FC = () => {
       setIsWithdrawing(false);
     }
   };
-
-  /* ──────────────────────────────────────────────────────────
-      3. 이벤트 핸들러
-  ────────────────────────────────────────────────────────── */
   const handleDeleteAccount = () => {
     setIsModalOpen(true);
   };
@@ -86,10 +70,6 @@ const MyPage: React.FC = () => {
     navigate('/');
     window.location.reload();
   };
-
-  /* ──────────────────────────────────────────────────────────
-      4. 유저 정보 로딩 로직
-  ────────────────────────────────────────────────────────── */
   useEffect(() => {
     const fetchUser = async () => {
       if (isWithdrawing) return;

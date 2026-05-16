@@ -8,14 +8,10 @@ const AdminPage = () => {
   const [subTab, setSubTab] = useState('filter'); 
   const [users, setUsers] = useState<any[]>([]);
   const [reportedReviews, setReportedReviews] = useState<any[]>([]); 
-
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // ✨ 초기값을 'ACTIVE'(정상)로 설정[cite: 10]
   const [statusFilter, setStatusFilter] = useState('ACTIVE');
-  
   const [summarySortTarget, setSummarySortTarget] = useState<'review' | 'wish'>('review');
   const [selectedMonth, setSelectedMonth] = useState('ALL');
 
@@ -109,11 +105,8 @@ const AdminPage = () => {
   const filteredUsers = users.filter(user => {
     if (!user.createdAt) return false;
     const userDate = user.createdAt.split('T')[0];
-
     if (startDate && userDate < startDate) return false;
     if (endDate && userDate > endDate) return false;
-    
-    // ✨ 필터링 로직 업데이트[cite: 10]
     if (statusFilter !== 'ALL') {
         if (statusFilter === 'ACTIVE' && user.status !== 'ACTIVE') return false;
         if (statusFilter === 'SUSPENDED' && (user.status !== 'BANNED' && user.status !== 'SUSPENDED')) return false;

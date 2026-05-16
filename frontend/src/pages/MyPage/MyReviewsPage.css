@@ -1,4 +1,3 @@
-/* --- 1. 배경 및 컨테이너 (기존 틀 유지) --- */
 .my-reviews-container {
     width: 100%;
     min-height: 100vh;
@@ -46,7 +45,6 @@
     font-size: 1.3rem;
 }
 
-/* --- 2. 수정 입력창 (크기 조절 완전 차단) --- */
 .edit-textarea {
     width: 100%;
     min-height: 120px;
@@ -73,7 +71,6 @@
     margin-top: 5px;
 }
 
-/* --- 3. 버튼 디자인 (연필/쓰레기통 아이콘 시인성 강화) --- */
 .action-btns {
     display: flex;
     gap: 10px;
@@ -137,7 +134,6 @@
     border-color: #e9ecef !important;
 }
 
-/* --- 4. 🚀 수정 모드 대왕 별점 스타일 (추가됨) --- */
 .interactive-stars-row {
     display: flex;
     align-items: center;
@@ -146,19 +142,17 @@
     padding-left: 10px;
 }
 
-/* 0점 조절용 투명 영역 */
 .rating-zero-zone {
     width: 40px;
     height: 80px;
     cursor: pointer;
 }
 
-/* 대왕 별 유닛 */
 .interactive-star-unit {
     position: relative;
     display: inline-block;
     cursor: pointer;
-    font-size: 1.8rem !important; /* 🚀 별 크기 대폭 확대 */
+    font-size: 1.8rem !important;
 }
 
 .interactive-star-unit .star-icon {
@@ -184,15 +178,13 @@
     width: 50%;
 }
 
-/* 수정 중인 점수 텍스트 */
 .edit-rating-num {
     font-size: 1.8rem;
     margin-left: 20px;
     font-weight: 800;
-    color: #212529 !important; /* 🚀 파란색 느낌 없는 확실한 검정/진회색 */
+    color: #212529 !important;
 }
 
-/* --- 5. 리뷰 리스트 및 기타 요소 --- */
 .reviews-list-wrapper {
     display: flex;
     flex-direction: column;
@@ -260,7 +252,7 @@
 }
 
 .star-icon.filled {
-    color: #fcc419 !important; /* 별 색상은 황금색 유지 */
+    color: #fcc419 !important;
 }
 
 .rating-text {
@@ -293,7 +285,6 @@
     color: #adb5bd;
 }
 
-/* --- 6. 페이지네이션 및 기타 --- */
 .pagination-wrapper {
     display: flex;
     justify-content: center;

@@ -1,5 +1,4 @@
 # Header, Footer, Sidebar 등
-
 ## Footer
 - 사이즈
 가로 : 1920 (100%, 100wh)

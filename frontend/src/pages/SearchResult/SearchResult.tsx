@@ -6,12 +6,9 @@ const SearchResult = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const query = searchParams.get('q') || "";
-  
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedGenre, setSelectedGenre] = useState("모든 장르"); // 기본값을 "모든 장르"로 설정
-
-  // 페이지네이션을 위한 상태
+  const [selectedGenre, setSelectedGenre] = useState("모든 장르");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
@@ -35,7 +32,7 @@ const SearchResult = () => {
             };
           });
           setResults(mapped);
-          setCurrentPage(1); // 검색어가 바뀌면 다시 1페이지로
+          setCurrentPage(1);
         }
       } catch (error) {
         console.error("검색 실패:", error);
@@ -47,17 +44,14 @@ const SearchResult = () => {
     fetchSearchResults();
   }, [query]);
 
-  // 1. 현재 결과물에 존재하는 장르만 뽑아내기 (동적 장르 목록)
   const availableGenres = Array.from(new Set(results.flatMap(movie => movie.genreList || [])));
   const displayGenres = ["모든 장르", ...availableGenres];
 
-  // 2. 장르 필터링 적용
   const filteredResults = results.filter(movie => {
     if (selectedGenre === "모든 장르") return true; 
     return movie.genreList && movie.genreList.includes(selectedGenre);
   });
 
-  // 3. 페이지네이션 계산 (필터링된 결과 기준)
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredResults.slice(indexOfFirstItem, indexOfLastItem);
@@ -80,7 +74,7 @@ const SearchResult = () => {
                   className={selectedGenre === genre ? "active" : ""}
                   onClick={() => {
                     setSelectedGenre(genre);
-                    setCurrentPage(1); // 장르 변경 시 1페이지로 이동
+                    setCurrentPage(1);
                   }}
                 >
                   {genre} <span className="genre-count">{count}</span>
@@ -121,7 +115,6 @@ const SearchResult = () => {
               ))}
             </div>
 
-            {/* 페이지네이션 UI */}
             {totalPages > 1 && (
               <div className="pagination-wrapper">
                 <button 
@@ -146,7 +139,7 @@ const SearchResult = () => {
           </>
         ) : (
           <div className="no-result-message">
-             <p>선택하신 <span>"{selectedGenre}"</span> 장르와 일치하는 결과가 없습니다.</p>
+            <p>선택하신 <span>"{selectedGenre}"</span> 장르와 일치하는 결과가 없습니다.</p>
           </div>
         )}
       </section>

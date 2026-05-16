@@ -7,7 +7,7 @@ const ResetPassword = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const query = new URLSearchParams(location.search);
-  const token = query.get('token'); // 이메일 링크에서 token 쿼리 파라미터 추출
+  const token = query.get('token');
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -35,7 +35,6 @@ const ResetPassword = () => {
     }
 
     try {
-      // 인증된 토큰을 서버에 전달하여 비밀번호 변경 처리
       await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/password-reset/confirm`, {
         token,
         newPassword: password

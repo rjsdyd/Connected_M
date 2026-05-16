@@ -11,7 +11,6 @@ interface ContentSummaryDto {
 }
 
 const GenrePage: React.FC = () => {
-  // 주소창에서 /genre/액션 -> '액션'을 꺼내옵니다.
   const { genreName } = useParams<{ genreName: string }>();
   const [movies, setMovies] = useState<ContentSummaryDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -22,14 +21,12 @@ const GenrePage: React.FC = () => {
       if (!genreName) return;
       try {
         setLoading(true);
-        // 방금 만든 백엔드 API 호출!
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/contents/genre/${genreName}`);
-        
-        // ApiResponse 구조 (data 안에 실제 배열이 있음)
+      
         if (response.data && response.data.data) {
           setMovies(response.data.data);
         } else {
-          setMovies(response.data); // 혹시 몰라 추가한 안전장치
+          setMovies(response.data);
         }
       } catch (error) {
         console.error("장르별 영화 로딩 실패:", error);
@@ -39,7 +36,7 @@ const GenrePage: React.FC = () => {
     };
 
     fetchMovies();
-    window.scrollTo(0, 0); // 다른 장르 누르면 화면 맨 위로 이동
+    window.scrollTo(0, 0);
   }, [genreName]);
 
   if (loading) {

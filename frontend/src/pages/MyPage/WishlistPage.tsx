@@ -15,8 +15,6 @@ const WishlistPage: React.FC = () => {
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
-  // 🚀 [추가] 기존 코드는 건들지 않고 상태만 추가합니다.
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
 
@@ -65,8 +63,6 @@ const WishlistPage: React.FC = () => {
       const savedWish = JSON.parse(localStorage.getItem('wishlist') || '[]');
       const filtered = savedWish.filter((item: any) => item.contentId !== contentId);
       localStorage.setItem('wishlist', JSON.stringify(filtered));
-
-      // 🚀 삭제 후 현재 페이지에 데이터가 없으면 앞으로 이동하는 로직만 추가 ㅋ
       const totalAfterDelete = wishlist.length - 1;
       const maxPage = Math.ceil(totalAfterDelete / itemsPerPage);
       if (currentPage > maxPage && maxPage > 0) setCurrentPage(maxPage);
@@ -77,8 +73,6 @@ const WishlistPage: React.FC = () => {
   };
 
   if (loading) return <div className="wishlist-loading">찜 목록을 불러오는 중...</div>;
-
-  // 🚀 [추가] 3개씩 잘라내기 위한 계산 로직
   const totalPages = Math.ceil(wishlist.length / itemsPerPage);
   const currentItems = wishlist.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
@@ -93,7 +87,6 @@ const WishlistPage: React.FC = () => {
         {wishlist.length > 0 ? (
           <>
             <div className="wishlist-items-grid">
-              {/* 🚀 wishlist 대신 3개로 잘린 currentItems를 맵핑합니다. ㅋ */}
               {currentItems.map((item) => (
                 <div 
                   key={item.contentId} 
@@ -122,8 +115,6 @@ const WishlistPage: React.FC = () => {
                 </div>
               ))}
             </div>
-
-            {/* 🚀 [추가] 최근 본 목록과 동일한 스타일의 페이지네이션 UI */}
             {totalPages > 1 && (
               <div className="wishlist-pagination-bar">
                 <button 

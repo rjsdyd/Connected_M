@@ -56,9 +56,7 @@ const Register = () => {
     try {
       const { passwordConfirm, ...signupData } = formData;
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/signup`, signupData);
-      
-      // 🚨 핵심 수정: navigate 대신 window.location.href 사용
-      // 알림창 확인 버튼을 누르는 순간 홈으로 강제 이동하며 상태를 초기화합니다.
+    
       alert('회원가입이 완료되었습니다! 반갑습니다.');
       window.location.href = "/"; 
 

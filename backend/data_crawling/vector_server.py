@@ -27,11 +27,11 @@ def vectorize():
 
 # 1. DB 설정
 db_config = {
-    'host': os.getenv('DB_HOST', 'localhost'),
-    'port': int(os.getenv('DB_PORT', 3310)),
-    'user': os.getenv('DB_USER', 'root'),
-    'password': os.getenv('DB_PASSWORD'),
-    'db': os.getenv('DB_NAME', 'connected_m'),
+    'host': 'localhost',
+    'port': 3310,
+    'user': 'root',
+    'password': '1234',
+    'db': 'connected_m',
     'charset': 'utf8mb4',
     'cursorclass': pymysql.cursors.DictCursor
 }

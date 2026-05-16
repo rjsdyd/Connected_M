@@ -1,5 +1,3 @@
-/* adminpage.css */
-
 .admin-container {
   margin-top: 150px;
 }
@@ -14,7 +12,6 @@
   font-size: 30px;
 }
 
-/* 탭 그룹 공통 레이아웃 */
 .tab-group {
   display: flex;
   gap: 10px;
@@ -48,7 +45,6 @@
   font-size: 14px;
 }
 
-/* 필터 컨트롤 바 */
 .filter-control-bar {
   display: flex;
   align-items: center;
@@ -104,7 +100,6 @@
   border: 2px solid #eee;
 }
 
-/* 유저 테이블 */
 .user-table-container {
   width: calc(100% - 40px);
   margin: 20px;
@@ -150,7 +145,6 @@
   background-color: #fff;
 }
 
-/* 관리 버튼들 */
 .btn-table.active-btn { 
   background: #f0fff4; 
   color: #2f855a; 
@@ -167,7 +161,6 @@
   border: 1px solid #e2e8f0; 
 }
 
-/* 상태 뱃지 공통 스타일 */
 .status-badge {
   display: inline-block;
   padding: 4px 12px;
@@ -178,14 +171,12 @@
   min-width: 60px;
 }
 
-/* [정상] - 민트색[cite: 7] */
 .status-badge.ACTIVE { 
   background-color: #e6fffa; 
   color: #319795; 
   border: 1px solid #b2f5ea;
 }
 
-/* [정지됨] - 주황색 계열로 변경 */
 .status-badge.BANNED,
 .status-badge.SUSPENDED { 
   background-color: #fffaf0; 
@@ -193,7 +184,6 @@
   border: 1px solid #fbd38d;
 }
 
-/* [탈퇴완료] - 기존 정지됨의 빨간색 스타일 적용[cite: 7] */
 .status-badge.WITHDRAWN,
 .status-badge.DELETED { 
   background-color: #fff5f5; 
@@ -201,7 +191,6 @@
   border: 1px solid #feb2b2;
 }
 
-/* 신고 목록 카드 스타일 */
 .report-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -263,7 +252,6 @@
   font-size: 12px;
 }
 
-/* 차트 및 기타 레이아웃 */
 .chart-container {
   background: #fff;
   border-radius: 15px;
@@ -283,7 +271,6 @@
   font-size: 18px;
 }
 
-/* 탈퇴된 행 흐리게 처리 (선택 사항) */
 tr.withdrawn-row {
   opacity: 0.7;
 }

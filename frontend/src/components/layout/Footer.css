@@ -1,4 +1,3 @@
-/* 1. 폰트 불러오기 (CSS 파일 최상단에 위치해야 함) */
 @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;700;900&display=swap');
 
 * {
@@ -9,7 +8,6 @@ input, button, textarea, select {
   font-family: 'Pretendard', sans-serif;
 }
 
-/* ================= 푸터 전체 스타일 ================= */
 .footer-wrapper {
   width: 100%;
   background-color: #eeeeee;
@@ -25,16 +23,15 @@ input, button, textarea, select {
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
-  align-items: center; /* 세로축 중앙 정렬 */
+  align-items: center;
   padding: 0 60px;
 }
 
-/* 1. 왼쪽 섹션 (세로 배치) */
 .footer-left-section {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 15px; /* 팀로고와 협력사로고 사이 간격 */
+  gap: 15px;
 }
 
 .footer-logo {
@@ -42,7 +39,7 @@ input, button, textarea, select {
 }
 
 .footer-logo img {
-  width: 100px; /* 팀 로고 크기 */
+  width: 100px;
   height: auto;
   display: block;
 }
@@ -50,7 +47,7 @@ input, button, textarea, select {
 .link-group {
   display: flex;
   align-items: center;
-  gap: 10px; /* TMDB와 씨네21 사이 간격 */
+  gap: 10px;
 }
 
 .tmdb-logo-img {
@@ -72,7 +69,6 @@ input, button, textarea, select {
   opacity: 0.7;
 }
 
-/* 2. 중앙 텍스트 정보 */
 .footer-center {
   text-align: center;
   flex: 1;
@@ -100,7 +96,6 @@ input, button, textarea, select {
   color: #666;
 }
 
-/* 3. 오른쪽 섹션 */
 .footer-right {
   display: flex;
   flex-direction: column;
@@ -148,7 +143,6 @@ input, button, textarea, select {
   margin-left: 15px;
 }
 
-/* 모달 스타일 */
 .modal-overlay-footer {
   position: fixed;
   top: 0;

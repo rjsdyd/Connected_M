@@ -1,9 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;700;900&display=swap');
-/* 기본 폰트 */
 
 #root { 
   width: 100%; 
-  max-width: none !important;     /* 가장 먼저 진행하라 */
+  max-width: none !important;
   margin: 0; 
   padding: 0; 
   text-align: left; 
@@ -16,7 +15,6 @@
   
 }
 
-/* 전체 코드 */
 * { 
   box-sizing: border-box; 
   margin: 0; 
@@ -24,7 +22,6 @@
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
 }
 
-/* 바디 영역 */
 body { 
   font-family: 'Pretendard', -apple-system, sans-serif; 
   background-color: #f8f9fa; 
@@ -36,13 +33,11 @@ input, button, textarea, select {
   font-family: inherit;
 }
 
-/* a 태그에 대한 전체적인 css */
 a { 
   text-decoration: none; 
   color: inherit; 
 }
 
-/* ================= 헤더 고정 및 가로 정렬 ================= */
 .header {
   position: fixed;
   top: 0;
@@ -64,14 +59,12 @@ a {
   gap: 60px; 
 }
 
-/* 로고 영역 */
 .logo-img {
   height: 70px;
   display: block;
   object-fit: contain;
 }
 
-/* 카테고리 */
 .category-title {
   color: #fff;
   transition: color 0.2s;
@@ -87,12 +80,10 @@ a {
   align-items: center;
 }
 
-/* ================= 메인 배너 (헤더에 가려지지 않게 밀어내기) ================= */
 .hero-section {
   margin-top: 94px;
 }
 
-/* ================= 드롭다운 네비게이션 ================= */
 .nav-menu { 
   display: flex; 
   align-items: center; 
@@ -126,7 +117,7 @@ a {
 }
 
 .category-parent:hover .category-dropdown { 
-  display: grid;    /* 2차원 배치 */
+  display: grid;
 }
 
 .dropdown-column h4 { 
@@ -224,7 +215,6 @@ a {
   color: #fff;
 }
 
-/* --- [히어로 섹션 (메인 배경)] --- */
 .hero-section {
   width: 100%; height: 900px; margin-top: 9px;
   background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
@@ -237,9 +227,8 @@ a {
 .hero-title { animation: fadeInDown 1.5s ease-out; margin-bottom: 30px; }
 @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
-/* --- [구글 스타일 검색 통합박스] --- */
 .hero-search-wrapper { 
-  position: relative; /* 자식 요소인 리스트의 기준점 */
+  position: relative;
   width: 100%; 
   max-width: 650px; 
   z-index: 1000; 
@@ -254,18 +243,16 @@ a {
   display: flex; 
   flex-direction: column; 
   box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
-  position: relative; /* 중요: 내부 구조 유지 */
+  position: relative;
 }
 
-/* 리스트가 열렸을 때 컨테이너 그림자만 강조 */
 .google-search-container.active { 
 box-shadow: 0 4px 12px rgba(32, 33, 36, 0.3); 
-  border-bottom-left-radius: 0;  /* 아래쪽 모서리를 깎아 리스트와 연결 */
+  border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
-  border-color: #dfe1e5; /* 테두리 유지 혹은 투명하게 조정 */
+  border-color: #dfe1e5;
 }
 
-/* 입력 영역 한 줄 */
 .search-input-row { 
   display: flex; 
   align-items: center; 
@@ -284,19 +271,18 @@ box-shadow: 0 4px 12px rgba(32, 33, 36, 0.3);
   cursor: pointer; margin-left: 8px; 
 }
 
-/* --- [공중 부양 검색 리스트] --- */
 .search-list { 
 position: absolute; 
-  top: 100%; /* 입력창 바로 밑에 밀착 */
-  left: -1px; /* 부모 테두리와 맞추기 위해 조정 */
+  top: 100%;
+  left: -1px;
   right: -1px;
   background: white;
   list-style: none; 
   margin: 0; 
-  padding: 0 0 15px 0; /* 아래쪽 여백 */
+  padding: 0 0 15px 0;
   border: 1px solid #dfe1e5;
-  border-top: none; /* 👈 위쪽 테두리를 없애서 입력창과 연결 */
-  border-radius: 0 0 24px 24px; /* 아래만 둥글게 */
+  border-top: none;
+  border-radius: 0 0 24px 24px;
   box-shadow: 0 8px 12px rgba(0,0,0,0.15); 
   z-index: 999;
 }
@@ -307,23 +293,21 @@ position: absolute;
 }
 .search-item:hover { background-color: #f1f3f4; }
 
-/* Home.css */
-
 .history-icon { 
   color: #9aa0a6; 
   margin-right: 14px; 
-  font-size: 20px; /* 아이콘 크기를 조절하고 싶을 때 사용하세요 */
-  display: flex; /* 아이콘과 텍스트의 세로 중앙 정렬을 위해 추가 */
+  font-size: 20px;
+  display: flex;
   align-items: center;
 }
 
 .search-text { 
   font-size: 15px;
-   color: #202124; 
-   text-align: left; 
-   flex: 1; }
+  color: #202124; 
+  text-align: left; 
+  flex: 1; 
+}
 
-/* --- [네비게이션 드롭다운] --- */
 .nav-menu { display: flex; align-items: center; gap: 40px; position: relative; }
 .category-parent { display: flex; align-items: center; padding: 8px 0; cursor: pointer; font-weight: 700; font-size: 15px; }
 
@@ -340,7 +324,6 @@ position: absolute;
 .dropdown-column p { font-size: 14px; color: #6b7280; margin-bottom: 10px; cursor: pointer; }
 .dropdown-column p:hover { color: #4b0082; font-weight: 700; }
 
-/* ================= 공통 레이아웃 & 키워드 ================= */
 .content-section { 
   max-width: 1280px; 
   margin: 0 auto; 
@@ -370,14 +353,12 @@ position: absolute;
   color: #9ca3af; 
 }
 
-/* ================= 오늘의 추천작 (슬라이더) ================= */
 .slider-section { 
   background: #f9fafb; 
   padding: 60px 0 80px 0;
   width: 100%;
 }
 
-/* 제목 왼쪽 정렬 고정 */
 .slider-header-wrapper { 
   max-width: 1280px; 
   margin: 0 auto; 
@@ -393,27 +374,25 @@ position: absolute;
   text-align: left;
 }
 
-/* 3D 슬라이더와 버튼을 감싸는 컨테이너 - 여기가 기준점입니다 */
 .slider-3d-wrapper {
-  position: relative; /* 버튼 position: absolute의 기준점 */
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 450px;
   cursor: grab;
-  user-select: none; /* 드래그 시 텍스트 선택 방지 */
-  -webkit-user-drag: none; /* 이미지 드래그 방지 */
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .slider-3d-wrapper:active {
-  cursor: grabbing; /* 클릭 시 잡는 모양으로 변경 */
+  cursor: grabbing;
 }
 
-/* 카드들이 모여있는 중앙 영역 */
 .slider-3d-container {
   position: relative;
-  width: 300px; /* 카드 기본 너비 */
+  width: 300px;
   height: 400px;
   display: flex;
   align-items: center;
@@ -429,9 +408,9 @@ position: absolute;
   align-items: center;
   justify-content: center;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  position: absolute; /* getSlideStyle의 position과 일치 */
+  position: absolute;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  pointer-events: auto; /* 클릭시 상세페이지로이동 */
+  pointer-events: auto;
   border-radius: 16px;
   overflow: hidden;
 }
@@ -439,17 +418,16 @@ position: absolute;
 .slide-card-3d img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* ⭐ 이미지가 찌그러지지 않고 박스에 맞게 꽉 채움 */
-  pointer-events: none;        /* ⭐ 매우 중요: 이미지가 마우스 이벤트를 뺏어가지 않도록 함 */
+  object-fit: cover;
+  pointer-events: none;
   -webkit-user-drag: none;
 }
 
-/* 좌우 버튼 공통 - 절대 위치로 양끝 배치 */
 .nav-btn-3d {
   position: absolute;
   top: 50%;
-  transform: translateY(-50%); /* 세로 중앙 정렬 */
-  z-index: 999; /* 카드보다 무조건 위로 */
+  transform: translateY(-50%);
+  z-index: 999;
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -465,12 +443,10 @@ position: absolute;
   transition: all 0.2s ease;
 }
 
-/* 왼쪽 버튼을 wrapper의 왼쪽 끝으로 */
 .nav-btn-3d.left {
   left: 20px; 
 }
 
-/* 오른쪽 버튼을 wrapper의 오른쪽 끝으로 */
 .nav-btn-3d.right {
   right: 20px;
 }
@@ -481,7 +457,6 @@ position: absolute;
   transform: translateY(-50%) scale(1.1);
 }
 
-/* ================= 카테고리별 영화 ================= */
 .category-header { 
   display: flex; 
   justify-content: space-between;
@@ -513,7 +488,6 @@ position: absolute;
 
 .movie-grid { 
   display: grid; 
-  /* 반응형을 위해 repeat(5, 1fr) 대신 minmax를 쓰면 더 안전합니다 */
   grid-template-columns: repeat(5, 1fr); 
   gap: 24px; 
 }
@@ -521,7 +495,7 @@ position: absolute;
 .movie-item {
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* 👈 왼쪽 정렬 강제 */
+    align-items: flex-start;
     width: 100%;
 }
 
@@ -561,17 +535,13 @@ position: absolute;
 }
 
 .movie-title_main {
-    /* 3. 그림자 및 기타 효과 완전 제거 */
   text-shadow: none !important;
   box-shadow: none !important;
   filter: none !important;
-
-  /* 2. 제목 크기 축소 및 검정색 변경 */
   font-size: 15px !important; 
   font-weight: 700 !important;
-  color: #111111 !important;  /* 선명한 검정 */
+  color: #111111 !important;
   text-align: left !important;
-  
   display: block !important;
   margin: 4px 0 !important;
   white-space: nowrap !important;
@@ -587,7 +557,6 @@ position: absolute;
   margin: 0 !important;
 }
 
-/* ================= 브랜드 컬러 대비 닉네임 스타일 ================= */
 .user-info {
   display: flex;
   align-items: center;
@@ -605,9 +574,8 @@ position: absolute;
   font-weight: 800;
 }
 
-/* 검색 기록 내 삭제 버튼 */
 .search-item {
-  position: relative; /* 자식 요소인 삭제 버튼 정렬 기준 */
+  position: relative;
 }
 
 .delete-history-btn {
@@ -618,13 +586,13 @@ position: absolute;
   cursor: pointer;
   padding: 5px 10px;
   transition: color 0.2s;
-  margin-left: auto; /* 오른쪽 끝으로 밀어내기 */
+  margin-left: auto;
 }
 
 .delete-history-btn:hover {
-  color: #0c0101; /* 마우스 올리면 빨간색으로 */
+  color: #0c0101;
 }
 
 .search-text {
-  flex: 1; /* 글자가 가능한 공간을 다 차지하게 해서 버튼을 밀어냄 */
+  flex: 1;
 }

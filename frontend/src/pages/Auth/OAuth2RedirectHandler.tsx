@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom'; // ✨ useNavigate 추가
+import { useNavigate } from 'react-router-dom';
 
 const OAuth2RedirectHandler = () => {
     const hasProcessed = useRef(false);
-    const navigate = useNavigate(); // ✨ 훅 생성
+    const navigate = useNavigate();
     
     useEffect(() => {
         if (hasProcessed.current) return;
@@ -36,15 +36,12 @@ const OAuth2RedirectHandler = () => {
                 navigate("/extra-info?needNickname=true", { replace: true });
             } else if (needInfo) {
                 alert("정상적인 서비스 이용을 위해 전화번호 등록이 필요합니다.");
-                // 🚨 href 대신 navigate를 쓰면 리액트 내부에서 안전하게 이동합니다.
                 navigate("/extra-info", { replace: true }); 
             } else {
                 navigate("/", { replace: true });
             }
-            // 🚨 새로고침은 이동 후에 한 번만!
             window.location.reload(); 
         } else {
-            // 에러 파라미터가 있으면 알림 띄워주기
             if (params.get('error')) {
                 alert("로그인 중 오류가 발생했습니다.");
             }

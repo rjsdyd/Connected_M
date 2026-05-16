@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './KeywordPage.css';
 
-// 🚀 백엔드 DTO와 일치하도록 인터페이스 유지
 interface MovieData {
   id: number;
   title: string;
@@ -17,33 +16,23 @@ const KeywordPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('전체');
   const navigate = useNavigate();
-  
-  // 🚀 그리드 배치를 위해 페이지당 아이템을 6개로 조정
   const itemsPerPage = 6; 
-
-  // 필터링할 장르 목록
   const genres = ['전체', '사극', '애니메이션', '로맨스', '액션', '스릴러', 'SF', '공포', '범죄'];
 
   useEffect(() => {
     const fetchAndCombineData = async () => {
       try {
         setIsLoading(true);
-
-        // 🚀 기존 fetch 로직 유지
         const [mainRes, aiRes] = await Promise.all([
-          // 💡 작은따옴표(')를 백틱(`)으로 바꾸고 변수를 넣어주세요!
           fetch(`${import.meta.env.VITE_API_URL}/api/contents/all`),
           fetch(`${import.meta.env.VITE_API_URL}/api/ai/keywords`)
         ]);
 
         const mainJson = await mainRes.json();
         const aiData = await aiRes.json();
-
-        // 🚀 211개 데이터를 모두 가져오기 위해 리스트 참조 (데이터 구조 유지)
         const mainList = mainJson.data;
 
         const combined = mainList.map((movie: any) => {
-          // 🚀 기존 content_id 매칭 로직 100% 보존
           const aiMatch = aiData.find((ai: any) => 
             Number(ai.content_id) === Number(movie.id)
           );
@@ -68,12 +57,9 @@ const KeywordPage: React.FC = () => {
     fetchAndCombineData();
   }, []);
 
-  // 🚀 핵심: 선택된 탭에 따라 영화 필터링 (기존 데이터 가공)
   const filteredMovies = movies.filter(movie => 
     activeTab === '전체' || movie.keywords.includes(activeTab)
   );
-
-  // 필터링된 결과로 페이지네이션 계산
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredMovies.slice(indexOfFirstItem, indexOfLastItem);
@@ -83,7 +69,7 @@ const KeywordPage: React.FC = () => {
 
   return (
     <div className="keyword-container">
-      {/* 🚀 상단 장르 탭 바 추가 */}
+      {}
       <div className="filter-tab-bar">
         {genres.map(genre => (
           <button 
@@ -121,12 +107,12 @@ const KeywordPage: React.FC = () => {
                 <div className="info-area">
                   <div className="summary-box">
                     <h3 className="movie-title_keyword">{movie.title}</h3>
-                    {/* 🚀 CSS의 line-clamp 설정을 위해 substring 없이 원문 그대로 전달합니다. */}
+                    {}
                     <p className="summary-text">{movie.summary}</p>
                   </div>
                   
                   <div className="keyword-row">
-                    {/* 🚀 movie.keywords 대신 지독하게 가공된 displayKeywords를 사용합니다! */}
+                    {}
                     {displayKeywords.map((tag: string, index: number) => (
                       <span key={index} className="keyword-tag"># {tag}</span>
                     ))}

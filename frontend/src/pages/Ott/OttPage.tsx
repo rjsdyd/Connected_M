@@ -14,8 +14,6 @@ const OttPage: React.FC = () => {
   const [movies, setMovies] = useState<ContentSummaryDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
-
-  // ✨ OTT별 정보를 결정하는 사전 (명준님 요청사항 반영)
   const getProviderInfo = (name: string) => {
   switch (name?.toLowerCase()) {
     case 'netflix': return { title: 'NETFLIX', color: '#E50914', logo: 'https://image.tmdb.org/t/p/original/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg' };
@@ -26,7 +24,6 @@ const OttPage: React.FC = () => {
     case 'watcha': return { 
   title: 'WATCHA', 
   color: '#FF0558', 
-  // 🚀 [리얼 최종] 오른쪽 끝이 더 높이 솟아오르는 왓챠 특유의 기울기를 완벽 재현한 로고입니다.
   logo: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCI+PHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByeD0iMTIiIGZpbGw9IiMwMDAiLz48cGF0aCBmaWxsPSIjRkYwNTU4IiBkPSJNMTAgMTYuNUgxNi41TDE5LjUgMzBMMjMuNSAxNC41SDI5TDMyLjUgMzBMNDAgNkg0NkwzNyAzNkgyOUwyNiAyMkwyMiAzNkgxM1oiLz48L3N2Zz4='
 };
     default: return { title: 'OTT', color: '#ffffff', logo: '' };
@@ -60,10 +57,8 @@ const OttPage: React.FC = () => {
 
   return (
     <div className="ott-page-container">
-      {/* 왼쪽 포인트 바 컬러 적용 */}
       <div className="ott-header" style={{ borderLeft: `5px solid ${info.color}` }}>
         <h2 style={{ display: 'flex', alignItems: 'center', gap: '15px', margin: 0 }}>
-          {/* 로고 이미지가 있을 때만 출력 (alt를 비워 중복 텍스트 방지) */}
           {info.logo && (
             <img 
               src={info.logo} 
@@ -72,7 +67,6 @@ const OttPage: React.FC = () => {
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           )}
-          {/* 서비스명(WATCHA, NETFLIX 등) 출력 */}
           <span style={{ color: '#000000', fontSize: '28px', fontWeight: 'bold' }}>
             {info.title}
           </span>
